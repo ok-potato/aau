@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d0ee4a31-f2c4-4fe0-ae0a-1e0927ad7511" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2e5IoT6JL93Yg9wvprO3RM5gmcb" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven. [archetype:generate,\\...].executor&quot;: &quot;Run&quot;,
+    &quot;Maven. [archetype:generate...].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.client.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.jetty:run -pl uarau-server -am -Denv=dev.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.sandbox [archetype:generate,\\...].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.server [dev].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.server.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.uarau [-h].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/Stuff/Dev/Bachelor/sandbox/uarau&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.project.maven.archetype.catalogs&quot;
+  }
+}</component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="mvn archetype:generate \    -DarchetypeGroupId=net.ltgt.gwt.archetypes \    -DarchetypeVersion=LATEST \    -DarchetypeArtifactId=modular-webapp" />
+      <command value="mvn archetype:generate &quot;-DarchetypeGroupId=net.ltgt.gwt.archetypes&quot; &quot;-DarchetypeVersion=LATEST&quot; &quot;-DarchetypeArtifactId=modular-webapp&quot;" />
+      <command value="mvn -h" />
+    </option>
+  </component>
+  <component name="RunManager" selected="Maven.server">
+    <configuration name="client" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="cmdOptions" />
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="gwt:devmode" />
+                <option value="-pl" />
+                <option value="uarau-client" />
+                <option value="-am" />
+              </list>
+            </option>
+            <option name="multimoduleDir" />
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="projectsCmdOptionValues">
+              <list />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$/uarau" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="server" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="cmdOptions" />
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="jetty:run" />
+                <option value="-pl" />
+                <option value="uarau-server" />
+                <option value="-am" />
+                <option value="-Denv=dev" />
+              </list>
+            </option>
+            <option name="multimoduleDir" />
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="projectsCmdOptionValues">
+              <list />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$/uarau" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Maven.client" />
+      <item itemvalue="Maven.server" />
+    </list>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="jdk-22-openjdk-22-3183f394aec4-bad0321e" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d0ee4a31-f2c4-4fe0-ae0a-1e0927ad7511" name="Changes" comment="" />
+      <created>1711188186593</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1711188186593</updated>
+    </task>
+    <servers />
+  </component>
+</project>

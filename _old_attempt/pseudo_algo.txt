@@ -1,0 +1,129 @@
+class UAlgorithm:
+	UConfiguration baseConfig
+	ArrayList<String> nameMap
+	ProximityRelation R
+	BiFunction<Float, Float, Float> TNorm
+	# for generalized tnorm, argument mappings with alpha < lambda may need to be explicitly evaluated
+	
+	public UAlgorithm() { # what makes sense here?
+	}
+	
+	void main(String[] args):
+		# parse args
+		
+	
+	void unify():
+		# {triv., decomp., clash, orient} are applied on insert
+		# inserted equations all have form x =? y or x =? f
+		# occurrence check -> return failure, otherwise branch for every possible variable elimination
+		occCheck_otherwise_varElim(baseConfig)
+	
+	
+	private void occCheck_otherwise_varElim(UConfiguration cfg):
+		if occurrence_cycle(cfg):
+			return
+		# variable elimination
+	
+	
+	# not all nodes are required to have the form x =? f, only the first
+	private boolean occurence_cycle(UConfiguration cfg):
+		# cannot collect to hashmap :)
+		HashMap<UEquation, Integer> visited = new HashMap<>()
+		for UEquation equation in cfg.funEquations:
+			visited.put(equation, 0) # undiscovered
+		for UEquation equation in cfg.varEquations:
+			visited.put(equation, 0) # undiscovered
+		
+		
+		for Map.Entry<UEquation, Integer> entry in visited.entrySet():
+			# part of an already checked independent subgraph
+			if entry.getValue() > 0 || !occ_visit(entry.getKey(), visited):
+				continue
+			return True
+		return False
+	
+	
+	# DFS algorithm stolen from CLRS
+	private boolean occ_visit(UEquation eq, HashMap<UEquation, Integer> nodes):
+		visited.put(eq, 1)
+		for UEquation s in succ(eq, nodes):
+			int visited = nodes.get(s)
+			if visited == 0:
+				occ_visit(s, nodes)
+			else if visited == 1:
+				return True
+		visited.put(eq, 2)
+	
+	
+	# succ(x =? s) contains all equations "y =? t", where y is elem of var(s)
+	private List<UEquation> succ (UEquation s0, HashMap<UEquation, Integer> nodes) {
+		List<UEquation> succ = new LinkedList<>()
+		
+		if s0.right instanceof Variable:
+			for UEquation s1 in nodes.keySet():
+				if s1.left.name == s0.left.name || s1.left.name == s0.right.name:
+					succ.append(s1)	
+		
+		for Variable x1 in s0.right.var:
+			# caching occurrences in variable would be faster if possible
+			for UEquation s1 in nodes.keySet():
+				if s1.left.name == x1.name:
+					succ.append(s1)
+		return succ
+	}
+	
+	
+	private void add_to_funEquations(UEquation e, UConfiguration cfg):
+		# equations all have form x =? f
+		cfg.funEquations.add(e)
+	
+	private void add_to_varEquations(UEquation e, UConfiguration cfg):
+		# equations all have form x =? y
+		cfg.varEquations.add(e)
+	
+	# returns true iff clash
+	boolean insert(UEquation e, UConfiguration cfg):
+		if e.left instanceof Variable:
+			if e.right instanceof Variable:
+				# x =? y
+				insert_if_untrivial(e, cfg)
+				return False
+			else:
+				# x =? f
+				add_to_funEquations(e, cfg)
+				return False
+		else if e.right instanceof Variable:
+			# f =? x
+			orient(e)
+			add_to_funEquations(e, cfg)
+			return False
+		else:
+			# f =? g
+			return clash_otherwise_decompose((Function) e.left, (Function) e.right, cfg):
+	
+	
+	private void insert_if_untrivial(UEquation e, UConfiguration cfg):
+		# x =? y
+		if e.left.name != e.right.name:
+			add_to_varEquations(e, cfg)
+	
+	
+	private void orient(UEquation e):
+		# f =? x
+		Term temp = e.left
+		e.left = e.right
+		e.right = temp
+	
+	
+	private boolean clash_otherwise_decompose(Function left, Function right, UConfiguration cfg):
+		# f =? g
+		# clash?
+		ArgumentRelation rho = R.getRelation(left.name, right.name)
+		if m == null:
+			return True
+		# no clash, so decompose
+		for (int i = 0; i < rho.map; i++):
+			if insert(new UEquation(left.terms[m.map[i][0]], right.terms[m.map[i][1]]), UConfiguration cfg):
+				return True
+		alpha = TNorm.apply(alpha, rho.beta)
+		return False
