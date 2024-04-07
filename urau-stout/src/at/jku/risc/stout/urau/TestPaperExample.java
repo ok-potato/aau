@@ -21,12 +21,10 @@ public class TestPaperExample {
         EquationSystem eqSys = new EquationSystem();
         new InputParser(eqSys).parseHedgeEquation(in1, in2);
         
-        new AntiUnify(rFnc, eqSys, DebugLevel.SILENT) {
+        new AntiUnify(rFnc, eqSys) {
             public void callback(AntiUnifySystem res, Variable var) {
                 System.out.println(res.getSigma().get(var));
             }
-            
-            ;
-        }.antiUnify(iterateAll, null);
+        }.antiUnify(iterateAll);
     }
 }

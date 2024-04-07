@@ -71,7 +71,7 @@ public class InputParser {
      * {@linkplain #parseHedgeEquation(Reader, Reader)} if possible! It performs
      * better and saves space by reading directly from the data streams;)
      */
-    public void parseEquationSystem(String unifProblem, PrintStream debug) throws IOException, MalformedTermException {
+    public void parseEquationSystem(String unifProblem) throws IOException, MalformedTermException {
         for (String equation : unifProblem.split(";")) {
             String[] terms = equation.split("[^._a-zA-Z0-9()]*=[^._a-zA-Z0-9()]*");
             if (terms.length == 2) {
@@ -80,9 +80,7 @@ public class InputParser {
                 String t = terms[1].replaceAll("^[^._a-zA-Z0-9()]+", "").replaceAll("[^._a-zA-Z0-9()]+$", "");
                 if (!s.isEmpty() && !t.isEmpty()) {
                     parseHedgeEquation(new StringReader(s), new StringReader(t));
-                    if (debug != null) {
-                        debug.println(system.getLast());
-                    }
+                    System.out.println(system.getLast());
                 }
             }
         }

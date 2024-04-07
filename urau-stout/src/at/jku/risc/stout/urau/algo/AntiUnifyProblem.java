@@ -28,93 +28,90 @@ import at.jku.risc.stout.urau.data.atom.Variable;
  * generalization variable (the most general generalization), and two
  * {@linkplain Hedge}s. The hedges represent the left hand side and the right
  * hand side of the equation.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public class AntiUnifyProblem implements Equation, Cloneable {
-	public Variable generalizationVar = NodeFactory.obtainFreshHedgeVar();
-	private TermNode left, right;
-	public static String PRINT_EQ_SEPARATOR = " =^= ";
-
-	/**
-	 * Create an AUP with the given generalization variable and hedges.
-	 */
-	public AntiUnifyProblem(Variable generalizationVar, TermNode left,
-			TermNode right) {
-		this.generalizationVar = generalizationVar;
-		this.left = left;
-		this.right = right;
-	}
-
-	/**
-	 * Create an AUP with a fresh hedge variable as generalization variable and
-	 * the given hedges.
-	 */
-	public AntiUnifyProblem(Hedge left, Hedge right) {
-		generalizationVar = NodeFactory.obtainFreshHedgeVar();
-		this.left = NodeFactory.newNode(null, left);
-		this.right = NodeFactory.newNode(null, right);
-	}
-
-	/**
-	 * Obtain an empty AUP with a fresh hedge variable as generalization
-	 * variable.
-	 */
-	public AntiUnifyProblem() {
-		this(new Hedge(), new Hedge());
-	}
-
-	/**
-	 * Create a {@linkplain TermNode} of the generalization variable.
-	 */
-	public TermNode createTermNode() {
-		return NodeFactory.newNode(generalizationVar);
-	}
-
-	@Override
-	public void addLeft(TermNode left) {
-		this.left.getHedge().add(left);
-	}
-
-	@Override
-	public void addRight(TermNode right) {
-		this.right.getHedge().add(right);
-	}
-
-	/**
-	 * Returns the left node of this AUP.
-	 */
-	public TermNode getLeft() {
-		return left;
-	}
-
-	/**
-	 * Returns the right node of this AUP.
-	 */
-	public TermNode getRight() {
-		return right;
-	}
-
-	public boolean isEmpty() {
-		return left.isNullAtom() && right.isNullAtom()
-				&& left.getHedge().size() == 0 && right.getHedge().size() == 0;
-	}
-
-	@Override
-	public AntiUnifyProblem clone() {
-		try {
-			AntiUnifyProblem clone = (AntiUnifyProblem) super.clone();
-			clone.left = left.clone();
-			clone.right = right.clone();
-			return clone;
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public String toString() {
-		return generalizationVar + ": " + left.toString() + PRINT_EQ_SEPARATOR
-				+ right.toString();
-	}
+    public Variable generalizationVar = NodeFactory.obtainFreshHedgeVar();
+    private TermNode left, right;
+    public static String PRINT_EQ_SEPARATOR = " =^= ";
+    
+    /**
+     * Create an AUP with the given generalization variable and hedges.
+     */
+    public AntiUnifyProblem(Variable generalizationVar, TermNode left, TermNode right) {
+        this.generalizationVar = generalizationVar;
+        this.left = left;
+        this.right = right;
+    }
+    
+    /**
+     * Create an AUP with a fresh hedge variable as generalization variable and
+     * the given hedges.
+     */
+    public AntiUnifyProblem(Hedge left, Hedge right) {
+        generalizationVar = NodeFactory.obtainFreshHedgeVar();
+        this.left = NodeFactory.newNode(null, left);
+        this.right = NodeFactory.newNode(null, right);
+    }
+    
+    /**
+     * Obtain an empty AUP with a fresh hedge variable as generalization
+     * variable.
+     */
+    public AntiUnifyProblem() {
+        this(new Hedge(), new Hedge());
+    }
+    
+    /**
+     * Create a {@linkplain TermNode} of the generalization variable.
+     */
+    public TermNode createTermNode() {
+        return NodeFactory.newNode(generalizationVar);
+    }
+    
+    @Override
+    public void addLeft(TermNode left) {
+        this.left.getHedge().add(left);
+    }
+    
+    @Override
+    public void addRight(TermNode right) {
+        this.right.getHedge().add(right);
+    }
+    
+    /**
+     * Returns the left node of this AUP.
+     */
+    public TermNode getLeft() {
+        return left;
+    }
+    
+    /**
+     * Returns the right node of this AUP.
+     */
+    public TermNode getRight() {
+        return right;
+    }
+    
+    public boolean isEmpty() {
+        return left.isNullAtom() && right.isNullAtom() && left.getHedge().size() == 0 && right.getHedge().size() == 0;
+    }
+    
+    @Override
+    public AntiUnifyProblem clone() {
+        try {
+            AntiUnifyProblem clone = (AntiUnifyProblem) super.clone();
+            clone.left = left.clone();
+            clone.right = right.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return generalizationVar.toString() + ": " + left.toString() + PRINT_EQ_SEPARATOR + right.toString();
+    }
 }

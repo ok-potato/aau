@@ -34,6 +34,8 @@ public class AntiUnifyMain {
     static String rigidityFnc = "at.jku.risc.stout.urau.algo.RigidityFncSubsequence";
     
     public static void main(String[] args) {
+        if (args.length == 0)
+            args = new String[] {"f(g(a, a), g(b, b), f (g(a), g(a))) =^= f(g(a, a), f(g(a), g))"};
         if (args.length >= 1) {
             if ("-d".equals(args[0])) {
                 debugLevel = DebugLevel.PROGRESS;
@@ -70,7 +72,7 @@ public class AntiUnifyMain {
                     main(Arrays.copyOfRange(args, 2, args.length));
                 }
             } else {
-                actuallyRunTheProgram(args[0]);
+                runProblem(args[0]);
             }
         } else {
             System.out.println("Insufficient parameters!");
@@ -79,16 +81,16 @@ public class AntiUnifyMain {
         }
     }
     
-    private static void actuallyRunTheProgram(String problem) {
+    private static void runProblem(String problem) {
         try {
-            RigidityFnc r = (RigidityFnc) Class.forName(rigidityFnc).newInstance();
-            r.setMinLen(minLen);
+            RigidityFnc rigidity = (RigidityFnc) Class.forName(rigidityFnc).getConstructor().newInstance();
+            rigidity.setMinLen(minLen);
             EquationSystem sys = new EquationSystem();
-            new InputParser(sys).parseEquationSystem(problem, System.out);
-            System.out.println();
+            new InputParser(sys).parseEquationSystem(problem);
+            System.out.println("~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~ ~~~");
             
-            AntiUnify rau = new AntiUnify(r, sys, debugLevel);
-            rau.antiUnify(iterateAll, System.out);
+            AntiUnify rau = new AntiUnify(rigidity, sys);
+            rau.antiUnify(iterateAll);
             
             System.out.println();
             System.out.println("Supported by the Austrian Science Fund (FWF) " + "under the project SToUT P 24087-N18");

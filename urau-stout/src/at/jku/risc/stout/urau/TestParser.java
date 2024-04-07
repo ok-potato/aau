@@ -28,7 +28,7 @@ public class TestParser {
     public static void testParser(String in) {
         EquationSystem sys = new EquationSystem();
         try {
-            new InputParser(sys).parseEquationSystem(in, null);
+            new InputParser(sys).parseEquationSystem(in);
             System.out.println(sys);
         } catch (Exception e) {
             e.printStackTrace();

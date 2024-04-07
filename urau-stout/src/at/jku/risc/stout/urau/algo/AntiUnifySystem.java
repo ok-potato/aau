@@ -260,9 +260,9 @@ public class AntiUnifySystem {
             }
             AntiUnifyProblem Zk = new AntiUnifyProblem(leftT.getHedge(), rightT.getHedge());
             problemSet.add(Zk);
-            TermNode substi = NodeFactory.newNode(leftT.getAtom(), new Hedge());
-            substi.getHedge().add(Zk.createTermNode());
-            substiHedge.add(substi);
+            TermNode substitution = NodeFactory.newNode(leftT.getAtom(), new Hedge());
+            substitution.getHedge().add(Zk.createTermNode());
+            substiHedge.add(substitution);
             
             leftStart = leftEnd + 1;
             rightStart = rightEnd + 1;
@@ -293,18 +293,6 @@ public class AntiUnifySystem {
     
     public int getBranchId() {
         return branchId;
-    }
-    
-    public RigidityFnc getRFnc() {
-        return rFnc;
-    }
-    
-    public EquationSystem getProblemSet() {
-        return problemSet;
-    }
-    
-    public List<AntiUnifyProblem> getStore() {
-        return store;
     }
     
     public Substitution getSigma() {

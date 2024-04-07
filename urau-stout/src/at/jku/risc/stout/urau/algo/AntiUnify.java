@@ -33,13 +33,9 @@ import java.util.Queue;
  * @author Alexander Baumgartner
  */
 public class AntiUnify {
-    private final DebugLevel debugLevel;
-    private final EquationSystem eqOrig;
     private final Queue<AntiUnifySystem> eqBranch = new ArrayDeque<>();
     
-    public AntiUnify(RigidityFnc rigidFnc, EquationSystem eq, DebugLevel debugLevel) {
-        this.debugLevel = debugLevel;
-        this.eqOrig = eq;
+    public AntiUnify(RigidityFnc rigidFnc, EquationSystem eq) {
         this.eqBranch.add(new AntiUnifySystem(eqBranch, rigidFnc, eq.clone(), true));
     }
     
@@ -48,22 +44,13 @@ public class AntiUnify {
      * progress of the computation. If the first argument is false, then only
      * one result will be computed.
      */
-    public long antiUnify(boolean iterateAll, PrintStream out) throws IllegalAlignmentException {
+    public long antiUnify(boolean iterateAll) throws IllegalAlignmentException {
         AntiUnifySystem.resetCounter(); // reset branch counter
         int count = 0;
         while (!eqBranch.isEmpty()) {
             AntiUnifySystem sys = eqBranch.poll();
-            sys.compute(debugLevel, out);
-            if (debugLevel == DebugLevel.VERBOSE || debugLevel == DebugLevel.PROGRESS) {
-                out.println("-----------");
-                out.println(" Result " + sys.getBranchId() + ": " + sys);
-                out.println("-----------");
-                out.println("  Sigma " + sys.getBranchId() + ": " + sys.getSigma());
-                out.println("  Store " + sys.getBranchId() + ": " + sys.getStore());
-                out.println();
-            } else if (debugLevel != DebugLevel.SILENT) {
-                out.println(" Result " + sys.getBranchId() + ": " + sys);
-            }
+            sys.compute();
+            System.out.println(" Result " + sys.getBranchId() + ": " + sys);
             for (Entry<Variable, TermNode> solved : sys.getSigma().getMapping().entrySet()) {
                 callback(sys, solved.getKey());
             }
@@ -72,17 +59,8 @@ public class AntiUnify {
                 break;
             }
         }
-        if (debugLevel != DebugLevel.SILENT) {
-            out.println(count + " generalizations found");
-        }
+        System.out.println(count + " generalizations found");
         return count;
-    }
-    
-    /**
-     * Returns the original system of equations.
-     */
-    public EquationSystem getEqOrig() {
-        return eqOrig;
     }
     
     /**
