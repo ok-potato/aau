@@ -27,12 +27,6 @@ public class TestParser {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		/*
-		 * NodeFactory.PREFIX_ContextVar = "$"; NodeFactory.PREFIX_FunctionVar =
-		 * "%"; NodeFactory.PREFIX_HedgeVar = "&";
-		 * NodeFactory.PREFIX_IndividualVar = "!"; NodeFactory.PREFIX_Function =
-		 * ""; NodeFactory.PREFIX_Constant = "";
-		 */
 		testParser("f(x,g(Y,x,b),h(y,X,X(f,g),F(f,g))) =^= x, x=X(c);");
 	}
 

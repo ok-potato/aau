@@ -16,10 +16,7 @@
  */
 
 /**
- * This package contains utility classes like the
- * {@linkplain at.jku.risc.stout.urau.util.DataStructureFactory} which
- * instantiates common data structures like {@linkplain java.util.List}s,
- * {@linkplain java.util.Map}s, {@linkplain java.util.Set}s. Another important
+ * An important
  * component of this package is the implementation for object pooling
  * ({@linkplain at.jku.risc.stout.urau.util.Pool}).
  */

@@ -19,12 +19,12 @@ package at.jku.risc.stout.urau.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import at.jku.risc.stout.urau.data.atom.TermAtom;
 import at.jku.risc.stout.urau.data.atom.Variable;
-import at.jku.risc.stout.urau.util.DataStructureFactory;
 import at.jku.risc.stout.urau.util.Printable;
 
 /**
@@ -37,7 +37,7 @@ public class Hedge extends Printable implements Cloneable {
 	public static String PRINT_PARAM_START = "(";
 	public static String PRINT_PARAM_SEPARATOR = ", ";
 	public static String PRINT_PARAM_END = ")";
-	private List<TermNode> sequence = DataStructureFactory.$.newList();
+	private List<TermNode> sequence = new ArrayList<>();
 
 	public Hedge substitute(Variable x, TermNode t) {
 		for (int i = sequence.size() - 1; i >= 0; i--)
@@ -52,15 +52,14 @@ public class Hedge extends Printable implements Cloneable {
 	}
 
 	public boolean isEmpty() {
-		return sequence.size() == 0;
+		return sequence.isEmpty();
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		if (!(other instanceof Hedge))
+		if (!(other instanceof Hedge oH))
 			return false;
-		Hedge oH = (Hedge) other;
-		if (this.size() != oH.size())
+        if (this.size() != oH.size())
 			return false;
 		for (int i = this.size() - 1; i >= 0; i--)
 			if (!this.sequence.get(i).equals(oH.sequence.get(i)))
@@ -84,7 +83,7 @@ public class Hedge extends Printable implements Cloneable {
 	public Hedge clone() {
 		try {
 			Hedge clone = (Hedge) super.clone();
-			clone.sequence = DataStructureFactory.$.newList(sequence.size());
+			clone.sequence = new ArrayList<>(sequence.size());
 			for (int i = 0, n = sequence.size(); i < n; i++)
 				clone.sequence.add(sequence.get(i).clone());
 			return clone;
@@ -95,8 +94,8 @@ public class Hedge extends Printable implements Cloneable {
 
 	public TermAtomList top() {
 		TermAtomList list = TermAtomList.obtainList();
-		for (int i = 0, n = sequence.size(); i < n; i++)
-			list.add(sequence.get(i).getAtom());
+        for (TermNode termNode : sequence)
+            list.add(termNode.getAtom());
 		return list;
 	}
 
@@ -110,7 +109,7 @@ public class Hedge extends Printable implements Cloneable {
 	}
 
 	public void print(Writer out, boolean isBlock) throws IOException {
-		if (sequence.size() > 0) {
+		if (!sequence.isEmpty()) {
 			if (isBlock)
 				out.append(PRINT_PARAM_START);
 			for (int i = 0, n = sequence.size(); i < n; i++) {
@@ -150,7 +149,7 @@ public class Hedge extends Printable implements Cloneable {
 	 * {@linkplain TermNode} if the {@linkplain TermAtom} of the new node is not
 	 * null. Otherwise the old {@linkplain TermNode} will be replaced by the
 	 * given sequence.
-	 * 
+	 *
 	 * @return Returns the amount of nodes inserted instead of the old one.
 	 */
 	public int replace(int idx, TermNode toTermOrHedge) {

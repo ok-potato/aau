@@ -17,13 +17,13 @@
 
 package at.jku.risc.stout.urau.algo;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import at.jku.risc.stout.urau.data.Hedge;
 import at.jku.risc.stout.urau.data.TermNode;
 import at.jku.risc.stout.urau.data.atom.Variable;
-import at.jku.risc.stout.urau.util.DataStructureFactory;
 
 /**
  * This class represents a substitution, which is a mapping from variables to
@@ -37,7 +37,7 @@ import at.jku.risc.stout.urau.util.DataStructureFactory;
  * @author Alexander Baumgartner
  */
 public class Substitution implements Cloneable {
-	private Map<Variable, TermNode> mapping = DataStructureFactory.$.newMap();
+	private final Map<Variable, TermNode> mapping = new HashMap<>();
 
 	/**
 	 * Default = "{"

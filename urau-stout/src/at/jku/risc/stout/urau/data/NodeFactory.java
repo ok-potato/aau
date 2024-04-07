@@ -17,13 +17,13 @@
 
 package at.jku.risc.stout.urau.data;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 
 import at.jku.risc.stout.urau.data.atom.Function;
 import at.jku.risc.stout.urau.data.atom.HedgeVar;
 import at.jku.risc.stout.urau.data.atom.TermAtom;
 import at.jku.risc.stout.urau.data.atom.TermVar;
-import at.jku.risc.stout.urau.util.DataStructureFactory;
 
 /**
  * A factory to create {@linkplain TermNode}s, {@linkplain Hedge}s and atomic
@@ -43,7 +43,7 @@ public class NodeFactory {
 	public static String SUFFIX_FreshHedgeVar = "";
 
 	private static long hedgeVarCnt = 0;
-	private Deque<Hedge> hStack = DataStructureFactory.$.newDeque();
+	private final Deque<Hedge> hStack = new ArrayDeque<>();
 
 	public void pushHedge() {
 		hStack.push(new Hedge());

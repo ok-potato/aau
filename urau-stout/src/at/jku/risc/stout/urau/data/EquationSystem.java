@@ -17,81 +17,84 @@
 
 package at.jku.risc.stout.urau.data;
 
-import java.util.List;
-
-import at.jku.risc.stout.urau.util.DataStructureFactory;
 import at.jku.risc.stout.urau.util.TinyList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A system of {@linkplain Equation}s
- * 
+ *
  * @author Alexander Baumgartner
  */
-public abstract class EquationSystem<T extends Equation> extends TinyList<T>
-		implements Cloneable {
-	private List<T> equations = DataStructureFactory.$.newList();
-	/**
-	 * The separator is used to separate the equations of this system.
-	 */
-	public static String EQ_SEPARATOR = ";  ";
-	/**
-	 * The output will look like "{@linkplain #EQ_PREFIX1}#i#
-	 * {@linkplain #EQ_PREFIX2}" where #i# is the index of an equation.
-	 */
-	public static String EQ_PREFIX1 = "EQ";
-	/**
-	 * If {@linkplain #EQ_PREFIX2} is null then the output of the index will
-	 * also be omitted.
-	 */
-	public static String EQ_PREFIX2 = ": ";
-
-	public abstract T newEquation();
-
-	@Override
-	public int size() {
-		return equations.size();
-	}
-
-	@Override
-	public T get(int i) {
-		return equations.get(i);
-	}
-
-	@Override
-	public void removeLast() {
-		equations.remove(size() - 1);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public EquationSystem<T> clone() {
-		try {
-			EquationSystem<T> ret = (EquationSystem<T>) super.clone();
-			ret.equations = DataStructureFactory.$.newList(equations.size());
-			for (int i = 0, n = equations.size(); i < n; i++)
-				ret.equations.add((T) equations.get(i).clone());
-			return ret;
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void add(T equation) {
-		equations.add(equation);
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0, n = size(); i < n; i++) {
-			if (EQ_SEPARATOR != null && i != 0)
-				sb.append(EQ_SEPARATOR);
-			if (EQ_PREFIX1 != null)
-				sb.append(EQ_PREFIX1);
-			if (EQ_PREFIX2 != null)
-				sb.append(i + 1).append(EQ_PREFIX2);
-			sb.append(get(i));
-		}
-		return sb.toString();
-	}
+public abstract class EquationSystem<T extends Equation> extends TinyList<T> implements Cloneable {
+    private List<T> equations = new ArrayList<>();
+    /**
+     * The separator is used to separate the equations of this system.
+     */
+    public static String EQ_SEPARATOR = ";  ";
+    /**
+     * The output will look like "{@linkplain #EQ_PREFIX1}#i#
+     * {@linkplain #EQ_PREFIX2}" where #i# is the index of an equation.
+     */
+    public static String EQ_PREFIX1 = "EQ";
+    /**
+     * If {@linkplain #EQ_PREFIX2} is null then the output of the index will
+     * also be omitted.
+     */
+    public static String EQ_PREFIX2 = ": ";
+    
+    public abstract T newEquation();
+    
+    @Override
+    public int size() {
+        return equations.size();
+    }
+    
+    @Override
+    public T get(int i) {
+        return equations.get(i);
+    }
+    
+    @Override
+    public void removeLast() {
+        equations.remove(size() - 1);
+    }
+    
+    @Override
+    @SuppressWarnings("unchecked")
+    public EquationSystem<T> clone() {
+        try {
+            EquationSystem<T> ret = (EquationSystem<T>) super.clone();
+            ret.equations = new ArrayList<>(equations.size());
+            for (int i = 0, n = equations.size(); i < n; i++) {
+                ret.equations.add((T) equations.get(i).clone());
+            }
+            return ret;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void add(T equation) {
+        equations.add(equation);
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0, n = size(); i < n; i++) {
+            if (EQ_SEPARATOR != null && i != 0) {
+                sb.append(EQ_SEPARATOR);
+            }
+            if (EQ_PREFIX1 != null) {
+                sb.append(EQ_PREFIX1);
+            }
+            if (EQ_PREFIX2 != null) {
+                sb.append(i + 1).append(EQ_PREFIX2);
+            }
+            sb.append(get(i));
+        }
+        return sb.toString();
+    }
 }

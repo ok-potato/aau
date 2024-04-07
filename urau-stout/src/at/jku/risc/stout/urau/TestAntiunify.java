@@ -32,24 +32,6 @@ import at.jku.risc.stout.urau.data.MalformedTermException;
 public class TestAntiunify {
 	public static void main(String[] args) {
 		try {
-			// String l = "f(a),f(a)";
-			// String r = "f(a),f";
-			// String l = "f(a,b,c),g(a),h(a)";
-			// String r = "f(a,b,c),g(a),h(a)";
-			// String l = "f(g(a,X),a,X,b)";
-			// String r = "f(g(b),b)";
-			// String l = "f(g(a,a),a,X,b)";
-			// String r = "f(g(b,b),g(Y),b)";
-			// String l =
-			// "if(geq(x1, x2), then(eq(x3, add(x4, x2)), eq(x4, add(x4, 1))), else(eq(x3, sub(x4, x1)))) ";
-			// String r =
-			// "if(geq(y1, y2), then(eq(y3, add(y4, y2)), eq(y5, 1), eq(y4, add(y4, 5))), else(eq(y3, sub(y4, y1))))";
-			// String l =
-			// "sumProd(input(type(int), n), returnType(bvoid), eq(type(float), n, 0.0), eq(type(float), prod, 1.0), for(eq(type(int), i, 1), le(i, n), pp(i), eq(sum, plus(sum, i)), eq(prod, mult(prod, i)), foo(sum, prod)))";
-			// String r =
-			// "sumProd(input(type(int), n), returnType(bvoid), eq(type(float), n, 0.0), eq(type(float), prod, 1.0), for(eq(type(int), i, 1), le(i, n), pp(i), eq(sum, plus(sum, mult(i, i))), eq(prod, mult(prod, mult(i, i))), foo(sum, prod)))";
-			// String l = "x,f(g(a(f,a), a, a)";
-			// String r = "x,f(g(b,b), b, b)";
 			String l = "f(g(a, a), g(b, b), f (g(a), g(a)))";
 			String r = "f(g(a, a), f(g(a), g))";
 			RigidityFnc rFnc = new RigidityFncSubsequence();
