@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A system of {@linkplain Equation}s
+ * A system of {@linkplain AntiUnifyProblem}s
  *
  * @author Alexander Baumgartner
  */

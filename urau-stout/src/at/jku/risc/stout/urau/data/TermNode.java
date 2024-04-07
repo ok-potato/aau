@@ -40,7 +40,7 @@ public class TermNode implements Cloneable {
     public static final Hedge nullHedge = new Hedge() {
         @Override
         public void add(TermNode t) {
-            throw new IllegalAccessError("Illegal null-hedge modification");
+            throw new IllegalAccessError("Illegal null-hedge situation");
         }
         
         @Override

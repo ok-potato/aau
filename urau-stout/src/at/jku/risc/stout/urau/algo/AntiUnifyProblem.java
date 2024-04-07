@@ -17,7 +17,6 @@
 
 package at.jku.risc.stout.urau.algo;
 
-import at.jku.risc.stout.urau.data.Equation;
 import at.jku.risc.stout.urau.data.Hedge;
 import at.jku.risc.stout.urau.data.NodeFactory;
 import at.jku.risc.stout.urau.data.TermNode;
@@ -31,7 +30,7 @@ import at.jku.risc.stout.urau.data.atom.Variable;
  *
  * @author Alexander Baumgartner
  */
-public class AntiUnifyProblem implements Equation, Cloneable {
+public class AntiUnifyProblem implements Cloneable {
     public Variable generalizationVar = NodeFactory.obtainFreshHedgeVar();
     private TermNode left, right;
     public static String PRINT_EQ_SEPARATOR = " =^= ";
@@ -70,12 +69,10 @@ public class AntiUnifyProblem implements Equation, Cloneable {
         return NodeFactory.newNode(generalizationVar);
     }
     
-    @Override
     public void addLeft(TermNode left) {
         this.left.getHedge().add(left);
     }
     
-    @Override
     public void addRight(TermNode right) {
         this.right.getHedge().add(right);
     }

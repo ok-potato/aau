@@ -19,7 +19,6 @@ package at.jku.risc.stout.urau.algo;
 
 import at.jku.risc.stout.urau.algo.AlignmentList.Alignment;
 import at.jku.risc.stout.urau.algo.AlignmentList.Alignment.AlignmentAtom;
-import at.jku.risc.stout.urau.data.Equation;
 import at.jku.risc.stout.urau.data.atom.TermAtom;
 import at.jku.risc.stout.urau.util.Pool;
 import at.jku.risc.stout.urau.util.Poolable;
@@ -167,7 +166,7 @@ public class AlignmentList extends TinyList<Alignment> implements Poolable {
         /**
          * An {@linkplain AlignmentAtom} consists of an {@linkplain TermAtom}
          * and two indexes for the positions of the atom inside the two hedges
-         * of an {@linkplain Equation}.
+         * of an {@linkplain AntiUnifyProblem}.
          *
          * @author Alexander Baumgartner
          */
