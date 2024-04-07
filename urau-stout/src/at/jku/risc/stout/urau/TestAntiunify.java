@@ -62,13 +62,13 @@ public class TestAntiunify {
 
 	private void test(String problem, RigidityFnc r) throws IOException,
 			IllegalAlignmentException, MalformedTermException {
-		EquationSystem<AntiUnifyProblem> sys = new EquationSystem<AntiUnifyProblem>() {
-			@Override
-			public AntiUnifyProblem newEquation() {
-				return new AntiUnifyProblem();
-			}
-		};
-		new InputParser<AntiUnifyProblem>(sys).parseEquationSystem(problem, null);
+		EquationSystem<AntiUnifyProblem> sys = new EquationSystem<>() {
+            @Override
+            public AntiUnifyProblem newEquation() {
+                return new AntiUnifyProblem();
+            }
+        };
+        new InputParser<>(sys).parseEquationSystem(problem, null);
 		System.out.println(sys);
 		System.out.println();
 		AntiUnify rau = new AntiUnify(r, sys, DebugLevel.SIMPLE);
