@@ -34,10 +34,10 @@ import java.util.Queue;
  */
 public class AntiUnify {
     private final DebugLevel debugLevel;
-    private final EquationSystem<AntiUnifyProblem> eqOrig;
+    private final EquationSystem eqOrig;
     private final Queue<AntiUnifySystem> eqBranch = new ArrayDeque<>();
     
-    public AntiUnify(RigidityFnc rigidFnc, EquationSystem<AntiUnifyProblem> eq, DebugLevel debugLevel) {
+    public AntiUnify(RigidityFnc rigidFnc, EquationSystem eq, DebugLevel debugLevel) {
         this.debugLevel = debugLevel;
         this.eqOrig = eq;
         this.eqBranch.add(new AntiUnifySystem(eqBranch, rigidFnc, eq.clone(), true));
@@ -81,7 +81,7 @@ public class AntiUnify {
     /**
      * Returns the original system of equations.
      */
-    public EquationSystem<AntiUnifyProblem> getEqOrig() {
+    public EquationSystem getEqOrig() {
         return eqOrig;
     }
     

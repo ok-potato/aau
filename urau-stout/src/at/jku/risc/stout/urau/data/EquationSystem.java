@@ -17,6 +17,7 @@
 
 package at.jku.risc.stout.urau.data;
 
+import at.jku.risc.stout.urau.algo.AntiUnifyProblem;
 import at.jku.risc.stout.urau.util.TinyList;
 
 import java.util.ArrayList;
@@ -27,8 +28,8 @@ import java.util.List;
  *
  * @author Alexander Baumgartner
  */
-public abstract class EquationSystem<T extends Equation> extends TinyList<T> implements Cloneable {
-    private List<T> equations = new ArrayList<>();
+public class EquationSystem extends TinyList<AntiUnifyProblem> implements Cloneable {
+    private List<AntiUnifyProblem> equations = new ArrayList<>();
     /**
      * The separator is used to separate the equations of this system.
      */
@@ -44,7 +45,9 @@ public abstract class EquationSystem<T extends Equation> extends TinyList<T> imp
      */
     public static String EQ_PREFIX2 = ": ";
     
-    public abstract T newEquation();
+    public AntiUnifyProblem newEquation() {
+        return new AntiUnifyProblem();
+    }
     
     @Override
     public int size() {
@@ -52,7 +55,7 @@ public abstract class EquationSystem<T extends Equation> extends TinyList<T> imp
     }
     
     @Override
-    public T get(int i) {
+    public AntiUnifyProblem get(int i) {
         return equations.get(i);
     }
     
@@ -62,13 +65,12 @@ public abstract class EquationSystem<T extends Equation> extends TinyList<T> imp
     }
     
     @Override
-    @SuppressWarnings("unchecked")
-    public EquationSystem<T> clone() {
+    public EquationSystem clone() {
         try {
-            EquationSystem<T> ret = (EquationSystem<T>) super.clone();
+            EquationSystem ret = (EquationSystem) super.clone();
             ret.equations = new ArrayList<>(equations.size());
             for (int i = 0, n = equations.size(); i < n; i++) {
-                ret.equations.add((T) equations.get(i).clone());
+                ret.equations.add(equations.get(i).clone());
             }
             return ret;
         } catch (CloneNotSupportedException e) {
@@ -76,7 +78,7 @@ public abstract class EquationSystem<T extends Equation> extends TinyList<T> imp
         }
     }
     
-    public void add(T equation) {
+    public void add(AntiUnifyProblem equation) {
         equations.add(equation);
     }
     

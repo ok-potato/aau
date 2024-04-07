@@ -18,7 +18,6 @@
 package at.jku.risc.stout.urau;
 
 import at.jku.risc.stout.urau.algo.AntiUnify;
-import at.jku.risc.stout.urau.algo.AntiUnifyProblem;
 import at.jku.risc.stout.urau.algo.DebugLevel;
 import at.jku.risc.stout.urau.algo.RigidityFnc;
 import at.jku.risc.stout.urau.data.EquationSystem;
@@ -84,13 +83,8 @@ public class AntiUnifyMain {
         try {
             RigidityFnc r = (RigidityFnc) Class.forName(rigidityFnc).newInstance();
             r.setMinLen(minLen);
-            EquationSystem<AntiUnifyProblem> sys = new EquationSystem<AntiUnifyProblem>() {
-                @Override
-                public AntiUnifyProblem newEquation() {
-                    return new AntiUnifyProblem();
-                }
-            };
-            new InputParser<AntiUnifyProblem>(sys).parseEquationSystem(problem, System.out);
+            EquationSystem sys = new EquationSystem();
+            new InputParser(sys).parseEquationSystem(problem, System.out);
             System.out.println();
             
             AntiUnify rau = new AntiUnify(r, sys, debugLevel);

@@ -20,7 +20,6 @@ package at.jku.risc.stout.urau;
 import java.io.IOException;
 
 import at.jku.risc.stout.urau.algo.AntiUnify;
-import at.jku.risc.stout.urau.algo.AntiUnifyProblem;
 import at.jku.risc.stout.urau.algo.DebugLevel;
 import at.jku.risc.stout.urau.algo.IllegalAlignmentException;
 import at.jku.risc.stout.urau.algo.RigidityFnc;
@@ -44,13 +43,8 @@ public class TestAntiunify {
 
 	private void test(String problem, RigidityFnc r) throws IOException,
 			IllegalAlignmentException, MalformedTermException {
-		EquationSystem<AntiUnifyProblem> sys = new EquationSystem<>() {
-            @Override
-            public AntiUnifyProblem newEquation() {
-                return new AntiUnifyProblem();
-            }
-        };
-        new InputParser<>(sys).parseEquationSystem(problem, null);
+		EquationSystem sys = new EquationSystem();
+        new InputParser(sys).parseEquationSystem(problem, null);
 		System.out.println(sys);
 		System.out.println();
 		AntiUnify rau = new AntiUnify(r, sys, DebugLevel.SIMPLE);

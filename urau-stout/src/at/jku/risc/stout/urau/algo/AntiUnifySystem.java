@@ -47,20 +47,19 @@ public class AntiUnifySystem {
     private final TermNode tmpNode = NodeFactory.newNode(null, null);
     private int branchId;
     private final RigidityFnc rFnc;
-    private final EquationSystem<AntiUnifyProblem> problemSet;
+    private final EquationSystem problemSet;
     private List<AntiUnifyProblem> store = new ArrayList<>();
     private Substitution sigma;
     private final Queue<AntiUnifySystem> branchPointer;
     
     private static int BRANCH_COUNT = 0;
-    public static String OUTPUT_SEPARATOR = "; ";
     
     /**
      * Most likely you don't need this constructor because the algorithm is
      * encapsulated in the class {@linkplain AntiUnify} which is much easier to
      * use.
      */
-    public AntiUnifySystem(Queue<AntiUnifySystem> eqBranch, RigidityFnc rFnc, EquationSystem<AntiUnifyProblem> problemSet, boolean setUID) {
+    public AntiUnifySystem(Queue<AntiUnifySystem> eqBranch, RigidityFnc rFnc, EquationSystem problemSet, boolean setUID) {
         this.branchPointer = eqBranch;
         if (setUID) {
             this.branchId = ++BRANCH_COUNT;
@@ -300,7 +299,7 @@ public class AntiUnifySystem {
         return rFnc;
     }
     
-    public EquationSystem<AntiUnifyProblem> getProblemSet() {
+    public EquationSystem getProblemSet() {
         return problemSet;
     }
     

@@ -18,7 +18,6 @@
 package at.jku.risc.stout.urau;
 
 import at.jku.risc.stout.urau.algo.AlignmentList;
-import at.jku.risc.stout.urau.algo.AntiUnifyProblem;
 import at.jku.risc.stout.urau.algo.RigidityFnc;
 import at.jku.risc.stout.urau.algo.RigidityFncSubsequence;
 import at.jku.risc.stout.urau.data.EquationSystem;
@@ -43,13 +42,8 @@ public class TestRigid {
     }
     
     private void test(String hedgeL, String hedgeR, RigidityFnc r, int timesI, int timesJ) throws IOException, MalformedTermException {
-        EquationSystem<AntiUnifyProblem> sys = new EquationSystem<AntiUnifyProblem>() {
-            @Override
-            public AntiUnifyProblem newEquation() {
-                return new AntiUnifyProblem();
-            }
-        };
-        new InputParser<AntiUnifyProblem>(sys).parseHedgeEquation(new StringReader(hedgeL), new StringReader(hedgeR));
+        EquationSystem sys = new EquationSystem();
+        new InputParser(sys).parseHedgeEquation(new StringReader(hedgeL), new StringReader(hedgeR));
         
         TermAtomList topLeft = sys.getLast().getLeft().getHedge().top();
         TermAtomList topRight = sys.getLast().getRight().getHedge().top();

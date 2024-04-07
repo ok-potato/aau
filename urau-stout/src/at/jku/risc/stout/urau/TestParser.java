@@ -17,33 +17,21 @@
 
 package at.jku.risc.stout.urau;
 
-import at.jku.risc.stout.urau.algo.AntiUnifyProblem;
 import at.jku.risc.stout.urau.data.EquationSystem;
 import at.jku.risc.stout.urau.data.InputParser;
 
 public class TestParser {
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		testParser("f(x,g(Y,x,b),h(y,X,X(f,g),F(f,g))) =^= x, x=X(c);");
-	}
-
-	public static void testParser(String in) {
-		EquationSystem<AntiUnifyProblem> sys = new EquationSystem<AntiUnifyProblem>() {
-			@Override
-			public AntiUnifyProblem newEquation() {
-				return new AntiUnifyProblem();
-			}
-		};
-		try {
-			new InputParser<AntiUnifyProblem>(sys)
-					.parseEquationSystem(in, null);
-			System.out.println(sys);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
+    public static void main(String[] args) {
+        testParser("f(x,g(Y,x,b),h(y,X,X(f,g),F(f,g))) =^= x, x=X(c);");
+    }
+    
+    public static void testParser(String in) {
+        EquationSystem sys = new EquationSystem();
+        try {
+            new InputParser(sys).parseEquationSystem(in, null);
+            System.out.println(sys);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
