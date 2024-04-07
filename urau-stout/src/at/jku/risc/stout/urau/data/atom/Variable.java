@@ -17,38 +17,40 @@
 
 package at.jku.risc.stout.urau.data.atom;
 
-import java.util.Map;
-
 import at.jku.risc.stout.urau.data.TermNode;
+
+import java.util.Map;
 
 /**
  * This is the base class for different types of variables.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public abstract class Variable extends TermAtom {
-
-	public Variable(String name) {
-		super(name);
-	}
-
-	@Override
-	public TermNode substitute(Variable from, TermNode to, TermNode thisNode) {
-		if (equals(from))
-			return to.clone();
-		return thisNode;
-	}
-
-	@Override
-	public TermNode apply(Map<Variable, TermNode> sigma, TermNode thisNode) {
-		TermNode to = sigma.get(this);
-		if (to != null)
-			return to.clone();
-		return thisNode;
-	}
-
-	@Override
-	public Variable clone() {
-		return (Variable) super.clone();
-	}
+    
+    public Variable(String name) {
+        super(name);
+    }
+    
+    @Override
+    public TermNode substitute(Variable from, TermNode to, TermNode thisNode) {
+        if (equals(from)) {
+            return to.clone();
+        }
+        return thisNode;
+    }
+    
+    @Override
+    public TermNode apply(Map<Variable, TermNode> sigma, TermNode thisNode) {
+        TermNode to = sigma.get(this);
+        if (to != null) {
+            return to.clone();
+        }
+        return thisNode;
+    }
+    
+    @Override
+    public Variable clone() {
+        return (Variable) super.clone();
+    }
 }

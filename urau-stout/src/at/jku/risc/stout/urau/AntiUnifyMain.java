@@ -34,8 +34,9 @@ public class AntiUnifyMain {
     static String rigidityFnc = "at.jku.risc.stout.urau.algo.RigidityFncSubsequence";
     
     public static void main(String[] args) {
-        if (args.length == 0)
-            args = new String[] {"f(g(a, a), g(b, b), f (g(a), g(a))) =^= f(g(a, a), f(g(a), g))"};
+        if (args.length == 0) {
+            args = new String[]{"f(g(a, a), g(b, b), f (g(a), g(a))) =^= f(g(a, a), f(g(a), g))"};
+        }
         if (args.length >= 1) {
             if ("-d".equals(args[0])) {
                 debugLevel = DebugLevel.PROGRESS;

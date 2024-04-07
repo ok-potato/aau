@@ -21,8 +21,6 @@ import at.jku.risc.stout.urau.data.TermAtomList;
 import at.jku.risc.stout.urau.data.atom.TermAtom;
 import at.jku.risc.stout.urau.util.CoordList;
 
-import java.io.PrintStream;
-
 /**
  * Implementation for rigidity function with subsequence matching.<br>
  * Let m be the number of left term atoms and n be the number of right term
@@ -104,7 +102,7 @@ public class RigidityFncSubsequence extends RigidityFnc {
         }
         
         if (DEBUG) {
-            debugMatrix(left, right, System.out);
+            debugMatrix(left, right);
         }
         // create result set via recursive back tracking
         alignList.nextAlignment();
@@ -113,16 +111,16 @@ public class RigidityFncSubsequence extends RigidityFnc {
         return alignList;
     }
     
-    protected void debugMatrix(TermAtomList left, TermAtomList right, PrintStream debugOut) {
+    protected void debugMatrix(TermAtomList left, TermAtomList right) {
         int lenL = left.size(), lenR = right.size();
         int MAX_VALUE = Integer.MAX_VALUE;
         int[][] traceRoute = this.traceRoute;
-        debugOut.println("Length matrix: (* signals a match)");
+        System.out.println("Length matrix: (* signals a match)");
         StringBuilder out = new StringBuilder("    ");
         for (int j = 0; j < lenR; j++) {
             out.append((" " + right.get(j).getName() + "    ").substring(0, 5));
         }
-        debugOut.println(out);
+        System.out.println(out);
         out.setLength(0);
         for (int i = 1; i <= lenL; i++) {
             out.append((left.get(i - 1).getName() + "    ").substring(0, 4));
@@ -145,7 +143,7 @@ public class RigidityFncSubsequence extends RigidityFnc {
                 }
                 out.append(num);
             }
-            debugOut.println(out);
+            System.out.println(out);
             out.setLength(0);
         }
     }

@@ -17,74 +17,73 @@
 
 package at.jku.risc.stout.urau.data.atom;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Map;
-
 import at.jku.risc.stout.urau.data.TermNode;
-import at.jku.risc.stout.urau.util.Printable;
+
+import java.util.Map;
 
 /**
  * Base class for all the atomic types like function symbols and variables.
- * 
+ *
  * @author Alexander Baumgartner
  */
-public abstract class TermAtom extends Printable implements
-		Comparable<TermAtom>, Cloneable {
-	private String name;
-	private Class<? extends TermAtom> clazz = getClass();
-
-	public TermAtom(String name) {
-		this.name = name.intern();
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public boolean equals(TermAtom obj) {
-		// We only need to compare the pointers, because of calling intern
-		// at construction time
-		return name == obj.name && clazz == obj.clazz;
-	}
-
-	@Override
-	public TermAtom clone() {
-		try {
-			return (TermAtom) super.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public int hashCode() {
-		return name.hashCode();
-	}
-
-	@Override
-	public int compareTo(TermAtom o) {
-		String n1 = this.name, n2 = o.name;
-		if (n1 == n2) {
-			Class<? extends TermAtom> c1 = clazz;
-			Class<? extends TermAtom> c2 = o.clazz;
-			if (c1 == c2)
-				return 0;
-			return c1.getSimpleName().compareTo(c2.getSimpleName());
-		}
-		return n1.compareTo(n2);
-	}
-
-	@Override
-	public void print(Writer out) throws IOException {
-		out.append(getName());
-	}
-
-	public TermNode substitute(Variable from, TermNode to, TermNode thisNode) {
-		return thisNode;
-	}
-
-	public TermNode apply(Map<Variable, TermNode> sigma, TermNode thisNode) {
-		return thisNode;
-	}
+public abstract class TermAtom implements Comparable<TermAtom>, Cloneable {
+    private final String name;
+    private final Class<? extends TermAtom> clazz = getClass();
+    
+    public TermAtom(String name) {
+        this.name = name.intern();
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    @SuppressWarnings("StringEquality")
+    public boolean equals(TermAtom obj) {
+        // We only need to compare the pointers, because of calling intern
+        // at construction time
+        return name == obj.name && clazz == obj.clazz;
+    }
+    
+    @Override
+    public TermAtom clone() {
+        try {
+            return (TermAtom) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+    
+    @Override
+    @SuppressWarnings("StringEquality")
+    public int compareTo(TermAtom o) {
+        String n1 = this.name, n2 = o.name;
+        if (n1 == n2) {
+            Class<? extends TermAtom> c1 = clazz;
+            Class<? extends TermAtom> c2 = o.clazz;
+            if (c1 == c2) {
+                return 0;
+            }
+            return c1.getSimpleName().compareTo(c2.getSimpleName());
+        }
+        return n1.compareTo(n2);
+    }
+    
+    @Override
+    public String toString() {
+        return getName();
+    }
+    
+    public TermNode substitute(Variable from, TermNode to, TermNode thisNode) {
+        return thisNode;
+    }
+    
+    public TermNode apply(Map<Variable, TermNode> sigma, TermNode thisNode) {
+        return thisNode;
+    }
 }

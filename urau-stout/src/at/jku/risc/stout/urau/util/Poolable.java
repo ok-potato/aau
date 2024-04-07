@@ -20,19 +20,19 @@ package at.jku.risc.stout.urau.util;
 /**
  * This interface defines the two methods which are needed to enable object
  * pooling.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public interface Poolable {
-	/**
-	 * This method is called from the {@linkplain Pool} if there is no object
-	 * available to recycle.
-	 */
-	public Poolable newObject();
-
-	/**
-	 * This method is called from the {@linkplain Pool} before the object is
-	 * returned to the pool.
-	 */
-	public void cleanUp();
+    /**
+     * This method is called from the {@linkplain Pool} if there is no object
+     * available to recycle.
+     */
+    Poolable newObject();
+    
+    /**
+     * This method is called from the {@linkplain Pool} before the object is
+     * returned to the pool.
+     */
+    void cleanUp();
 }

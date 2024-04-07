@@ -21,11 +21,11 @@ import at.jku.risc.stout.urau.data.TermAtomList;
 
 /**
  * This is the base class to all rigidity functions.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public abstract class RigidityFnc {
-	public abstract AlignmentList compute(TermAtomList left, TermAtomList right);
-
-	public abstract RigidityFnc setMinLen(int minLen);
+    public abstract AlignmentList compute(TermAtomList left, TermAtomList right);
+    
+    public abstract RigidityFnc setMinLen(int minLen);
 }

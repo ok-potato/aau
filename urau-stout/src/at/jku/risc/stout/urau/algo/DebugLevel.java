@@ -27,9 +27,9 @@ package at.jku.risc.stout.urau.algo;
  * {@linkplain DebugLevel#SIMPLE}
  * <li>{@linkplain DebugLevel#PROGRESS} = Shows very possible information
  * </ul>
- * 
+ *
  * @author Alexander Baumgartner
  */
 public enum DebugLevel {
-	SILENT, SIMPLE, VERBOSE, PROGRESS
+    SILENT, SIMPLE, VERBOSE, PROGRESS
 }

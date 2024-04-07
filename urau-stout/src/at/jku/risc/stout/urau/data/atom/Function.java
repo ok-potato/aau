@@ -17,15 +17,14 @@
 
 package at.jku.risc.stout.urau.data.atom;
 
-
 /**
  * A {@linkplain TermAtom} which represents a function symbol. Function symbols
  * can be typed.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public class Function extends TermAtom {
-	public Function(String name) {
-		super(name);
-	}
+    public Function(String name) {
+        super(name);
+    }
 }

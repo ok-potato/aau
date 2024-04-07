@@ -17,8 +17,6 @@
 
 package at.jku.risc.stout.urau;
 
-import java.io.IOException;
-
 import at.jku.risc.stout.urau.algo.AntiUnify;
 import at.jku.risc.stout.urau.algo.IllegalAlignmentException;
 import at.jku.risc.stout.urau.algo.RigidityFnc;
@@ -27,27 +25,27 @@ import at.jku.risc.stout.urau.data.EquationSystem;
 import at.jku.risc.stout.urau.data.InputParser;
 import at.jku.risc.stout.urau.data.MalformedTermException;
 
+import java.io.IOException;
+
 public class TestAntiunify {
-	public static void main(String[] args) {
-		try {
-			String l = "f(g(a, a), g(b, b), f (g(a), g(a)))";
-			String r = "f(g(a, a), f(g(a), g))";
-			RigidityFnc rFnc = new RigidityFncSubsequence();
-			rFnc.setMinLen(1);
-			new TestAntiunify().test(l + " =^= " + r, rFnc);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void test(String problem, RigidityFnc r) throws IOException,
-			IllegalAlignmentException, MalformedTermException {
-		EquationSystem sys = new EquationSystem();
+    public static void main(String[] args) {
+        try {
+            String l = "f(g(a, a), g(b, b), f (g(a), g(a)))";
+            String r = "f(g(a, a), f(g(a), g))";
+            RigidityFnc rFnc = new RigidityFncSubsequence();
+            rFnc.setMinLen(1);
+            new TestAntiunify().test(l + " =^= " + r, rFnc);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void test(String problem, RigidityFnc r) throws IOException, IllegalAlignmentException, MalformedTermException {
+        EquationSystem sys = new EquationSystem();
         new InputParser(sys).parseEquationSystem(problem);
-		System.out.println(sys);
-		System.out.println();
-		AntiUnify rau = new AntiUnify(r, sys);
-		rau.antiUnify(true);
-
-	}
+        System.out.println(sys);
+        System.out.println();
+        AntiUnify rau = new AntiUnify(r, sys);
+        rau.antiUnify(true);
+    }
 }

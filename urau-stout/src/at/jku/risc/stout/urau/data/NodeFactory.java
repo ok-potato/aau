@@ -57,14 +57,6 @@ public class NodeFactory {
 		return hStack.pop();
 	}
 
-	public Hedge createHedge(TermNode... nodes) {
-		Hedge h = new Hedge();
-		for (TermNode termNode : nodes) {
-			h.add(termNode);
-		}
-		return h;
-	}
-
 	public TermNode createHedgeVar(String name) {
 		if (PREFIX_HedgeVar != null)
 			name = PREFIX_HedgeVar + name;
@@ -99,10 +91,6 @@ public class NodeFactory {
 		return new HedgeVar(name.toString());
 	}
 
-	public static TermNode obtainFreshHedgeNode() {
-		return newNode(obtainFreshHedgeVar());
-	}
-
 	public static TermVar obtainFreshTermVar() {
 		StringBuilder name = new StringBuilder();
 		if (PREFIX_FreshTermVar != null)
@@ -113,16 +101,8 @@ public class NodeFactory {
 		return new TermVar(name.toString());
 	}
 
-	public static TermNode obtainFreshTermVarNode() {
-		return newNode(obtainFreshTermVar(), null);
-	}
-
 	public static TermNode newNode(TermAtom atom) {
 		return newNode(atom, null);
-	}
-
-	public static void resetCounter() {
-		hedgeVarCnt = 0;
 	}
 
 	public static TermNode newNode(TermAtom atom, Hedge hedge) {

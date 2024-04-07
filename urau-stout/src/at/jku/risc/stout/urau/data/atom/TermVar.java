@@ -21,11 +21,11 @@ import at.jku.risc.stout.urau.data.TermNode;
 
 /**
  * A simple term variable can be substituted by a single {@linkplain TermNode}.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public class TermVar extends Variable {
-	public TermVar(String name) {
-		super(name);
-	}
+    public TermVar(String name) {
+        super(name);
+    }
 }

@@ -95,7 +95,7 @@ public class AntiUnifyProblem implements Equation, Cloneable {
     }
     
     public boolean isEmpty() {
-        return left.isNullAtom() && right.isNullAtom() && left.getHedge().size() == 0 && right.getHedge().size() == 0;
+        return left.isNullAtom() && right.isNullAtom() && left.getHedge().isEmpty() && right.getHedge().isEmpty();
     }
     
     @Override

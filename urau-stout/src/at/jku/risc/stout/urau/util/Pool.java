@@ -25,61 +25,61 @@ import java.util.List;
  * A pool of objects of a certain type. The pooled class has to implement the
  * interface {@linkplain Poolable}. This object pool can be used to recycle
  * objects and avoid memory allocation / garbage collection.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public class Pool<T extends Poolable> {
-
-	private static HashMap<Class<? extends Poolable>, Pool<? extends Poolable>> pools = new HashMap<Class<? extends Poolable>, Pool<? extends Poolable>>();
-	private List<T> freeObjects = new ArrayList<T>();
-	private T sample;
-
-	private Pool() {
-	}
-
-	/**
-	 * Pulls an object out of this {@linkplain Pool} or creates a new object if
-	 * the pool is empty.
-	 */
-	@SuppressWarnings("unchecked")
-	public T obtain() {
-		int idx = freeObjects.size();
-		if (idx == 0)
-			sample = (T) sample.newObject();
-		else
-			sample = freeObjects.remove(idx - 1);
-		return sample;
-	}
-
-	/**
-	 * Calls the method {@linkplain Poolable#cleanUp()} to clean the object and
-	 * returns it into this pool.
-	 */
-	public void free(T obj) {
-		obj.cleanUp();
-		freeObjects.add(obj);
-	}
-
-	/**
-	 * Returns a {@linkplain Pool} for a certain type of objects. A new pool
-	 * will be created if there is not jet a pool available for the requested
-	 * type.
-	 */
-	public static <T extends Poolable> Pool<T> getPool(T sample) {
-		@SuppressWarnings("unchecked")
-		Pool<T> p = (Pool<T>) pools.get(sample.getClass());
-		if (p == null) {
-			p = new Pool<T>();
-			p.sample = sample;
-			pools.put(sample.getClass(), p);
-		}
-		return p;
-	}
-
-	/**
-	 * Removes this pool and let the garbage collector do it's work.
-	 */
-	public void removePool() {
-		pools.remove(getClass());
-	}
+    
+    private static final HashMap<Class<? extends Poolable>, Pool<? extends Poolable>> pools = new HashMap<>();
+    private final List<T> freeObjects = new ArrayList<>();
+    private T sample;
+    
+    private Pool() {
+    }
+    
+    /**
+     * Pulls an object out of this {@linkplain Pool} or creates a new object if
+     * the pool is empty.
+     */
+    @SuppressWarnings("unchecked")
+    public T obtain() {
+        int idx = freeObjects.size();
+        if (idx == 0) {
+            sample = (T) sample.newObject();
+        } else {
+            sample = freeObjects.remove(idx - 1);
+        }
+        return sample;
+    }
+    
+    /**
+     * Calls the method {@linkplain Poolable#cleanUp()} to clean the object and
+     * returns it into this pool.
+     */
+    public void free(T obj) {
+        obj.cleanUp();
+        freeObjects.add(obj);
+    }
+    
+    /**
+     * Returns a {@linkplain Pool} for a certain type of objects. A new pool
+     * will be created if there is not jet a pool available for the requested
+     * type.
+     */
+    public static <T extends Poolable> Pool<T> getPool(T sample) {
+        @SuppressWarnings("unchecked") Pool<T> p = (Pool<T>) pools.get(sample.getClass());
+        if (p == null) {
+            p = new Pool<>();
+            p.sample = sample;
+            pools.put(sample.getClass(), p);
+        }
+        return p;
+    }
+    
+    /**
+     * Removes this pool and let the garbage collector do it's work.
+     */
+    public void removePool() {
+        pools.remove(getClass());
+    }
 }

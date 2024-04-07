@@ -20,46 +20,47 @@ package at.jku.risc.stout.urau.util;
 /**
  * Tiny abstract list. All implementors have to provide O(1) complexity for all
  * the abstract methods!!!
- * 
+ *
  * @author Alexander Baumgartner
  */
 public abstract class TinyList<V> {
-	/**
-	 * guarantees complexity O(1) by definition
-	 */
-	public abstract int size();
-
-	/**
-	 * guarantees complexity O(1) by definition
-	 */
-	public abstract V get(int i);
-
-	/**
-	 * guarantees complexity O(1) by definition
-	 */
-	public abstract void removeLast();
-
-	/**
-	 * guarantees complexity O(1) by definition
-	 */
-	public V getLast() {
-		return get(size() - 1);
-	}
-
-	public boolean isEmpty() {
-		return size() == 0;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append('[');
-		for (int i = 0, n = size(); i < n; i++) {
-			if (i != 0)
-				sb.append(',');
-			sb.append(get(i));
-		}
-		sb.append(']');
-		return sb.toString();
-	}
+    /**
+     * guarantees complexity O(1) by definition
+     */
+    public abstract int size();
+    
+    /**
+     * guarantees complexity O(1) by definition
+     */
+    public abstract V get(int i);
+    
+    /**
+     * guarantees complexity O(1) by definition
+     */
+    public abstract void removeLast();
+    
+    /**
+     * guarantees complexity O(1) by definition
+     */
+    public V getLast() {
+        return get(size() - 1);
+    }
+    
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = 0, n = size(); i < n; i++) {
+            if (i != 0) {
+                sb.append(',');
+            }
+            sb.append(get(i));
+        }
+        sb.append(']');
+        return sb.toString();
+    }
 }

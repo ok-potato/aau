@@ -23,11 +23,11 @@ import at.jku.risc.stout.urau.data.TermNode;
  * A hedge variable can be substituted by a single {@linkplain TermNode} or a
  * hedge which is represented by a {@linkplain TermNode} with a null-atom
  * {@linkplain TermNode#isNullAtom()}.
- * 
+ *
  * @author Alexander Baumgartner
  */
 public class HedgeVar extends Variable {
-	public HedgeVar(String name) {
-		super(name);
-	}
+    public HedgeVar(String name) {
+        super(name);
+    }
 }
