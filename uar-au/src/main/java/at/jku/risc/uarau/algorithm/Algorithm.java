@@ -24,24 +24,27 @@ package at.jku.risc.uarau.algorithm;
 
 import at.jku.risc.uarau.data.AUT;
 import at.jku.risc.uarau.data.Term;
-import at.jku.risc.uarau.data.Variable;
+import at.jku.risc.uarau.data.ProximityMap;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Algorithm {
     // ..,;-:-*^'°'^*-:-;,.. API ..,;-:-*^'°'^*-:-;,..
-    public static void solve(Term t1, Term t2) {
-        a1(t1, t2);
+    public static void solve(Term t1, Term t2, ProximityMap R, float lambda) {
+        new Algorithm(R, lambda).a1(t1, t2);
     }
     
     private static class Configuration {
         // Tuple (A; S; r; alpha1; alpha2) - used to track state
         private final Set<AUT> unsolved, solved; // 'A', 'S'
-        private Term generalization; // 'r'
+        private int generalization; // 'r'
+        private Map<Integer, Term> substitution; // var -> term
         private float alpha1, alpha2;
         
-        Configuration(Term generalization) {
+        Configuration(int generalization) {
             unsolved = new HashSet<>();
             solved = new HashSet<>();
             this.generalization = generalization;
@@ -53,31 +56,59 @@ public class Algorithm {
             unsolved = new HashSet<>(cfg.unsolved);
             solved = new HashSet<>(cfg.solved);
             generalization = cfg.generalization;
+            substitution = new HashMap<>(cfg.substitution);
             alpha1 = cfg.alpha1;
             alpha2 = cfg.alpha2;
         }
     }
     
-    private Algorithm() {
+    private final float lambda;
+    private final ProximityMap R;
+    
+    private Algorithm(ProximityMap R, float lambda) {
+        this.lambda = lambda;
+        this.R = R;
     }
     
-    private static void a1(Term t1, Term t2) {
-        Variable x = Variable.fresh();
-        Configuration cfg = new Configuration(x);
-        cfg = applyRules(cfg, new AUT(x, t1, t2));
+    private void a1(Term t1, Term t2) {
+        int x = Term.freshVar();
+        Configuration cfg = applyRules(new Configuration(x), new AUT(x, t1, t2));
     }
     
-    private static Configuration applyRules(Configuration cfg, AUT aut) {
+    private Configuration applyRules(Configuration cfg, AUT aut) {
+        cfg = new Configuration(cfg);
         // Tri: Trivial
-        if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-            // TODO substitution??
-            aut.variable;
+        if (trivial(cfg, aut)) {
             return cfg;
         }
         // Dec: Decomposition
-        // TODO
+        if (decomposition(cfg, aut)) {
+            return cfg;
+        }
         // Sol: Solving
         cfg.solved.add(aut);
         return cfg;
+    }
+    
+    private boolean trivial(Configuration cfg, AUT aut) {
+        // O(1)
+        if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
+            cfg.substitution.put(aut.variable, Term.ANON);
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean decomposition(Configuration cfg, AUT aut) {
+        // O(n)
+        Set<Term> intersection = new HashSet<>(aut.T1);
+        intersection.retainAll(aut.T2);
+        if (intersection.isEmpty()) {
+            return false;
+        }
+        // TODO
+        
+        
+        return true;
     }
 }
