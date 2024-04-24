@@ -23,8 +23,8 @@ package at.jku.risc.uarau.algorithm;
  */
 
 import at.jku.risc.uarau.data.AUT;
-import at.jku.risc.uarau.data.Term;
 import at.jku.risc.uarau.data.ProximityMap;
+import at.jku.risc.uarau.data.Term;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,35 +33,15 @@ import java.util.Set;
 
 public class Algorithm {
     // ..,;-:-*^'°'^*-:-;,.. API ..,;-:-*^'°'^*-:-;,..
+    public static void solve(String problem, String R, float lambda) {
+    
+    }
+    
     public static void solve(Term t1, Term t2, ProximityMap R, float lambda) {
         new Algorithm(R, lambda).a1(t1, t2);
     }
     
-    private static class Configuration {
-        // Tuple (A; S; r; alpha1; alpha2) - used to track state
-        private final Set<AUT> unsolved, solved; // 'A', 'S'
-        private int generalization; // 'r'
-        private Map<Integer, Term> substitution; // var -> term
-        private float alpha1, alpha2;
-        
-        Configuration(int generalization) {
-            unsolved = new HashSet<>();
-            solved = new HashSet<>();
-            this.generalization = generalization;
-            alpha1 = 1.0f;
-            alpha2 = 1.0f;
-        }
-        
-        Configuration(Configuration cfg) {
-            unsolved = new HashSet<>(cfg.unsolved);
-            solved = new HashSet<>(cfg.solved);
-            generalization = cfg.generalization;
-            substitution = new HashMap<>(cfg.substitution);
-            alpha1 = cfg.alpha1;
-            alpha2 = cfg.alpha2;
-        }
-    }
-    
+    private final Map<Integer, String> names = new HashMap<>();
     private final float lambda;
     private final ProximityMap R;
     
@@ -71,8 +51,7 @@ public class Algorithm {
     }
     
     private void a1(Term t1, Term t2) {
-        int x = Term.freshVar();
-        Configuration cfg = applyRules(new Configuration(x), new AUT(x, t1, t2));
+        Configuration cfg = applyRules(new Configuration(0), new AUT(0, t1, t2));
     }
     
     private Configuration applyRules(Configuration cfg, AUT aut) {
@@ -93,7 +72,7 @@ public class Algorithm {
     private boolean trivial(Configuration cfg, AUT aut) {
         // O(1)
         if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-            cfg.substitution.put(aut.variable, Term.ANON);
+            cfg.substitution.put(aut.variable, Term.ANONYMOUS);
             return true;
         }
         return false;
@@ -107,7 +86,6 @@ public class Algorithm {
             return false;
         }
         // TODO
-        
         
         return true;
     }
