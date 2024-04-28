@@ -33,12 +33,8 @@ import java.util.Set;
 
 public class Algorithm {
     // ..,;-:-*^'°'^*-:-;,.. API ..,;-:-*^'°'^*-:-;,..
-    public static void solve(String problem, String R, float lambda) {
-    
-    }
-    
-    public static void solve(Term t1, Term t2, ProximityMap R, float lambda) {
-        new Algorithm(R, lambda).a1(t1, t2);
+    public static void solve(Problem p) {
+        new Algorithm(p.R, p.lambda).a1(p.lhs, p.rhs);
     }
     
     private final Map<Integer, String> names = new HashMap<>();
@@ -55,6 +51,7 @@ public class Algorithm {
     }
     
     private Configuration applyRules(Configuration cfg, AUT aut) {
+        // TODO expensive
         cfg = new Configuration(cfg);
         // Tri: Trivial
         if (trivial(cfg, aut)) {

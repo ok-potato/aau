@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class Configuration {
+class Configuration {
     // Tuple (A; S; r; alpha1; alpha2) - used to track state
     final Set<AUT> unsolved, solved; // 'A', 'S'
     int generalization; // 'r'
@@ -21,6 +21,8 @@ public class Configuration {
     Configuration(int generalization) {
         unsolved = new HashSet<>();
         solved = new HashSet<>();
+        substitution = new HashMap<>();
+        
         this.generalization = generalization;
         alpha1 = 1.0f;
         alpha2 = 1.0f;
