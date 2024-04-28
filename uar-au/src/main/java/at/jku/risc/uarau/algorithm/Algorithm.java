@@ -22,9 +22,7 @@ package at.jku.risc.uarau.algorithm;
  *   - correspondence mapping -A2> mcsg [=^= mcsrg, I assume]
  */
 
-import at.jku.risc.uarau.data.AUT;
-import at.jku.risc.uarau.data.ProximityMap;
-import at.jku.risc.uarau.data.Term;
+import at.jku.risc.uarau.data.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +45,8 @@ public class Algorithm {
     }
     
     private void a1(Term t1, Term t2) {
-        Configuration cfg = applyRules(new Configuration(0), new AUT(0, t1, t2));
+        Configuration init = new Configuration();
+        Configuration cfg = applyRules(init, new AUT(init.generalization, t1, t2));
     }
     
     private Configuration applyRules(Configuration cfg, AUT aut) {
@@ -69,7 +68,7 @@ public class Algorithm {
     private boolean trivial(Configuration cfg, AUT aut) {
         // O(1)
         if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-            cfg.substitution.put(aut.variable, Term.ANONYMOUS);
+            cfg.substitution.put(aut.variable, Variable.ANON);
             return true;
         }
         return false;

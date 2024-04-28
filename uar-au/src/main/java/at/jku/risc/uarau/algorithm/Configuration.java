@@ -2,6 +2,7 @@ package at.jku.risc.uarau.algorithm;
 
 import at.jku.risc.uarau.data.AUT;
 import at.jku.risc.uarau.data.Term;
+import at.jku.risc.uarau.data.Variable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,19 +12,18 @@ import java.util.Set;
 class Configuration {
     // Tuple (A; S; r; alpha1; alpha2) - used to track state
     final Set<AUT> unsolved, solved; // 'A', 'S'
-    int generalization; // 'r'
-    Map<Integer, Term> substitution; // var -> term
+    Variable generalization; // 'r'
+    Map<Term, Term> substitution; // var -> term
     float alpha1, alpha2;
     
-    // for fresh variable naming
-    int varCounter;
+    int freshName;
     
-    Configuration(int generalization) {
+    Configuration() {
         unsolved = new HashSet<>();
         solved = new HashSet<>();
         substitution = new HashMap<>();
         
-        this.generalization = generalization;
+        this.generalization = freshVar();
         alpha1 = 1.0f;
         alpha2 = 1.0f;
     }
@@ -35,6 +35,10 @@ class Configuration {
         substitution = new HashMap<>(cfg.substitution);
         alpha1 = cfg.alpha1;
         alpha2 = cfg.alpha2;
-        varCounter = cfg.varCounter;
+        freshName = cfg.freshName;
+    }
+    
+    public Variable freshVar() {
+        return new Variable(String.valueOf(freshName++));
     }
 }
