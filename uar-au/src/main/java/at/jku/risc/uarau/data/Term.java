@@ -11,13 +11,23 @@ public abstract class Term {
         if (StringUtils.isBlank(head)) {
             throw new IllegalArgumentException("https://youtu.be/aS8O-F0ICxw");
         }
-        this.head = head;
+        this.head = head.intern();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        throw new UnsupportedOperationException("Inheritor of Term must implement equals!");
+    }
+    
+    @Override
+    public int hashCode() {
+        System.err.println("hashCode was called on inheritor of 'Term' without custom implementation - this is probably a mistake!");
+        return super.hashCode();
     }
     
     // terms look like this:  'f(g(a, b), c, d)'
     // you can write function/variable names using any symbols besides '(),'
     // whitespace is ignored
-    
     public static Term parse(String term) {
         // 'f(g(a, b), c, d)'  =>  'f(', 'g(', 'a', 'b', ')', 'c', 'd', ')'
         String[] tokens = term.replaceAll("\\s", "").split("((?<=\\()|,|(?=\\)))");

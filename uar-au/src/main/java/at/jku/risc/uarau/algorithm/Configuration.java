@@ -13,17 +13,16 @@ class Configuration {
     // Tuple (A; S; r; alpha1; alpha2) - used to track state
     final Set<AUT> unsolved, solved; // 'A', 'S'
     Variable generalization; // 'r'
-    Map<Term, Term> substitution; // var -> term
+    Map<Variable, Term> substitution; // var -> term
     float alpha1, alpha2;
     
     int freshName;
     
     Configuration() {
-        unsolved = new HashSet<>();
+        unsolved = new HashSet<>(); // TODO do I need unsolved?
         solved = new HashSet<>();
         substitution = new HashMap<>();
-        
-        this.generalization = freshVar();
+        generalization = freshVar();
         alpha1 = 1.0f;
         alpha2 = 1.0f;
     }

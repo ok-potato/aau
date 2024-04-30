@@ -22,7 +22,10 @@ package at.jku.risc.uarau.algorithm;
  *   - correspondence mapping -A2> mcsg [=^= mcsrg, I assume]
  */
 
-import at.jku.risc.uarau.data.*;
+import at.jku.risc.uarau.data.AUT;
+import at.jku.risc.uarau.data.ProximityMap;
+import at.jku.risc.uarau.data.Term;
+import at.jku.risc.uarau.data.Variable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,13 +38,12 @@ public class Algorithm {
         new Algorithm(p.R, p.lambda).a1(p.lhs, p.rhs);
     }
     
-    private final Map<Integer, String> names = new HashMap<>();
     private final float lambda;
     private final ProximityMap R;
     
     private Algorithm(ProximityMap R, float lambda) {
         this.lambda = lambda;
-        this.R = R;
+        this.R = R.ready(lambda);
     }
     
     private void a1(Term t1, Term t2) {
@@ -50,7 +52,6 @@ public class Algorithm {
     }
     
     private Configuration applyRules(Configuration cfg, AUT aut) {
-        // TODO expensive
         cfg = new Configuration(cfg);
         // Tri: Trivial
         if (trivial(cfg, aut)) {
@@ -81,7 +82,13 @@ public class Algorithm {
         if (intersection.isEmpty()) {
             return false;
         }
-        // TODO
+        
+        // TODO find set of possible h's, i.e. all those fct. symbols which approximate all fct. symbols in aut.T1 and aut.T2
+//        Set<String> heads = aut.T1.stream().map(t -> )
+//
+//                Set < String > h = R.relations.stream().filter(pr -> {
+//                    if (pr.f() == aut)
+//                })
         
         return true;
     }

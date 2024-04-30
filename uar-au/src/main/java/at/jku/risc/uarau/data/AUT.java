@@ -21,4 +21,9 @@ public class AUT {
         this.T2 = new HashSet<>();
         T2.add(t2);
     }
+    
+    @Override
+    public String toString() {
+        return STR."\{variable}: \{T1} =^= \{T2}";
+    }
 }

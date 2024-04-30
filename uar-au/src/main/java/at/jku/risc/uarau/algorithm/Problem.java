@@ -8,6 +8,7 @@ public class Problem {
     ProximityMap R;
     float lambda;
     
+    
     public Problem(Term lhs, Term rhs, ProximityMap r, float lambda) {
         this.lhs = lhs;
         this.rhs = rhs;
