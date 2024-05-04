@@ -32,8 +32,7 @@ public class Function extends Term {
     @Override
     public boolean equals(Object other) {
         if (other instanceof Function otherFunction) {
-            // terms are write-only, so we can do this for some performance gainz
-            // proper pooling would be a better solution, though
+            // this is okay fast, but could also do pooling for more fast
             if (hashCode() != otherFunction.hashCode()) {
                 return false;
             }
@@ -47,6 +46,7 @@ public class Function extends Term {
         if (hash == 0) {
             hash = head.hashCode() + 31 * arguments.hashCode();
             if (hash == 0) {
+                System.out.println("Function got hashed as 0; this shouldn't happen very often.");
                 hash = 1234567890;
             }
         }

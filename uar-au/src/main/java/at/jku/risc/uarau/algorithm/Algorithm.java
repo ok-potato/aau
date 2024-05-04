@@ -22,14 +22,9 @@ package at.jku.risc.uarau.algorithm;
  *   - correspondence mapping -A2> mcsg [=^= mcsrg, I assume]
  */
 
-import at.jku.risc.uarau.data.AUT;
-import at.jku.risc.uarau.data.ProximityMap;
-import at.jku.risc.uarau.data.Term;
-import at.jku.risc.uarau.data.Variable;
+import at.jku.risc.uarau.data.*;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class Algorithm {
@@ -43,7 +38,7 @@ public class Algorithm {
     
     private Algorithm(ProximityMap R, float lambda) {
         this.lambda = lambda;
-        this.R = R.ready(lambda);
+        this.R = R;
     }
     
     private void a1(Term t1, Term t2) {
@@ -76,19 +71,20 @@ public class Algorithm {
     }
     
     private boolean decomposition(Configuration cfg, AUT aut) {
-        // O(n)
-        Set<Term> intersection = new HashSet<>(aut.T1);
-        intersection.retainAll(aut.T2);
-        if (intersection.isEmpty()) {
-            return false;
+        // did trivial -> union has 1 or more elements
+        Set<Term> union = new HashSet<>(aut.T1);
+        union.addAll(aut.T2);
+        Set<String> common = R.commonApproximates(union);
+        for (String h : common) {
+            // TODO arity of h
+            cfg.substitution.put(aut.variable, new Function(h));
         }
         
-        // TODO find set of possible h's, i.e. all those fct. symbols which approximate all fct. symbols in aut.T1 and aut.T2
-//        Set<String> heads = aut.T1.stream().map(t -> )
-//
-//                Set < String > h = R.relations.stream().filter(pr -> {
-//                    if (pr.f() == aut)
-//                })
+        //        Set<String> heads = aut.T1.stream().map(t -> )
+        //
+        //                Set < String > h = R.relations.stream().filter(pr -> {
+        //                    if (pr.f() == aut)
+        //                })
         
         return true;
     }

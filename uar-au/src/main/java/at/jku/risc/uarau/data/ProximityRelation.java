@@ -2,7 +2,13 @@ package at.jku.risc.uarau.data;
 
 public record ProximityRelation(String f, String g, float proximity, int[][] argumentRelation) {
     public ProximityRelation(String f, String g, float proximity, int[][] argumentRelation) {
-        // -> canonical representation (via fixed ordering)
+        for (int[] pair : argumentRelation) {
+            if (pair.length != 2) {
+                throw new IllegalArgumentException();
+            }
+        }
+        
+        // do fixed ordering
         if (f.hashCode() < g.hashCode()) {
             this.f = f.intern();
             this.g = g.intern();
@@ -13,6 +19,16 @@ public record ProximityRelation(String f, String g, float proximity, int[][] arg
             this.argumentRelation = reverse(argumentRelation);
         }
         this.proximity = proximity;
+    }
+    
+    public String getOther(String f) {
+        if (f == this.f) {
+            return this.g;
+        }
+        if (f == this.g) {
+            return this.f;
+        }
+        throw new IllegalArgumentException(STR."Called getOther on ProximityRelation \{this} with function name \{f}!");
     }
     
     @Override

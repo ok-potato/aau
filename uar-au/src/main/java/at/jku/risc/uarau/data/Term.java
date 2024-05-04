@@ -31,20 +31,22 @@ public abstract class Term {
     public static Term parse(String term) {
         // 'f(g(a, b), c, d)'  =>  'f(', 'g(', 'a', 'b', ')', 'c', 'd', ')'
         String[] tokens = term.replaceAll("\\s", "").split("((?<=\\()|,|(?=\\)))");
-        Stack<Function> fTerms = new Stack<>();
-        fTerms.add(new Function(",")); // "dummy term" -> avoid null pointer
+        
+        Stack<Function> functions = new Stack<>();
+        functions.add(new Function(",")); // "dummy term" -> avoid null pointer
         for (String s : tokens) {
             try {
-                if (")".equals(s)) { // end of a set of arguments
-                    Function subTerm = fTerms.pop();
-                    fTerms.peek().arguments.add(subTerm);
+                if (")".equals(s)) { // end of arguments for current function
+                    Function f = functions.pop();
+                    functions.peek().arguments.add(f);
                     continue;
                 }
-                if (s.endsWith("(")) { // head of a function, beginning of a set of arguments
-                    fTerms.add(new Function(s.substring(0, s.length() - 1)));
+                if (s.endsWith("(")) { // head of a function -> start of arguments
+                    functions.add(new Function(s.substring(0, s.length() - 1)));
                     continue;
                 }
-                fTerms.peek().arguments.add(new Variable(s)); // just a variable
+                functions.peek().arguments.add(new Variable(s)); // otherwise, it's just a variable
+                //
             } catch (Exception e) {
                 String msg = STR."Error while parsing term '\{term}' at token '\{s}', check syntax!";
                 if (")".equals(s)) {
@@ -53,10 +55,10 @@ public abstract class Term {
                 throw new IllegalArgumentException(msg);
             }
         }
-        if (fTerms.size() != 1) {
-            throw new IllegalArgumentException(STR."Term \{term} contains \{fTerms.size() - 1} unclosed parentheses!");
+        if (functions.size() != 1) {
+            throw new IllegalArgumentException(STR."Term \{term} contains \{functions.size() - 1} unclosed parentheses!");
         }
         
-        return fTerms.pop().arguments.getFirst(); // deref. "dummy term"
+        return functions.pop().arguments.getFirst(); // deref. "dummy term"
     }
 }
