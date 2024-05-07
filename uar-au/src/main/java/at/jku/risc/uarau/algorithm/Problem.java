@@ -59,6 +59,6 @@ public class Problem {
     
     @Override
     public String toString() {
-        return STR."Problem:\n  \{lhs}  =^=  \{rhs}\n  R: \{R}\n  λ: \{lambda}\n";
+        return STR."Problem:\n  \{lhs} =^= \{rhs}\n  λ: \{lambda}\n  R: \{R}\n";
     }
 }

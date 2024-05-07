@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Function extends Term {
     public final List<Term> arguments;
-    private int hash = 0;
+    private Integer hash = null;
     
     public Function(String head, List<Term> arguments) {
         super(head);
@@ -43,13 +43,10 @@ public class Function extends Term {
     
     @Override
     public int hashCode() {
-        if (hash == 0) {
-            hash = head.hashCode() + 31 * arguments.hashCode();
-            if (hash == 0) {
-                System.out.println("Function got hashed as 0; this shouldn't happen very often.");
-                hash = 1234567890;
-            }
+        if (hash != null) {
+            return hash;
         }
+        hash = head.hashCode() + 31 * arguments.hashCode();
         return hash;
     }
 }

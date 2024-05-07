@@ -13,13 +13,15 @@ class Configuration {
     // Tuple (A; S; r; alpha1; alpha2) - used to track state
     final Set<AUT> unsolved, solved; // 'A', 'S'
     Variable generalization; // 'r'
+    // TODO this is a term which substitution is applied to
+    //  I guess the thing to do is make this a list, and apply it at the end
     Map<Variable, Term> substitution; // var -> term
     float alpha1, alpha2;
     
     int freshName;
     
     Configuration() {
-        unsolved = new HashSet<>(); // TODO do I need unsolved?
+        unsolved = new HashSet<>();
         solved = new HashSet<>();
         substitution = new HashMap<>();
         generalization = freshVar();

@@ -30,20 +30,18 @@ import java.util.Set;
 public class Algorithm {
     // ..,;-:-*^'°'^*-:-;,.. API ..,;-:-*^'°'^*-:-;,..
     public static void solve(Problem p) {
-        new Algorithm(p.R, p.lambda).a1(p.lhs, p.rhs);
+        new Algorithm(p).a1();
     }
     
-    private final float lambda;
-    private final ProximityMap R;
+    private final Problem p;
     
-    private Algorithm(ProximityMap R, float lambda) {
-        this.lambda = lambda;
-        this.R = R;
+    private Algorithm(Problem problem) {
+        this.p = problem;
     }
     
-    private void a1(Term t1, Term t2) {
+    private void a1() {
         Configuration init = new Configuration();
-        Configuration cfg = applyRules(init, new AUT(init.generalization, t1, t2));
+        Configuration cfg = applyRules(init, new AUT(init.generalization, p.lhs, p.rhs));
     }
     
     private Configuration applyRules(Configuration cfg, AUT aut) {
@@ -74,7 +72,8 @@ public class Algorithm {
         // did trivial -> union has 1 or more elements
         Set<Term> union = new HashSet<>(aut.T1);
         union.addAll(aut.T2);
-        Set<String> common = R.commonApproximates(union);
+        Set<String> common = p.R.commonApproximates(union);
+        // TODO possibly multiple arg maps h -> t per t
         for (String h : common) {
             // TODO arity of h
             cfg.substitution.put(aut.variable, new Function(h));
@@ -87,5 +86,10 @@ public class Algorithm {
         //                })
         
         return true;
+    }
+    
+    private boolean consistent(Set<Term> T) {
+        // TODO
+        return false;
     }
 }

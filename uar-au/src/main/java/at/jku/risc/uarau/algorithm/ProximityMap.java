@@ -16,16 +16,17 @@ public class ProximityMap {
     final Map<String, Integer> arities = new HashMap<>();
     
     public void add(ProximityRelation pr, float lambda) {
-        if (pr == null || pr.proximity() < 0.0f || pr.proximity() > 1.0f) {
+        if (pr == null || pr.proximity < 0.0f || pr.proximity > 1.0f) {
             throw new IllegalArgumentException();
         }
+        // TODO how to handle Id proximity? I think I need it
         // optimization: these will never come into play
-        if (pr.proximity() < lambda) {
-            System.out.println(STR."Discarding relation with proximity [\{pr.proximity()}] < λ [\{lambda}]");
+        if (pr.proximity < lambda) {
+            System.out.println(STR."Discarding relation with proximity [\{pr.proximity}] < λ [\{lambda}]");
             return;
         }
-        Set<ProximityRelation> fClass = proximityClasses.computeIfAbsent(pr.f(), _ -> new HashSet<>());
-        Set<ProximityRelation> gClass = proximityClasses.computeIfAbsent(pr.g(), _ -> new HashSet<>());
+        Set<ProximityRelation> fClass = proximityClasses.computeIfAbsent(pr.f, _ -> new HashSet<>());
+        Set<ProximityRelation> gClass = proximityClasses.computeIfAbsent(pr.g, _ -> new HashSet<>());
         fClass.add(pr);
         gClass.add(pr);
         relations.add(pr);
@@ -79,10 +80,9 @@ public class ProximityMap {
     
     static ProximityMap parse(String map, float lambda) {
         var proximityMap = new ProximityMap();
-        String[] relations = map.split(";");
-        for (String relation : relations) {
+        for (String relation : map.split(";")) {
             if (StringUtils.isNotBlank(relation)) {
-                proximityMap.add(ProximityRelation.parse(relation), lambda);
+                proximityMap.add(ProximityRelation.parse(relation.strip()), lambda);
             }
         }
         return proximityMap;

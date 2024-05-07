@@ -21,19 +21,19 @@ public abstract class Term {
     
     @Override
     public int hashCode() {
-        System.err.println("hashCode was called on inheritor of 'Term' without custom implementation - this is probably a mistake!");
+        System.err.println("hashCode was called on inheritor of 'Term' without custom implementation!");
         return super.hashCode();
     }
     
-    // terms look like this:  'f(g(a, b), c, d)'
-    // you can write function/variable names using any symbols besides '(),'
+    // terms look like this: 'f(g(a,b),c,d)'
+    // function/variable names can be written using any symbols, except '(', ')' or ','
     // whitespace is ignored
     public static Term parse(String term) {
-        // 'f(g(a, b), c, d)'  =>  'f(', 'g(', 'a', 'b', ')', 'c', 'd', ')'
+        // 'f(g(a,b),c,d)'  =>  'f(', 'g(', 'a', 'b', ')', 'c', 'd', ')'
         String[] tokens = term.replaceAll("\\s", "").split("((?<=\\()|,|(?=\\)))");
         
         Stack<Function> functions = new Stack<>();
-        functions.add(new Function(",")); // "dummy term" -> avoid null pointer
+        functions.add(new Function(",")); // "dummy term" to avoid null pointer
         for (String s : tokens) {
             try {
                 if (")".equals(s)) { // end of arguments for current function
@@ -59,6 +59,6 @@ public abstract class Term {
             throw new IllegalArgumentException(STR."Term \{term} contains \{functions.size() - 1} unclosed parentheses!");
         }
         
-        return functions.pop().arguments.getFirst(); // deref. "dummy term"
+        return functions.pop().arguments.getFirst(); // dereference "dummy term"
     }
 }
