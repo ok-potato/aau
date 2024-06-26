@@ -1,7 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Function extends Term {
     public final List<Term> arguments;
@@ -48,5 +47,24 @@ public class Function extends Term {
         }
         hash = head.hashCode() + 31 * arguments.hashCode();
         return hash;
+    }
+    
+    public void foo(){
+        SequencedSet<String> E = new LinkedHashSet<>();
+        E.add("asdf");
+        E.add("qwer");
+        E.add("zxcv");
+        E.add("tyui");
+        while (!E.isEmpty()) {
+            String a = E.getFirst();
+            Set<String> joined = new HashSet<>();
+            for (String e : E) {
+                if (e.startsWith(a.substring(0, 2))) {
+                    a += e;
+                    joined.add(e);
+                }
+            }
+            E.removeAll(joined);
+        }
     }
 }
