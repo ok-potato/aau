@@ -1,7 +1,7 @@
-package at.jku.risc.uarau.algorithm;
+package prev.uarau.algorithm;
 
-import at.jku.risc.uarau.data.ProximityRelation;
-import at.jku.risc.uarau.data.Term;
+import prev.uarau.data.ProximityRelation;
+import prev.uarau.data.Term;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.HashMap;

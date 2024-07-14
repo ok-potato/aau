@@ -1,5 +1,5 @@
-import at.jku.risc.uarau.algorithm.Algorithm;
-import at.jku.risc.uarau.algorithm.Problem;
+import prev.uarau.algorithm.Algorithm;
+import prev.uarau.algorithm.Problem;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

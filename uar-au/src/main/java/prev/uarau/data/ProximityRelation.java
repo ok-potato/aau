@@ -1,4 +1,4 @@
-package at.jku.risc.uarau.data;
+package prev.uarau.data;
 
 import java.util.Arrays;
 

@@ -1,4 +1,4 @@
-package at.jku.risc.uarau.data;
+package prev.uarau.data;
 
 import org.junit.platform.commons.util.StringUtils;
 

@@ -1,4 +1,4 @@
-package at.jku.risc.uarau.data;
+package prev.uarau.data;
 
 public class Variable extends Term {
     public static final Variable ANON = new Variable("_");

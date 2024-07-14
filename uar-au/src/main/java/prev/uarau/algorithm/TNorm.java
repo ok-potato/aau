@@ -1,4 +1,4 @@
-package at.jku.risc.uarau.algorithm;
+package prev.uarau.algorithm;
 
 public interface TNorm {
     float apply(float a, float b);

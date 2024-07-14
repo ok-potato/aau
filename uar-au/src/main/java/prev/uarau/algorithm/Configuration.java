@@ -1,8 +1,8 @@
-package at.jku.risc.uarau.algorithm;
+package prev.uarau.algorithm;
 
-import at.jku.risc.uarau.data.AUT;
-import at.jku.risc.uarau.data.Term;
-import at.jku.risc.uarau.data.Variable;
+import prev.uarau.data.AUT;
+import prev.uarau.data.Term;
+import prev.uarau.data.Variable;
 
 import java.util.HashMap;
 import java.util.HashSet;

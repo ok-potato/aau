@@ -1,4 +1,4 @@
-package at.jku.risc.uarau.algorithm;
+package prev.uarau.algorithm;
 
 /*
  * [Acronyms]
@@ -22,10 +22,10 @@ package at.jku.risc.uarau.algorithm;
  *   - correspondence mapping -A2> mcsg [=^= mcsrg, I assume]
  */
 
-import at.jku.risc.uarau.data.AUT;
-import at.jku.risc.uarau.data.Function;
-import at.jku.risc.uarau.data.Term;
-import at.jku.risc.uarau.data.Variable;
+import prev.uarau.data.AUT;
+import prev.uarau.data.Function;
+import prev.uarau.data.Term;
+import prev.uarau.data.Variable;
 
 import java.util.HashSet;
 import java.util.Set;

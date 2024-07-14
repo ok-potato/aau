@@ -1,8 +1,8 @@
-package at.jku.risc.uarau.algorithm;
+package prev.uarau.algorithm;
 
-import at.jku.risc.uarau.data.Function;
-import at.jku.risc.uarau.data.Term;
-import at.jku.risc.uarau.data.Variable;
+import prev.uarau.data.Function;
+import prev.uarau.data.Term;
+import prev.uarau.data.Variable;
 
 public class Problem {
     Term lhs, rhs;
