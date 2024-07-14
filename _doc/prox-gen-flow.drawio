@@ -1,6 +1,6 @@
-<mxfile host="Electron" modified="2024-07-14T08:52:25.038Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.4.0 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="re1X7ngDJv1K3U5h0NNR" version="24.4.0" type="device">
+<mxfile host="Electron" modified="2024-07-14T14:53:25.000Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.4.0 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="y9TlTnlm3qHdSzFZW8S9" version="24.4.0" type="device">
   <diagram name="Page-1" id="MV5HsdUabSFrRN66-z7L">
-    <mxGraphModel dx="1195" dy="737" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1143" dy="737" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -22,7 +22,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="2ND7MC_ksWg2ifwJMLWy-2" value="&lt;div&gt;&lt;b&gt;&lt;font color=&quot;#0066cc&quot;&gt;Decompose:&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;child := cfg.clone()&lt;/div&gt;&lt;div&gt;update child:&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#4d4d4d&quot;&gt;~ A \= {aut} ~&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#b3b3b3&quot;&gt;A u= {(yi: Qi1^Qi2)}&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#b3b3b3&quot;&gt;r .= {x -&amp;gt; h(yi..yn)}&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#b3b3b3&quot;&gt;update a1, a2&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#e6e6e6&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#e6e6e6&quot;&gt;branches.push(&lt;/font&gt;child&lt;font color=&quot;#e6e6e6&quot;&gt;)&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#00cc00&quot;&gt;dec = true&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="2ND7MC_ksWg2ifwJMLWy-2" value="&lt;div&gt;&lt;b&gt;&lt;font color=&quot;#0066cc&quot;&gt;Decompose:&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;child := cfg.clone()&lt;/div&gt;&lt;div&gt;update child:&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#4d4d4d&quot;&gt;~ A \= {aut} ~&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#b3b3b3&quot;&gt;A u= {(yi: Qi1^Qi2)}&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#b3b3b3&quot;&gt;r .= {x -&amp;gt; h(yi..yn)}&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#b3b3b3&quot;&gt;update alphas&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#e6e6e6&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#e6e6e6&quot;&gt;branches.push(&lt;/font&gt;child&lt;font color=&quot;#e6e6e6&quot;&gt;)&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#00cc00&quot;&gt;dec = true&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="90" y="630" width="140" height="160" as="geometry" />
         </mxCell>
         <mxCell id="2ND7MC_ksWg2ifwJMLWy-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="2ND7MC_ksWg2ifwJMLWy-4" target="2ND7MC_ksWg2ifwJMLWy-5" edge="1">
