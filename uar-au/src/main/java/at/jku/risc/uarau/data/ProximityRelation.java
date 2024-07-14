@@ -35,7 +35,7 @@ public class ProximityRelation {
         if (f == this.g) {
             return this.f;
         }
-        throw new IllegalArgumentException(STR."Called getOther on ProximityRelation \{this} with function name \{f}!");
+        throw new IllegalArgumentException(String.format("Called getOther on ProximityRelation %s with function name %s!", this, f));
     }
     
     @Override
@@ -59,9 +59,9 @@ public class ProximityRelation {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int[] map : argumentRelation) {
-            sb.append(STR."(\{map[0]},\{map[1]}),");
+            sb.append(String.format("(%d,%d),", map[0], map[1]));
         }
-        return STR."\{f} ~ \{g}, α[\{proximity}], ρ[\{sb.delete(sb.length() - 1, sb.length())}]";
+        return String.format("%s ~ %s, α[%s], ρ[%s]", f, g, proximity, sb.delete(sb.length() - 1, sb.length()));
     }
     
     public static ProximityRelation parse(String relation) {
@@ -71,17 +71,17 @@ public class ProximityRelation {
         int closedBracket = relation.indexOf(']');
         
         if (!(openBrace < closedBrace && openBracket < closedBracket)) {
-            throw new IllegalArgumentException(STR."Malformed proximity relation \{relation}");
+            throw new IllegalArgumentException(String.format("Malformed proximity relation %s", relation));
         }
         int firstOpen = Math.min(openBrace, openBracket);
         int lastClosed = Math.max(closedBrace, closedBracket);
         
-        String[] heads = (relation.substring(0, firstOpen) + relation.substring(lastClosed + 1)).strip().split("\\s+");
-        String proximity = relation.substring(openBracket + 1, closedBracket).strip();
+        String[] heads = (relation.substring(0, firstOpen) + relation.substring(lastClosed + 1)).trim().split("\\s+");
+        String proximity = relation.substring(openBracket + 1, closedBracket).trim();
         
         int[][] parsedArgRelations = new int[0][];
         
-        String brace = relation.substring(openBrace + 1, closedBrace).strip();
+        String brace = relation.substring(openBrace + 1, closedBrace).trim();
         if (!brace.isEmpty()) {
             String[] argRelations = brace.substring(brace.indexOf('(') + 1, brace.lastIndexOf(')'))
                     .replaceAll("\\s", "")

@@ -22,11 +22,11 @@ public class ProximityMap {
         // TODO how to handle Id proximity? I think I need it
         // optimization: these will never come into play
         if (pr.proximity < lambda) {
-            System.out.println(STR."Discarding relation with proximity [\{pr.proximity}] < λ [\{lambda}]");
+            System.out.printf("Discarding relation with proximity [%s] < λ [%s]%n", pr.proximity, lambda);
             return;
         }
-        Set<ProximityRelation> fClass = proximityClasses.computeIfAbsent(pr.f, _ -> new HashSet<>());
-        Set<ProximityRelation> gClass = proximityClasses.computeIfAbsent(pr.g, _ -> new HashSet<>());
+        Set<ProximityRelation> fClass = proximityClasses.computeIfAbsent(pr.f, _ignored -> new HashSet<>());
+        Set<ProximityRelation> gClass = proximityClasses.computeIfAbsent(pr.g, _ignored -> new HashSet<>());
         fClass.add(pr);
         gClass.add(pr);
         relations.add(pr);
@@ -35,7 +35,7 @@ public class ProximityMap {
     // TODO this needs unit tests
     public Set<String> commonApproximates(Set<Term> terms) {
         // for some term s, find all its approximates
-        Term s = terms.stream().findAny().orElseThrow();
+        Term s = terms.stream().findAny().orElseThrow(IllegalStateException::new);
         terms.remove(s);
         
         Set<String> common = proximityClass(s.head).stream()
@@ -66,7 +66,7 @@ public class ProximityMap {
         for (ProximityRelation pr : relations) {
             sb.append(pr.toString()).append("\n       ");
         }
-        return STR."{\{sb.delete(sb.length() - 8, sb.length()).toString()} }";
+        return String.format("{ %s }", sb.delete(sb.length() - 8, sb.length()));
     }
     
     // TODO non-parsing construction (for Problem constructor)
@@ -79,10 +79,10 @@ public class ProximityMap {
     // <proximity> is a float between 0.0 and 1.0            (with surrounding '[]')
     
     static ProximityMap parse(String map, float lambda) {
-        var proximityMap = new ProximityMap();
+        ProximityMap proximityMap = new ProximityMap();
         for (String relation : map.split(";")) {
             if (StringUtils.isNotBlank(relation)) {
-                proximityMap.add(ProximityRelation.parse(relation.strip()), lambda);
+                proximityMap.add(ProximityRelation.parse(relation.trim()), lambda);
             }
         }
         return proximityMap;

@@ -14,7 +14,8 @@ public class Variable extends Term {
     
     @Override
     public boolean equals(Object other) {
-        if (other instanceof Variable otherVariable) {
+        if (other instanceof Variable) {
+            Variable otherVariable = (Variable) other;
             return this.head == otherVariable.head;
         }
         return false;

@@ -30,7 +30,7 @@ public class Problem {
         int arity = f.arguments.size();
         
         if (R.arities.containsKey(f.head) && R.arities.get(f.head) != arity) {
-            throw new IllegalStateException(STR."Function symbol \{f.head}(...) shows up with multiple arities!");
+            throw new IllegalStateException(String.format("Function symbol %s(...) shows up with multiple arities!", f.head));
         }
         R.arities.put(f.head, arity);
         
@@ -59,6 +59,6 @@ public class Problem {
     
     @Override
     public String toString() {
-        return STR."Problem:\n  \{lhs} =^= \{rhs}\n  λ: \{lambda}\n  R: \{R}\n";
+        return String.format("Problem:\n  %s =^= %s\n  λ: %s\n  R: %s\n", lhs, rhs, lambda, R);
     }
 }

@@ -24,6 +24,6 @@ public class AUT {
     
     @Override
     public String toString() {
-        return STR."\{variable}: \{T1} =^= \{T2}";
+        return String.format("%s: %s =^= %s", variable, T1, T2);
     }
 }

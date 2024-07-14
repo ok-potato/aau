@@ -46,9 +46,8 @@ public abstract class Term {
                     continue;
                 }
                 functions.peek().arguments.add(new Variable(s)); // otherwise, it's just a variable
-                //
             } catch (Exception e) {
-                String msg = STR."Error while parsing term '\{term}' at token '\{s}', check syntax!";
+                String msg = String.format("Error while parsing term %s at token %s, check syntax!", term, s);
                 if (")".equals(s)) {
                     msg += " (Too many closing parentheses)";
                 }
@@ -56,9 +55,10 @@ public abstract class Term {
             }
         }
         if (functions.size() != 1) {
-            throw new IllegalArgumentException(STR."Term \{term} contains \{functions.size() - 1} unclosed parentheses!");
+            throw new IllegalArgumentException(String.format("Term %s contains %d unclosed parentheses!", term,
+                    functions.size() - 1));
         }
         
-        return functions.pop().arguments.getFirst(); // dereference "dummy term"
+        return functions.pop().arguments.get(0); // dereference "dummy term"
     }
 }
