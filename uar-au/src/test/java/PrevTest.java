@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SigmaTest {
+public class PrevTest {
     @Test
     public void simple() {
         String problem = "f(a,b) =^= g(a,c,d)";

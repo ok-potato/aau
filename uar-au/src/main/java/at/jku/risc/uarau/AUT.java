@@ -19,6 +19,6 @@ public class AUT {
     
     @Override
     public String toString() {
-        return String.format("%s: %s =^= %s", var, T1, T2);
+        return String.format("'%s':%s?=%s", var, T1, T2);
     }
 }

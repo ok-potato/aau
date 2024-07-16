@@ -1,9 +1,11 @@
 package at.jku.risc.uarau;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
 public class Algorithm {
-    
     // ~~ ~~ ~~ ~~ API ~~ ~~ ~~ ~~
     
     public static void solve(Term lhs, Term rhs, ProximityMap R, float lambda) {
@@ -15,6 +17,7 @@ public class Algorithm {
     }
     
     // ~~ ~~ ~~ ~~ IMPLEMENTATION ~~ ~~ ~~ ~~
+    Logger log = LoggerFactory.getLogger(Algorithm.class);
     
     private final ProximityMap R;
     private final TNorm tNorm;
@@ -32,6 +35,7 @@ public class Algorithm {
         Deque<Config> branches = new ArrayDeque<>();
         Deque<Config> solved = new ArrayDeque<>();
         branches.push(new Config(lhs, rhs));
+        log.info("Solving {}  ;  λ={}  ;  {}", branches.peek(), lambda, R);
         
         BRANCHING:
         while (!branches.isEmpty()) {
@@ -40,6 +44,7 @@ public class Algorithm {
                 AUT aut = cfg.A.pop();
                 // TRIVIAL
                 if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
+                    log.debug("Trivial: {}", cfg);
                     cfg.r.push(new Substitution(aut.var, Term.ANON));
                     continue;
                 }

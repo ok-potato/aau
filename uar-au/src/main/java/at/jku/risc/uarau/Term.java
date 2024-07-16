@@ -11,8 +11,10 @@ public class Term {
     public final int var;
     public final String head;
     public final Term[] arguments;
+    
     private Integer hash = null;
     
+    // function term
     public Term(String head, Term[] arguments) {
         assert (!StringUtils.isBlank(head));
         this.var = UNUSED_VAR;
@@ -20,10 +22,12 @@ public class Term {
         this.arguments = arguments;
     }
     
+    // constant term
     public Term(String head) {
         this(head, new Term[0]);
     }
     
+    // variable term
     public Term(int var) {
         assert (var > UNUSED_VAR);
         this.var = var;
@@ -34,13 +38,17 @@ public class Term {
     @Override
     public int hashCode() {
         if (hash == null) {
-            if (var > UNUSED_VAR) {
+            if (isVar()) {
                 hash = Integer.hashCode(var);
             } else {
                 hash = head.hashCode() + 31 * Arrays.hashCode(arguments);
             }
         }
         return hash;
+    }
+    
+    public boolean isVar() {
+        return var > UNUSED_VAR;
     }
     
     @Override
@@ -55,9 +63,20 @@ public class Term {
         if (hashCode() != otherTerm.hashCode()) {
             return false;
         }
-        if (var > UNUSED_VAR) {
+        if (isVar()) {
             return var == otherTerm.var;
         }
         return head.equals(otherTerm.head) && Arrays.equals(arguments, otherTerm.arguments);
+    }
+    
+    @Override
+    public String toString() {
+        if (isVar()) {
+            return "'" + var + "'";
+        }
+        if (arguments.length == 0) {
+            return head;
+        }
+        return head + Arrays.toString(arguments);
     }
 }

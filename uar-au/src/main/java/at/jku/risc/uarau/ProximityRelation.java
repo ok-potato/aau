@@ -65,4 +65,9 @@ public class ProximityRelation {
     public int hashCode() {
         return f.hashCode() + g.hashCode();
     }
+    
+    @Override
+    public String toString() {
+        return "PR[" + f + " -" + proximity + "-> " + g + "; " + f_to_g + "]";
+    }
 }

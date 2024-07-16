@@ -44,4 +44,9 @@ public class Config {
     public int peekVar() {
         return freshVar + 1;
     }
+    
+    @Override
+    public String toString() {
+        return String.format("CFG[A:%s  S:%s  r:%s  a1:'%s'  a2:'%s']", A, S, r, alpha1, alpha2);
+    }
 }
