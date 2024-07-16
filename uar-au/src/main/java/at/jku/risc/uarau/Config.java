@@ -10,7 +10,7 @@ public class Config {
     
     private int freshVar;
     
-    public Config() {
+    private Config() {
         A = new ArrayDeque<>();
         S = new ArrayDeque<>();
         r = new ArrayDeque<>();
@@ -24,13 +24,13 @@ public class Config {
         A.push(new AUT(freshVar(), T1, T2));
     }
     
-    private Config(Config cfg) {
-        A = new ArrayDeque<>(cfg.A);
-        S = new ArrayDeque<>(cfg.S);
-        r = new ArrayDeque<>(cfg.r);
-        alpha1 = cfg.alpha1;
-        alpha2 = cfg.alpha2;
-        freshVar = cfg.freshVar;
+    private Config(Config original) {
+        A = Util.copy(original.A);
+        S = Util.copy(original.S);
+        r = Util.copy(original.r);
+        alpha1 = original.alpha1;
+        alpha2 = original.alpha2;
+        freshVar = original.freshVar;
     }
     
     public Config copy() {
@@ -39,5 +39,9 @@ public class Config {
     
     public int freshVar() {
         return freshVar++;
+    }
+    
+    public int peekVar() {
+        return freshVar + 1;
     }
 }

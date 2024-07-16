@@ -5,7 +5,8 @@ import org.junit.platform.commons.util.StringUtils;
 import java.util.Arrays;
 
 public class Term {
-    public static final Term ANON = new Term(-1);
+    public static final int UNUSED_VAR = -2;
+    public static final Term ANON = new Term(UNUSED_VAR + 1);
     
     public final int var;
     public final String head;
@@ -14,7 +15,7 @@ public class Term {
     
     public Term(String head, Term[] arguments) {
         assert (!StringUtils.isBlank(head));
-        this.var = -2;
+        this.var = UNUSED_VAR;
         this.head = head;
         this.arguments = arguments;
     }
@@ -24,7 +25,7 @@ public class Term {
     }
     
     public Term(int var) {
-        assert (var > -2);
+        assert (var > UNUSED_VAR);
         this.var = var;
         this.head = null;
         this.arguments = null;
@@ -54,7 +55,7 @@ public class Term {
         if (hashCode() != otherTerm.hashCode()) {
             return false;
         }
-        if (var > -2) {
+        if (var > UNUSED_VAR) {
             return var == otherTerm.var;
         }
         return head.equals(otherTerm.head) && Arrays.equals(arguments, otherTerm.arguments);
