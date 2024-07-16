@@ -34,7 +34,7 @@ public class Term {
     @Override
     public int hashCode() {
         if (hash == null) {
-            if (var > -2) {
+            if (var > UNUSED_VAR) {
                 hash = Integer.hashCode(var);
             } else {
                 hash = head.hashCode() + 31 * Arrays.hashCode(arguments);
