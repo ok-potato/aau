@@ -4,38 +4,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Algorithm {
     // ~~ ~~ ~~ ~~ API ~~ ~~ ~~ ~~
     
-    public static void solve(Term lhs, Term rhs, ProximityMap R, float lambda) {
-        solve(lhs, rhs, R, Math::min, lambda);
+    public static void solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, float lambda) {
+        solve(lhs, rhs, relations, Math::min, lambda);
     }
     
-    public static void solve(Term lhs, Term rhs, ProximityMap R, TNorm tNorm, float lambda) {
-        new Algorithm(R, tNorm, lambda).run(lhs, rhs);
+    public static void solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, TNorm tNorm, float lambda) {
+        new Algorithm(lhs, rhs, relations, tNorm, lambda).run();
     }
     
     // ~~ ~~ ~~ ~~ IMPLEMENTATION ~~ ~~ ~~ ~~
     Logger log = LoggerFactory.getLogger(Algorithm.class);
     
     private final ProximityMap R;
+    private final Term lhs, rhs;
     private final TNorm tNorm;
     private final float lambda;
     
-    private Algorithm(ProximityMap r, TNorm tNorm, float lambda) {
-        R = r;
+    private Algorithm(Term lhs, Term rhs, Collection<ProximityRelation> relations, TNorm tNorm, float lambda) {
+        this.rhs = rhs;
+        this.lhs = lhs;
+        this.R = new ProximityMap(rhs, lhs, relations, lambda);
         this.tNorm = tNorm;
         this.lambda = lambda;
     }
     
-    private void run(Term lhs, Term rhs) {
+    private void run() {
         // TODO analyze for correspondence/mapping properties
         
         Deque<Config> branches = new ArrayDeque<>();
         Deque<Config> solved = new ArrayDeque<>();
-        branches.push(new Config(lhs, rhs));
-        log.info("Solving {}  ;  λ={}  ;  {}", branches.peek(), lambda, R);
+        Config initCfg = new Config(lhs, rhs);
+        branches.push(initCfg);
+        log.info("solving {}  ;  λ={}  ;  {}", initCfg, lambda, R);
         
         BRANCHING:
         while (!branches.isEmpty()) {
@@ -67,25 +72,27 @@ public class Algorithm {
     
     private Set<Config> decompose(AUT aut, Config cfg) {
         Set<Config> children = new HashSet<>();
-        Set<Term> union = new HashSet<>(aut.T1);
-        union.addAll(aut.T2);
-        
-        for (String h : R.commonProximates(union)) {
+        Set<String> heads = aut.T1.stream().map(t -> t.head).collect(Collectors.toSet());
+        heads.addAll(aut.T2.stream().map(t -> t.head).collect(Collectors.toSet()));
+        if (log.isDebugEnabled()) {
+            log.debug("{} U {} = {}", aut.T1, aut.T2, heads);
+        }
+        for (String h : R.commonProximates(heads)) {
             float[] childAlpha1 = new float[]{cfg.alpha1}; // => pass by reference
             float[] childAlpha2 = new float[]{cfg.alpha2}; // (feel free to email me your opinions on this)
             List<Set<Term>> Q1 = map(h, aut.T1, childAlpha1);
             List<Set<Term>> Q2 = map(h, aut.T2, childAlpha2);
             
-            // CHECK
+            // CHECK DEC
             if (childAlpha1[0] < lambda || childAlpha2[0] < lambda) {
                 continue;
             }
-            if (Q1.stream().anyMatch(q -> !consistent(q, childAlpha1[0])) || Q2.stream()
-                    .anyMatch(q -> !consistent(q, childAlpha2[0]))) {
+            if (Q1.stream().anyMatch(q -> !consistent(q, childAlpha1[0]))
+                    || Q2.stream().anyMatch(q -> !consistent(q, childAlpha2[0]))) {
                 continue;
             }
             
-            // APPLY
+            // APPLY DEC
             Config child = cfg.copy();
             Term[] hArgs = new Term[R.arity(h)];
             for (int i = 0; i < hArgs.length; i++) {
@@ -104,17 +111,16 @@ public class Algorithm {
     
     private List<Set<Term>> map(String h, Set<Term> T, float[] beta) {
         int hArity = R.arity(h);
-        
         // Q[i] => set of args which h|i maps to
         List<Set<Term>> Q = new ArrayList<>(hArity);
         for (int i = 0; i < hArity; i++) {
             Q.add(new HashSet<>());
         }
         for (Term t : T) {
-            ProximityRelation proxRelation = R.relation(h, t.head);
+            ProximityRelation proxRelation = R.proxRelation(h, t.head);
             for (int i = 0; i < hArity; i++) {
                 for (int p : proxRelation.get(h, i)) {
-                    assert (t.arguments != null); // TODO is there a better place to do this check?
+                    assert (!t.isVar());
                     Term tArg = t.arguments[p];
                     Q.get(i).add(tArg);
                 }
@@ -141,7 +147,7 @@ public class Algorithm {
                     continue;
                 }
                 // REDUCE
-                for (String h : R.commonProximates(pair.T)) {
+                for (String h : R.commonProximates(pair.T.stream().map(t -> t.head).collect(Collectors.toSet()))) {
                     float[] childAlpha = new float[]{state.alpha}; // => pass by reference
                     List<Set<Term>> Q = map(h, pair.T, childAlpha);
                     if (childAlpha[0] < lambda) {

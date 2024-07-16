@@ -10,40 +10,62 @@ public class ProximityMap {
     private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
     
     private final Map<String, Set<ProximityRelation>> proxClasses = new HashMap<>();
-    private final Map<String, Integer> arities = new HashMap<>(); // TODO infer arities, or add them to input?
+    private final Map<String, Integer> arities = new HashMap<>();
     
-    public ProximityMap(Collection<ProximityRelation> proximityRelations, float lambda) {
-        for (ProximityRelation proxRelation : proximityRelations) {
-            add(proxRelation, lambda);
+    public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
+        proximityRelations = proximityRelations.stream().filter(relation -> {
+            if (relation.proximity < lambda) {
+                log.info("Discarding relation {} with proximity < λ [{}]", relation, lambda);
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toSet());
+        calcArities(rhs, lhs, proximityRelations);
+        if (log.isDebugEnabled()) {
+            log.debug("Calculated arities: {}", arities);
+            log.debug("Adding proximity relations {}", proximityRelations);
+        }
+        for (ProximityRelation relation : proximityRelations) {
+            Set<ProximityRelation> fClass = proxClass(relation.f);
+            Set<ProximityRelation> gClass = proxClass(relation.g);
+            fClass.add(relation);
+            gClass.add(relation);
         }
     }
     
-    public void add(ProximityRelation proxRelation, float lambda) {
-        log.debug("Adding proximity relation {}", proxRelation);
-        if (proxRelation.proximity < lambda) {
-            log.info("Discarding relation with proximity [{}] < λ [{}]", proxRelation.proximity, lambda);
-            return;
+    private void calcArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
+        calcArities(rhs);
+        calcArities(lhs);
+        for (ProximityRelation relation : proximityRelations) {
+            int prevF = arities.getOrDefault(relation.f, 0);
+            arities.put(relation.f, Math.max(prevF, relation.get(relation.f).size()));
+            int prevG = arities.getOrDefault(relation.g, 0);
+            arities.put(relation.g, Math.max(prevG, relation.get(relation.g).size()));
         }
-        Set<ProximityRelation> fClass = proxClass(proxRelation.f);
-        Set<ProximityRelation> gClass = proxClass(proxRelation.g);
-        fClass.add(proxRelation);
-        gClass.add(proxRelation);
     }
     
-    public Set<String> commonProximates(Set<Term> T) {
-        log.debug("commonProx({})", T);
-        Term someT = T.iterator().next();
-        T.remove(someT);
-        
-        Set<String> commonProx = proxClass(someT.head).stream()
-                .map(proxRelation -> proxRelation.other(someT.head))
-                .collect(Collectors.toSet());
-        
-        for (Term t : T) {
-            Set<String> tProx = proxClass(t.head).stream()
-                    .map(proximityRelation -> proximityRelation.other(t.head))
-                    .collect(Collectors.toSet());
+    private void calcArities(Term t) {
+        assert (!t.isVar());
+        int prev = arities.getOrDefault(t.head, 0);
+        arities.put(t.head, Math.max(prev, t.arguments.length));
+        for (Term arg : t.arguments) {
+            calcArities(arg);
+        }
+    }
+    
+    public Set<String> commonProximates(Set<String> T) {
+        assert (T != null && !T.isEmpty());
+        Set<String> commonProx = null;
+        for (String t : T) {
+            if (commonProx == null) {
+                commonProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
+                continue;
+            }
+            Set<String> tProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
             commonProx.retainAll(tProx);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("common proximates for {}: {} (according to {})", T, commonProx, this);
         }
         return commonProx;
     }
@@ -51,7 +73,8 @@ public class ProximityMap {
     private Set<ProximityRelation> proxClass(String f) {
         return proxClasses.computeIfAbsent(f, head -> {
             Set<ProximityRelation> proxClass = new HashSet<>();
-            // add id-relation
+            // initialize with id-relation
+            assert (arities.containsKey(head));
             int arity = arities.get(head);
             List<List<Integer>> mapping = new ArrayList<>(arity);
             for (int i = 0; i < arity; i++) {
@@ -62,13 +85,16 @@ public class ProximityMap {
         });
     }
     
-    public ProximityRelation relation(String f, String g) throws NoSuchElementException {
+    public ProximityRelation proxRelation(String f, String g) throws NoSuchElementException {
+        assert (proxClasses.containsKey(f) && proxClasses.containsKey(g));
+        assert ((proxClasses.get(f).stream().anyMatch(relation -> relation.other(f) == g))
+                && (proxClasses.get(g).stream().anyMatch(relation -> relation.other(g) == f)));
         Set<ProximityRelation> fProxClass = proxClasses.get(f);
-        assert (fProxClass != null);
         return fProxClass.stream().filter(pr -> pr.other(f) == g).findFirst().orElseThrow(NoSuchElementException::new);
     }
     
     public int arity(String f) {
+        assert (arities.containsKey(f));
         return arities.get(f);
     }
     

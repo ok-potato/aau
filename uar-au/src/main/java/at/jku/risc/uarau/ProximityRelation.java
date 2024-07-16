@@ -1,7 +1,6 @@
 package at.jku.risc.uarau;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ProximityRelation {
     public final float proximity;
@@ -18,23 +17,23 @@ public class ProximityRelation {
     }
     
     private List<List<Integer>> reverse(List<List<Integer>> map) {
-        List<List<Integer>> reversed = new ArrayList<>();
+        int maxToIdx = map.stream().flatMap(Collection::stream).max(Comparator.naturalOrder()).orElse(0);
+        List<List<Integer>> reversed = Collections.nCopies(maxToIdx, new ArrayList<>());
         for (int mapFrom = 0; mapFrom < map.size(); mapFrom++) {
             for (int mapTo : map.get(mapFrom)) {
-                for (int maxIdx = reversed.size() - 1; maxIdx < mapTo; maxIdx++) {
-                    reversed.add(new ArrayList<>());
-                }
                 reversed.get(mapTo).add(mapFrom);
             }
         }
         return reversed;
     }
     
-    public List<Integer> get(String from, int index) {
+    public List<List<Integer>> get(String from) {
         assert (from == this.f || from == this.g);
-        List<List<Integer>> map = from == this.f ? f_to_g : g_to_f;
-        assert (map.size() > index); // TODO this assertion might fail, since I only pad to max map index
-        return map.get(index);
+        return from == this.f ? f_to_g : g_to_f;
+    }
+    
+    public List<Integer> get(String from, int index) {
+        return get(from).get(index);
     }
     
     public String other(String f) {
