@@ -32,22 +32,41 @@ public class ProximityMap {
     }
     
     private void calcArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
-        calcArities(rhs);
-        calcArities(lhs);
+        Map<String, Integer> termArities = new HashMap<>();
+        calcArities(rhs, termArities);
+        calcArities(lhs, termArities);
+        arities.putAll(termArities);
+        
         for (ProximityRelation relation : proximityRelations) {
+            int minF = relation.get(relation.f).size();
+            int minG = relation.get(relation.g).size();
+            
+            Integer termArityF = termArities.get(relation.f);
+            Integer termArityG = termArities.get(relation.g);
+            if (termArityF != null && termArityF < minF) {
+                log.error("Arity of {} according to proximity relations exceeds the one found in problem declaration", relation.f);
+            }
+            if (termArityG != null && termArityG < minG) {
+                log.error("Arity of {} according to proximity relations exceeds the one found in problem declaration", relation.g);
+            }
+            
             int prevF = arities.getOrDefault(relation.f, 0);
-            arities.put(relation.f, Math.max(prevF, relation.get(relation.f).size()));
             int prevG = arities.getOrDefault(relation.g, 0);
-            arities.put(relation.g, Math.max(prevG, relation.get(relation.g).size()));
+            arities.put(relation.f, Math.max(prevF, minF));
+            arities.put(relation.g, Math.max(prevG, minG));
         }
     }
     
-    private void calcArities(Term t) {
+    private void calcArities(Term t, Map<String, Integer> map) {
         assert (!t.isVar());
-        int prev = arities.getOrDefault(t.head, 0);
-        arities.put(t.head, Math.max(prev, t.arguments.length));
+        Integer existing = map.get(t.head);
+        if (existing != null && existing != t.arguments.length) {
+            log.error("Found multiple arities of {} in problem declaration", t.head);
+            throw new IllegalArgumentException();
+        }
+        map.put(t.head, t.arguments.length);
         for (Term arg : t.arguments) {
-            calcArities(arg);
+            calcArities(arg, map);
         }
     }
     

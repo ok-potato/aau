@@ -17,8 +17,8 @@ public class ProximityRelation {
     }
     
     private List<List<Integer>> reverse(List<List<Integer>> map) {
-        int maxToIdx = map.stream().flatMap(Collection::stream).max(Comparator.naturalOrder()).orElse(0);
-        List<List<Integer>> reversed = Collections.nCopies(maxToIdx, new ArrayList<>());
+        int maxIdxTo = map.stream().flatMap(Collection::stream).max(Comparator.naturalOrder()).orElse(0);
+        List<List<Integer>> reversed = Collections.nCopies(maxIdxTo, new ArrayList<>());
         for (int mapFrom = 0; mapFrom < map.size(); mapFrom++) {
             for (int mapTo : map.get(mapFrom)) {
                 reversed.get(mapTo).add(mapFrom);
