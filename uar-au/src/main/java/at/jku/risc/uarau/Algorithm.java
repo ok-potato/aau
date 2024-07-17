@@ -9,6 +9,11 @@ import java.util.stream.Collectors;
 public class Algorithm {
     // ~~ ~~ ~~ ~~ API ~~ ~~ ~~ ~~
     
+    public static void solve(String problem, String proximityRelations, float lambda) {
+        List<Term> sides = Parser.parseProblem(problem);
+        solve(sides.get(0), sides.get(1), Parser.parseProximityRelations(proximityRelations), lambda);
+    }
+    
     public static void solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, float lambda) {
         solve(lhs, rhs, relations, Math::min, lambda);
     }
@@ -78,7 +83,7 @@ public class Algorithm {
         Set<String> heads = aut.T1.stream().map(t -> t.head).collect(Collectors.toSet());
         heads.addAll(aut.T2.stream().map(t -> t.head).collect(Collectors.toSet()));
         log.trace("{} U {} = {}", aut.T1, aut.T2, heads);
-
+        
         for (String h : R.commonProximates(heads)) {
             float[] childAlpha1 = new float[]{cfg.alpha1}; // => pass by reference
             float[] childAlpha2 = new float[]{cfg.alpha2}; // (feel free to email me your opinions on this)

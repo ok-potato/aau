@@ -30,7 +30,7 @@ public abstract class Term {
     // whitespace is ignored
     public static Term parse(String term) {
         // 'f(g(a,b),c,d)'  =>  'f(', 'g(', 'a', 'b', ')', 'c', 'd', ')'
-        String[] tokens = term.replaceAll("\\s", "").split("((?<=\\()|,|(?=\\)))");
+        String[] tokens = term.replaceAll("\\s", "").split("(?<=\\() | , | (?=\\))");
         
         Stack<Function> functions = new Stack<>();
         functions.add(new Function(",")); // "dummy term" to avoid null pointer
