@@ -8,4 +8,9 @@ public class Substitution {
         this.var = var;
         this.term = term;
     }
+    
+    @Override
+    public String toString() {
+        return String.format("'%s'►%s", var, term);
+    }
 }

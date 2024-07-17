@@ -21,10 +21,8 @@ public class ProximityMap {
             return true;
         }).collect(Collectors.toSet());
         calcArities(rhs, lhs, proximityRelations);
-        if (log.isDebugEnabled()) {
-            log.debug("Calculated arities: {}", arities);
-            log.debug("Adding proximity relations {}", proximityRelations);
-        }
+        log.trace("Arities {}", arities);
+        log.trace("PR's {}", proximityRelations);
         for (ProximityRelation relation : proximityRelations) {
             Set<ProximityRelation> fClass = proxClass(relation.f);
             Set<ProximityRelation> gClass = proxClass(relation.g);
@@ -64,9 +62,7 @@ public class ProximityMap {
             Set<String> tProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
             commonProx.retainAll(tProx);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("common proximates for {}: {} (according to {})", T, commonProx, this);
-        }
+        log.trace("CP{} = {} {}", T, commonProx, this);
         return commonProx;
     }
     
@@ -100,6 +96,14 @@ public class ProximityMap {
     
     @Override
     public String toString() {
-        return "R[" + proxClasses + "]";
+        if (proxClasses.isEmpty()) {
+            return "💢";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String k : proxClasses.keySet()) {
+            sb.append("💢");
+            proxClasses.get(k).forEach(pr -> sb.append(pr).append(" "));
+        }
+        return sb.substring(0, sb.length() - 1);
     }
 }

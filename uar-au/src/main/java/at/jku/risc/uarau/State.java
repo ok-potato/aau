@@ -35,6 +35,11 @@ public class State {
         return freshVar++;
     }
     
+    @Override
+    public String toString() {
+        return pairs.toString();
+    }
+    
     public static class Pair {
         public final int x;
         public final Set<Term> T;
@@ -42,6 +47,11 @@ public class State {
         public Pair(int x, Set<Term> t) {
             this.x = x;
             T = t;
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("`%s´:%s", x, T);
         }
     }
 }

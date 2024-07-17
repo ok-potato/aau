@@ -71,12 +71,13 @@ public class Term {
     
     @Override
     public String toString() {
+        if (var == ANON.var) {
+            return "'_'";
+        }
         if (isVar()) {
-            return "'" + var + "'";
+            return String.format("'%s'", var);
         }
-        if (arguments.length == 0) {
-            return head;
-        }
-        return head + Arrays.toString(arguments);
+        String args = Arrays.toString(arguments);
+        return String.format("%s(%s)", head, args.substring(1, args.length()-1));
     }
 }

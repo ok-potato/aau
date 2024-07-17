@@ -67,6 +67,7 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return "PR[" + f + " -" + proximity + "-> " + g + "; " + f_to_g + "]";
+        return String.format("(%s►%s %s %s)",f , g, proximity, f_to_g);
+        
     }
 }

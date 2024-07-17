@@ -40,7 +40,7 @@ public class Algorithm {
         Deque<Config> solved = new ArrayDeque<>();
         Config initCfg = new Config(lhs, rhs);
         branches.push(initCfg);
-        log.info("solving {}  ;  λ={}  ;  {}", initCfg, lambda, R);
+        log.info("A1 ██ {} ██ λ={} ██ {}", initCfg, lambda, R);
         
         BRANCHING:
         while (!branches.isEmpty()) {
@@ -49,8 +49,8 @@ public class Algorithm {
                 AUT aut = cfg.A.pop();
                 // TRIVIAL
                 if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-                    log.debug("Trivial: {}", cfg);
                     cfg.r.push(new Substitution(aut.var, Term.ANON));
+                    log.debug("TRI => {}", cfg);
                     continue;
                 }
                 // DECOMPOSE
@@ -59,24 +59,26 @@ public class Algorithm {
                     for (Config child : children) {
                         branches.push(child);
                     }
+                    log.debug("DEC => {}", children);
                     continue BRANCHING;
                 }
                 // SOLVE
                 cfg.r.push(new Substitution(aut.var, Term.ANON));
+                log.debug("SOL => {}", cfg);
             }
             assert (cfg.A.isEmpty());
             solved.push(cfg);
         }
         // TODO post-process
+        log.info("~~~~~~~~~~~~~~~~~~~~~~~~  done  ~~~~~~~~~~~~~~~~~~~~~~~~");
     }
     
     private Set<Config> decompose(AUT aut, Config cfg) {
         Set<Config> children = new HashSet<>();
         Set<String> heads = aut.T1.stream().map(t -> t.head).collect(Collectors.toSet());
         heads.addAll(aut.T2.stream().map(t -> t.head).collect(Collectors.toSet()));
-        if (log.isDebugEnabled()) {
-            log.debug("{} U {} = {}", aut.T1, aut.T2, heads);
-        }
+        log.trace("{} U {} = {}", aut.T1, aut.T2, heads);
+
         for (String h : R.commonProximates(heads)) {
             float[] childAlpha1 = new float[]{cfg.alpha1}; // => pass by reference
             float[] childAlpha2 = new float[]{cfg.alpha2}; // (feel free to email me your opinions on this)

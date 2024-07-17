@@ -2,6 +2,7 @@ package at.jku.risc.uarau;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.StringJoiner;
 
 public class Config {
     public final Deque<AUT> A, S;
@@ -47,6 +48,16 @@ public class Config {
     
     @Override
     public String toString() {
-        return String.format("CFG[A:%s  S:%s  r:%s  a1:'%s'  a2:'%s']", A, S, r, alpha1, alpha2);
+        StringJoiner joinA = new StringJoiner("");
+        A.forEach(aut -> joinA.add(aut.toString()));
+        if (joinA.length() == 0) {
+            joinA.add("..");
+        }
+        StringJoiner joinS = new StringJoiner("");
+        S.forEach(aut -> joinS.add(aut.toString()));
+        if (joinS.length() == 0) {
+            joinS.add("..");
+        }
+        return String.format("🟡⚫%s⚫%s⚫%s⚫%s,%s", joinA, joinS, r, alpha1, alpha2);
     }
 }
