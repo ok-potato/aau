@@ -1,8 +1,16 @@
 package at.jku.risc.uarau.data;
 
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 public class ProximityRelation {
+    Logger log = LoggerFactory.getLogger(ProximityRelation.class);
+    
     public final float proximity;
     public final String f, g;
     private final List<List<Integer>> f_to_g;
@@ -14,11 +22,29 @@ public class ProximityRelation {
         this.proximity = proximity;
         this.f_to_g = argRelation;
         this.g_to_f = reverse(argRelation);
+        assert (symmetric());
+    }
+    
+    private boolean symmetric() {
+        for (int i = 0; i < f_to_g.size(); i++) {
+            int finalI = i;
+            if (f_to_g.get(i).stream().anyMatch(j -> g_to_f.get(j).stream().noneMatch(v -> v == finalI))) {
+                log.error("Sanity check failed: {} {} {}", f_to_g.get(i), g_to_f, i);
+                return false;
+            }
+        }
+        for (int i = 0; i < g_to_f.size(); i++) {
+            int finalI = i;
+            if (g_to_f.get(i).stream().anyMatch(j -> f_to_g.get(j).stream().noneMatch(v -> v == finalI))) {
+                log.error("Sanity check failed: {} {} {}", g_to_f.get(i), f_to_g, i);
+                return false;
+            }
+        }
+        return true;
     }
     
     private List<List<Integer>> reverse(List<List<Integer>> map) {
-        int maxToIdx = map.stream().flatMap(Collection::stream).max(Comparator.naturalOrder()).orElse(0) + 1;
-        // TODO nCopies is wrong
+        int maxToIdx = map.stream().flatMap(Collection::stream).max(Comparator.naturalOrder()).orElse(-1) + 1;
         List<List<Integer>> reversed = new ArrayList<>(maxToIdx);
         for (int i = 0; i < maxToIdx; i++) {
             reversed.add(new ArrayList<>());
@@ -72,7 +98,6 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return String.format("(%s►%s %s %s)",f , g, proximity, f_to_g);
-        
+        return String.format("(%s►%s %s %s)", f, g, proximity, f_to_g);
     }
 }

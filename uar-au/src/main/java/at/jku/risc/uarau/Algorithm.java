@@ -46,7 +46,7 @@ public class Algorithm {
         Deque<Config> solved = new ArrayDeque<>();
         Config initCfg = new Config(lhs, rhs);
         branches.push(initCfg);
-        log.info("A1 ██ {} ██ λ={} ██ {}", initCfg, lambda, R);
+        log.info("A1 █ {} █ λ={} █ {}", initCfg, lambda, R);
         
         BRANCHING:
         while (!branches.isEmpty()) {
@@ -65,7 +65,7 @@ public class Algorithm {
                     for (Config child : children) {
                         branches.push(child);
                     }
-                    log.debug("DEC => {}", children);
+                    log.debug("DEC => {}", Util.join(children, "   ", "⚠️"));
                     continue BRANCHING;
                 }
                 // SOLVE
@@ -94,8 +94,8 @@ public class Algorithm {
             if (childAlpha1[0] < lambda || childAlpha2[0] < lambda) {
                 continue;
             }
-            if (Q1.stream().anyMatch(q -> !consistent(q, childAlpha1[0]))
-                    || Q2.stream().anyMatch(q -> !consistent(q, childAlpha2[0]))) {
+            if (Q1.stream().anyMatch(q -> !consistent(q, childAlpha1[0])) || Q2.stream()
+                    .anyMatch(q -> !consistent(q, childAlpha2[0]))) {
                 continue;
             }
             

@@ -4,7 +4,6 @@ import at.jku.risc.uarau.Util;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.StringJoiner;
 
 public class Config {
     public final Deque<AUT> A, S;
@@ -50,16 +49,9 @@ public class Config {
     
     @Override
     public String toString() {
-        StringJoiner joinA = new StringJoiner("");
-        A.forEach(aut -> joinA.add(aut.toString()));
-        if (joinA.length() == 0) {
-            joinA.add("..");
-        }
-        StringJoiner joinS = new StringJoiner("");
-        S.forEach(aut -> joinS.add(aut.toString()));
-        if (joinS.length() == 0) {
-            joinS.add("..");
-        }
-        return String.format("⚙️⚫%s⚫%s⚫%s⚫%s,%s", joinA, joinS, r, alpha1, alpha2);
+        String A_str = Util.join(A, "", "➰");
+        String S_str = Util.join(S, "", "➰");
+        String r_str = Util.join(r, ", ", "..");
+        return String.format("⧛ ⚫%s⚫%s⚫%s⚫%s,%s ⧚", A_str, S_str, r_str, alpha1, alpha2);
     }
 }

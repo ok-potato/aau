@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.Util;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.Arrays;
@@ -72,12 +73,11 @@ public class Term {
     @Override
     public String toString() {
         if (var == ANON.var) {
-            return "'_'";
+            return "_";
         }
         if (isVar()) {
-            return String.format("'%s'", var);
+            return String.format("%s", var);
         }
-        String args = Arrays.toString(arguments);
-        return String.format("%s(%s)", head, args.substring(1, args.length()-1));
+        return head + Util.join(Arrays.asList(arguments), ",", "()", "(", ")");
     }
 }

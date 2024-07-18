@@ -17,7 +17,8 @@ public class Parser {
         List<Term> terms = new ArrayList<>();
         String[] tokens = string.split("\\?=");
         if (tokens.length != 2) {
-            log.error("Need two terms per equation, {} supplied", tokens.length);
+            log.error("Need 2 terms per equation, {} supplied", tokens.length);
+            throw new IllegalArgumentException();
         }
         terms.add(parseTerm(tokens[0]));
         log.debug("Parsed LHS: {}", terms.get(0));
@@ -40,7 +41,8 @@ public class Parser {
             if (token.equals(")")) {
                 Util.TermBuilder subTerm = subTerms.pop();
                 if (subTerms.peek() == null) {
-                    throw new IllegalArgumentException("Too many closing parentheses in term " + string);
+                    log.error("Too many closing parentheses in term \"{}\"", string);
+                    throw new IllegalArgumentException();
                 }
                 subTerms.peek().arguments.add(subTerm.build());
                 continue;
@@ -53,7 +55,8 @@ public class Parser {
             subTerms.peek().arguments.add(new Term(token));
         }
         if (subTerms.size() > 1) {
-            throw new IllegalArgumentException("Unclosed parentheses in term " + string);
+            log.error("Unclosed parentheses in term \"{}\"", string);
+            throw new IllegalArgumentException();
         }
         return subTerms.pop().arguments.get(0);
     }
@@ -64,15 +67,18 @@ public class Parser {
     public static Set<ProximityRelation> parseProximityRelations(String string) {
         Set<ProximityRelation> proximityRelations = new HashSet<>();
         for (String token : string.split(";")) {
+            if (StringUtils.isBlank(token)) {
+                continue;
+            }
             ProximityRelation pr = parseProximityRelation(token);
             if (proximityRelations.contains(pr)) {
-                log.error("Multiple declarations of relation {} <-> {}", pr.f, pr.g);
+                log.error("Multiple declarations of relation '{}' <-> '{}'", pr.f, pr.g);
                 throw new IllegalArgumentException();
             }
             log.trace("Parsed PR: {}", pr);
             proximityRelations.add(pr);
         }
-        log.debug("Parsed PRs: {}", proximityRelations);
+        log.debug("Parsed PR's: {}", Util.join(proximityRelations));
         return proximityRelations;
     }
     
@@ -84,7 +90,7 @@ public class Parser {
             proximity = string.substring(string.lastIndexOf('['), string.indexOf(']') + 1);
             argMap = string.substring(string.lastIndexOf('{'), string.indexOf('}') + 1);
         } catch (StringIndexOutOfBoundsException e) {
-            log.error("Couldn't parse proximity or argument map from {}", string);
+            log.error("Couldn't parse proximity or argument map from \"{}\"", string);
             throw new IllegalArgumentException();
         }
         
@@ -95,7 +101,7 @@ public class Parser {
                 .filter(s -> !StringUtils.isBlank(s))
                 .collect(Collectors.toList());
         if (rest.size() != 2) {
-            log.error("Couldn't parse two function symbols from {}", string);
+            log.error("Couldn't parse two function symbols from \"{}\"", string);
             throw new IllegalArgumentException();
         }
         
@@ -107,13 +113,19 @@ public class Parser {
     }
     
     public static List<List<Integer>> parseArgRelation(String string) {
-        List<Integer> argRelations = Arrays.stream(string.substring(1, string.length() - 1).split("[(),]+"))
-                .filter(s -> !StringUtils.isBlank(s))
-                .map(Integer::parseInt)
-                .collect(Collectors.toList());
+        List<Integer> argRelations;
+        try {
+            argRelations = Arrays.stream(string.substring(1, string.length() - 1).split("[(),]+"))
+                    .filter(s -> !StringUtils.isBlank(s))
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+        } catch (NumberFormatException e) {
+            log.error("Couldn't parse some argument relations as integers in \"{}\"", string);
+            throw new IllegalArgumentException();
+        }
         
         if (argRelations.size() % 2 != 0) {
-            log.error("Odd number of argument relations in {{}}", string);
+            log.error("Odd number of argument relations in \"{}\"", string);
             throw new IllegalArgumentException();
         }
         

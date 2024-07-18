@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class ProximityMap {
             fClass.add(relation);
             gClass.add(relation);
         }
-        log.trace("PR's {}", proximityRelations);
+        log.trace("PR's {}", Util.join(proximityRelations));
     }
     
     private void calcArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
@@ -50,12 +51,13 @@ public class ProximityMap {
             Integer termArityF = termArities.get(relation.f);
             Integer termArityG = termArities.get(relation.g);
             if (termArityF != null && termArityF < minF) {
-                log.error("Arity of {} according to proximity relations exceeds the one found in problem declaration", relation.f);
+                log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem declaration ({})", relation.f, minF, termArityF);
+                throw new IllegalArgumentException();
             }
             if (termArityG != null && termArityG < minG) {
-                log.error("Arity of {} according to proximity relations exceeds the one found in problem declaration", relation.g);
+                log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem declaration ({})", relation.g, minG, termArityG);
+                throw new IllegalArgumentException();
             }
-            
             int prevF = arities.getOrDefault(relation.f, 0);
             int prevG = arities.getOrDefault(relation.g, 0);
             arities.put(relation.f, Math.max(prevF, minF));
@@ -67,7 +69,7 @@ public class ProximityMap {
         assert (!t.isVar());
         Integer existing = map.get(t.head);
         if (existing != null && existing != t.arguments.length) {
-            log.error("Found multiple arities of {} in problem declaration", t.head);
+            log.error("Found multiple arities of '{}' in problem declaration", t.head);
             throw new IllegalArgumentException();
         }
         map.put(t.head, t.arguments.length);
@@ -108,8 +110,9 @@ public class ProximityMap {
     
     public ProximityRelation proxRelation(String f, String g) throws NoSuchElementException {
         assert (proxClasses.containsKey(f) && proxClasses.containsKey(g));
-        assert ((proxClasses.get(f).stream().anyMatch(relation -> relation.other(f) == g))
-                && (proxClasses.get(g).stream().anyMatch(relation -> relation.other(g) == f)));
+        assert ((proxClasses.get(f).stream().anyMatch(relation -> relation.other(f) == g)) && (proxClasses.get(g)
+                .stream()
+                .anyMatch(relation -> relation.other(g) == f)));
         Set<ProximityRelation> fProxClass = proxClasses.get(f);
         return fProxClass.stream().filter(pr -> pr.other(f) == g).findFirst().orElseThrow(NoSuchElementException::new);
     }
