@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class ProximityMap {
     private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
     
-    private final Map<String, Set<ProximityRelation>> proxClasses = new HashMap<>();
+    public final Map<String, Set<ProximityRelation>> proxClasses = new HashMap<>();
     private final Map<String, Integer> arities = new HashMap<>();
     
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
@@ -35,7 +35,7 @@ public class ProximityMap {
             fClass.add(relation);
             gClass.add(relation);
         }
-        log.trace("PR's {}", Util.join(proximityRelations));
+        log.trace("PR's {}", Util.joinString(proximityRelations));
     }
     
     private void calcArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
@@ -89,7 +89,7 @@ public class ProximityMap {
             Set<String> tProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
             commonProx.retainAll(tProx);
         }
-        log.trace("comProx{} = {} {}", T, commonProx, this);
+        log.trace("comProx{} = {}", T, commonProx);
         return commonProx;
     }
     
@@ -124,12 +124,16 @@ public class ProximityMap {
     
     @Override
     public String toString() {
+        return toString("");
+    }
+    
+    public String toString(String prepender) {
         if (proxClasses.isEmpty()) {
             return "💢";
         }
         StringBuilder sb = new StringBuilder();
         for (String k : proxClasses.keySet()) {
-            sb.append(String.format("💢%s ", k));
+            sb.append(String.format("%s💢%s ", prepender, k));
             proxClasses.get(k).forEach(pr -> sb.append(pr).append(" "));
         }
         return sb.substring(0, sb.length() - 1);

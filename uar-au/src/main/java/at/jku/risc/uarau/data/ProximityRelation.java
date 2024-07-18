@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +99,6 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return String.format("(%s►%s %s %s)", f, g, proximity, f_to_g);
+        return String.format("(%s►%s %s %s)", f, g, proximity, Util.mapString(f_to_g));
     }
 }

@@ -78,6 +78,6 @@ public class Term {
         if (isVar()) {
             return String.format("%s", var);
         }
-        return head + Util.join(Arrays.asList(arguments), ",", "()", "(", ")");
+        return head + Util.joinString(Arrays.asList(arguments), ",", "()", "(", ")");
     }
 }

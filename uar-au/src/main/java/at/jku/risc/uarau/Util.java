@@ -29,21 +29,35 @@ public class Util {
     
     // stringify
     
-    public static <T> String join(Collection<T> collection) {
-        return join(collection, ", ", "..");
+    public static <T> String joinString(Collection<T> collection) {
+        return joinString(collection, ", ", "..");
     }
     
-    public static <T> String join(Collection<T> collection, String separator, String empty) {
-        return join(collection, separator, empty, "", "");
+    public static <T> String joinString(Collection<T> collection, String separator, String empty) {
+        return joinString(collection, separator, empty, "", "");
     }
     
-    public static <T> String join(Collection<T> collection, String separator, String empty, String open, String close) {
+    public static <T> String joinString(Collection<T> collection, String separator, String empty, String open, String close) {
         if (collection.isEmpty()) {
             return empty;
         }
         StringJoiner joiner = new StringJoiner(separator);
         collection.forEach(t -> joiner.add(t.toString()));
         return open + joiner + close;
+    }
+    
+    public static <T> String mapString(List<List<T>> map) {
+        StringBuilder sb = new StringBuilder("{");
+        for (Collection<T> c : map) {
+            sb.append("[");
+            String innerSep = "";
+            for (T t : c) {
+                sb.append(innerSep).append(t);
+                innerSep = ",";
+            }
+            sb.append("]");
+        }
+        return sb.append("}").toString();
     }
     
     // build

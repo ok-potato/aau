@@ -78,7 +78,7 @@ public class Parser {
             log.trace("Parsed PR: {}", pr);
             proximityRelations.add(pr);
         }
-        log.debug("Parsed PR's: {}", Util.join(proximityRelations));
+        log.debug("Parsed PR's: {}", Util.joinString(proximityRelations));
         return proximityRelations;
     }
     
