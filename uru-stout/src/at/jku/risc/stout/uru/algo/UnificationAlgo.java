@@ -38,9 +38,9 @@ public class UnificationAlgo {
     public UnificationAlgo(UnificationProblem problem, long maxDerivationDepth) {
         this.system = new UnifSystem(problem, new Substitution());
         this.maxDerivationDepth = maxDerivationDepth;
-        while (!system.problem().isEmpty()
-                && system.problem().getFirst().left.equals(system.problem().getFirst().right)) {
-            system.problem().remove();
+        while (!system.problem.isEmpty()
+                && system.problem.getFirst().left.equals(system.problem.getFirst().right)) {
+            system.problem.remove();
         }
     }
     
@@ -50,11 +50,11 @@ public class UnificationAlgo {
         
         while (!systems.isEmpty()) {
             UnifSystem sys = systems.pop();
-            while (!sys.problem().isEmpty()) {
-                UnificationEquation eq = sys.problem().remove();
+            while (!sys.problem.isEmpty()) {
+                UnificationEquation eq = sys.problem.remove();
                 if (eq.derivationDepth >= maxDerivationDepth) {
                     // Max derivation depth reached ===>> BOT
-                    sys.problem().add(eq);
+                    sys.problem.add(eq);
                     maxDepthReached = true;
                     error("Derivation depth " + maxDerivationDepth + " reached", debugLevel, debugError);
                     break;
@@ -65,7 +65,7 @@ public class UnificationAlgo {
                 Hedge leftH = eq.left.getHedge();
                 Hedge rightH = eq.right.getHedge();
                 if (isClash(leftH, rightH)) {
-                    sys.problem().add(eq);
+                    sys.problem.add(eq);
                     error("Irreparable difference encountered", debugLevel, debugError);
                     break;
                 }
@@ -73,12 +73,12 @@ public class UnificationAlgo {
                     if (rightA instanceof TermVar && !(leftA instanceof TermVar)) {
                         // Orient 1
                         eq.swap();
-                        sys.problem().add(eq);
+                        sys.problem.add(eq);
                         debug("Orient 1", sys, debugLevel, debugOut, false);
                     } else if (leftA instanceof TermVar && rightA != TermAtom.nullAtom) {
                         if (eq.right.occurs(leftA)) {
                             // Individual Variable Occurrence Check
-                            sys.problem().add(eq);
+                            sys.problem.add(eq);
                             error("Individual Variable Occurrence Check", debugLevel, debugError);
                             break;
                         } else {
@@ -88,7 +88,7 @@ public class UnificationAlgo {
                         }
                     } else {
                         // No rule applicable ===>> BOT
-                        sys.problem().add(eq);
+                        sys.problem.add(eq);
                         error("Symbol Clash", debugLevel, debugError);
                         break;
                     }
@@ -97,7 +97,7 @@ public class UnificationAlgo {
                     debug("Trivial", sys, debugLevel, debugOut, false);
                 } else if (rightH.isEmpty() || leftH.isEmpty()) {
                     // No rule applicable ===>> BOT
-                    sys.problem().add(eq);
+                    sys.problem.add(eq);
                     error("Empty", debugLevel, debugError);
                     break;
                 } else if (leftH.get(0).getAtom() instanceof HedgeVar) {
@@ -105,7 +105,7 @@ public class UnificationAlgo {
                         // Sequence Variable Elimination 1
                         leftH.getSequence().remove(0);
                         rightH.getSequence().remove(0);
-                        sys.problem().add(eq);
+                        sys.problem.add(eq);
                         debug("Sequence Variable Elimination 1", sys, debugLevel, debugOut, false);
                     } else {
                         HedgeVar leftVar = (HedgeVar) leftH.get(0).getAtom();
@@ -118,7 +118,7 @@ public class UnificationAlgo {
                             Hedge widen = new Hedge();
                             widen.add(eqNew.right.getHedge().getSequence().remove(0)); // t
                             widen.add(x);
-                            sysNew.problem().add(eqNew);
+                            sysNew.problem.add(eqNew);
                             sysNew.apply(leftVar, new TermNode(null, widen));
                             leftSeq.add(0, x);
                             systems.push(sysNew);
@@ -132,7 +132,7 @@ public class UnificationAlgo {
                                 widen = new Hedge();
                                 widen.add(eqNew.left.getHedge().getSequence().remove(0)); // x
                                 widen.add(y);
-                                sysNew.problem().add(eqNew);
+                                sysNew.problem.add(eqNew);
                                 sysNew.apply((Variable) y.getAtom(), new TermNode(null, widen));
                                 rightSeq.add(0, y);
                                 systems.push(sysNew);
@@ -141,12 +141,12 @@ public class UnificationAlgo {
                             // Sequence Variable Elimination 2
                             leftH.getSequence().remove(0);
                             TermNode t = rightH.getSequence().remove(0);
-                            sys.problem().add(eq);
+                            sys.problem.add(eq);
                             sys.apply(leftVar, t);
                             debug("Sequence Variable Elimination 2", sys, debugLevel, debugOut, false);
                         } else {
                             // No rule applicable ===>> BOT
-                            sys.problem().add(eq);
+                            sys.problem.add(eq);
                             error("Sequence Variable Occurrence Check", debugLevel, debugError);
                             break;
                         }
@@ -154,7 +154,7 @@ public class UnificationAlgo {
                 } else if (rightH.get(0).getAtom() instanceof HedgeVar) {
                     // Orient 2
                     eq.swap();
-                    sys.problem().add(eq);
+                    sys.problem.add(eq);
                     debug("Orient 2", sys, debugLevel, debugOut, false);
                 } else {
                     int idx = idxHedgeVar(leftH, rightH);
@@ -163,43 +163,43 @@ public class UnificationAlgo {
                         for (int i = 0; i < idx; i++) {
                             UnificationEquation eqDecomposition = new UnificationEquation(leftH.get(i), rightH.get(i));
                             eqDecomposition.derivationDepth = eq.derivationDepth;
-                            sys.problem().add(eqDecomposition);
+                            sys.problem.add(eqDecomposition);
                         }
                         eq.left = new TermNode(leftA, leftH.subHedge(idx, leftH.size()));
                         eq.right = new TermNode(rightA, rightH.subHedge(idx, rightH.size()));
-                        sys.problem().add(eq);
+                        sys.problem.add(eq);
                         debug("Partial Decomposition 1", sys, debugLevel, debugOut, false);
                     } else if (leftH.size() == rightH.size()) {
                         // Total Decomposition
                         for (int i = leftH.size() - 1; i >= 0; i--) {
                             UnificationEquation eqDecomposition = new UnificationEquation(leftH.get(i), rightH.get(i));
                             eqDecomposition.derivationDepth = eq.derivationDepth;
-                            sys.problem().add(eqDecomposition);
+                            sys.problem.add(eqDecomposition);
                         }
                         if (leftA != TermAtom.nullAtom || leftH.size() != 1) {
                             debug("Total Decomposition", sys, debugLevel, debugOut, false); // Non-trivial
                         }
                     } else {
                         // No rule applicable ===>> BOT
-                        sys.problem().add(eq);
+                        sys.problem.add(eq);
                         error("Arity Disagreement", debugLevel, debugOut);
                         break;
                     }
                 }
             }
             // Empty problem set = solution found
-            if (sys.problem().isEmpty()) {
+            if (sys.problem.isEmpty()) {
                 if (justify) {
-                    UnificationProblem problemOrig = system.problem().copy();
+                    UnificationProblem problemOrig = system.problem.copy();
                     while (!problemOrig.isEmpty()) {
                         UnificationEquation eqOriginal = problemOrig.remove();
-                        eqOriginal.apply(sys.sigma());
+                        eqOriginal.apply(sys.sigma);
                         if (!eqOriginal.left.equals(eqOriginal.right)) {
                             return null;
                         }
                     }
                 }
-                result.add(sys.sigma());
+                result.add(sys.sigma);
             }
         }
         return result;
@@ -264,9 +264,9 @@ public class UnificationAlgo {
     }
     
     private Stack<UnifSystem> projection(UnifSystem sys) {
-        var systems = new Stack<UnifSystem>();
+        Stack<UnifSystem> systems = new Stack<>();
         systems.push(sys.copy());
-        Set<HedgeVar> varSet = sys.problem().collectHedgeVars();
+        Set<HedgeVar> varSet = sys.problem.collectHedgeVars();
         HedgeVar[] vars = new HedgeVar[varSet.size()];
         int n = 1 << varSet.toArray(vars).length;
         for (int counter = 1; counter < n; counter++) {

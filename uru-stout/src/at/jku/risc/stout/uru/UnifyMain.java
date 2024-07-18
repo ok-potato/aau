@@ -61,7 +61,7 @@ public class UnifyMain {
                     }
                 default:
                     // Allow separation by whitespace or by ";", or both
-                    if (problemSet.isEmpty() || problemSet.toString().endsWith(";") || args[i].startsWith(";")) {
+                    if (problemSet.length() == 0 || problemSet.toString().endsWith(";") || args[i].startsWith(";")) {
                         problemSet.append(args[i]);
                     } else {
                         problemSet.append(";").append(args[i]);
@@ -69,14 +69,14 @@ public class UnifyMain {
                     break;
             }
         }
-        if (problemSet.isEmpty()) {
+        if (problemSet.length() == 0) {
             System.out.println("ERROR: no problem(s) provided!");
             return;
         }
         try {
-            var problem = new UnificationProblem();
+            UnificationProblem problem = new UnificationProblem();
             new InputParser(problem).parseEqSystem(problemSet.toString(), null);
-            var algo = new UnificationAlgo(problem, maxDepth);
+            UnificationAlgo algo = new UnificationAlgo(problem, maxDepth);
             Set<Substitution> substitutions = algo.unify(debugLevel, null, null, justifySigma);
             System.out.println(substitutions);
             

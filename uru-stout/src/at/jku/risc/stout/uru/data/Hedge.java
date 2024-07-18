@@ -68,9 +68,10 @@ public class Hedge extends Printable {
     
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof Hedge otherHedge)) {
+        if (!(other instanceof Hedge)) {
             return false;
         }
+        Hedge otherHedge = (Hedge) other;
         if (this.size() != otherHedge.size()) {
             return false;
         }

@@ -21,7 +21,14 @@ import at.jku.risc.stout.uru.data.TermNode;
 import at.jku.risc.stout.uru.data.atom.HedgeVar;
 import at.jku.risc.stout.uru.data.atom.Variable;
 
-public record UnifSystem(UnificationProblem problem, Substitution sigma) {
+public class UnifSystem {
+    public final UnificationProblem problem;
+    public final Substitution sigma;
+    
+    public UnifSystem(UnificationProblem problem, Substitution sigma) {
+        this.problem = problem;
+        this.sigma = sigma;
+    }
     
     public void apply(Variable fromVar, TermNode toTerm) {
         problem.apply(fromVar, toTerm);

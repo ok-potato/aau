@@ -100,15 +100,16 @@ public class TermNode implements Cloneable {
     
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof TermNode oNode)) {
+        if (!(other instanceof TermNode)) {
             return false;
         }
-        if (atom.equals(oNode.atom)) {
-            if (hedge == oNode.hedge) {
+        TermNode otherTermNode = (TermNode) other;
+        if (atom.equals(otherTermNode.atom)) {
+            if (hedge == otherTermNode.hedge) {
                 return true;
             }
             if (hedge != null) {
-                return hedge.equals(oNode.hedge);
+                return hedge.equals(otherTermNode.hedge);
             }
         }
         return false;

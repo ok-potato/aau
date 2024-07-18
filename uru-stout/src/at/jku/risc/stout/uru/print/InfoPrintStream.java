@@ -43,7 +43,7 @@ public class InfoPrintStream extends PrintStream {
     }
     
     public void flush() {
-        if (!buffer.isEmpty())
+        if (buffer.length() != 0)
             System.out.print("INFO:  " + buffer);
         buffer.setLength(0);
     }

@@ -128,7 +128,7 @@ public class Substitution implements Cloneable {
     public String toRanString() {
         StringBuilder sb = new StringBuilder();
         for (Entry<Variable, TermNode> e : mapping.entrySet()) {
-            if (!sb.isEmpty()) {
+            if (sb.length() != 0) {
                 sb.append(RAN_PRINT_SEPARATOR);
             }
             String goal = String.valueOf(e.getValue());

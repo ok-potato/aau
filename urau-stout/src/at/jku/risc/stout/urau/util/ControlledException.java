@@ -17,8 +17,6 @@
 
 package at.jku.risc.stout.urau.util;
 
-import java.io.Serial;
-
 /**
  * Every exception which will be thrown by intention is a subclass of this one.
  * By catching this exception you will get all the controlled failure cases.
@@ -26,7 +24,6 @@ import java.io.Serial;
  * @author Alexander Baumgartner
  */
 public abstract class ControlledException extends Exception {
-	@Serial
 	private static final long serialVersionUID = -7764972962627117950L;
 
 	public ControlledException() {

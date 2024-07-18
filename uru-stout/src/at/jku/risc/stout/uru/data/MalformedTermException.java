@@ -19,8 +19,6 @@ package at.jku.risc.stout.uru.data;
 
 import at.jku.risc.stout.uru.util.ControlledException;
 
-import java.io.Serial;
-
 /**
  * This exception is thrown if something goes wrong while parsing the input
  * term.
@@ -28,7 +26,6 @@ import java.io.Serial;
  * @author Alexander Baumgartner
  */
 public class MalformedTermException extends ControlledException {
-    @Serial
     private static final long serialVersionUID = -7310354284678739770L;
     
     public MalformedTermException(String message) {

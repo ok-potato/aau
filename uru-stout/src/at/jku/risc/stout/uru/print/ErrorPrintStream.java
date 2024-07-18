@@ -43,7 +43,7 @@ public class ErrorPrintStream extends PrintStream {
     }
     
     public void flush() {
-        if (!buffer.isEmpty())
+        if (buffer.length() != 0)
             System.out.print("ERROR: " + buffer);
         buffer.setLength(0);
     }

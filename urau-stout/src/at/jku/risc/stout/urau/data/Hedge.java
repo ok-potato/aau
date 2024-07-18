@@ -56,14 +56,15 @@ public class Hedge implements Cloneable {
     
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof Hedge oH)) {
+        if (!(other instanceof Hedge)) {
             return false;
         }
-        if (this.size() != oH.size()) {
+        Hedge otherHedge = (Hedge) other;
+        if (this.size() != otherHedge.size()) {
             return false;
         }
         for (int i = this.size() - 1; i >= 0; i--) {
-            if (!this.sequence.get(i).equals(oH.sequence.get(i))) {
+            if (!this.sequence.get(i).equals(otherHedge.sequence.get(i))) {
                 return false;
             }
         }
@@ -141,10 +142,10 @@ public class Hedge implements Cloneable {
                     sequence.remove(idx);
                     return 0;
                 case 1:
-                    sequence.set(idx, oSequence.getFirst());
+                    sequence.set(idx, oSequence.get(0));
                     return 1;
                 default:
-                    sequence.set(idx, oSequence.getFirst());
+                    sequence.set(idx, oSequence.get(0));
                     sequence.addAll(idx + 1, oSequence.subList(1, size));
                     return size;
             }

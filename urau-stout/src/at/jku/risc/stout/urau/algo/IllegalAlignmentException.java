@@ -19,15 +19,12 @@ package at.jku.risc.stout.urau.algo;
 
 import at.jku.risc.stout.urau.util.ControlledException;
 
-import java.io.Serial;
-
 /**
  * This exception indicates that the computed alignment is not admissible.
  *
  * @author Alexander Baumgartner
  */
 public class IllegalAlignmentException extends ControlledException {
-    @Serial
     private static final long serialVersionUID = -2425388395961466527L;
     
     public IllegalAlignmentException(String message) {

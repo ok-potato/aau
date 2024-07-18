@@ -49,7 +49,7 @@ public class OutPrintStream extends PrintStream {
     
     public void flush() {
         String lineNum = "000000" + count + ": ";
-        if (!buffer.isEmpty())
+        if (buffer.length() != 0)
             System.out.print(lineNum.substring(lineNum.length() - 8) + buffer);
         buffer.setLength(0);
     }

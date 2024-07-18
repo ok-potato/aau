@@ -84,7 +84,8 @@ public class TermNode {
     
     @Override
     public boolean equals(Object other) {
-        if (other instanceof TermNode otherNode) {
+        if (other instanceof TermNode) {
+            TermNode otherNode = (TermNode) other;
             if (atom.equals(otherNode.atom)) {
                 if (hedge == otherNode.hedge) {
                     return true;
