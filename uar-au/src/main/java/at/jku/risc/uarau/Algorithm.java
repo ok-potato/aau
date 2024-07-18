@@ -69,12 +69,13 @@ public class Algorithm {
                     continue BRANCHING;
                 }
                 // SOLVE
-                cfg.r.addLast(new Substitution(aut.var, Term.ANON));
+                cfg.S.push(aut);
                 log.debug("SOL => {}", cfg);
             }
             assert (cfg.A.isEmpty());
             solved.push(cfg);
         }
+        log.info("SOLVED: {}", Util.joinString(solved, "\n                   ::          ", "--"));
         // TODO post-process
         log.info("~~~~~~~~~~~~~~~~~~~~~~~~  done  ~~~~~~~~~~~~~~~~~~~~~~~~");
     }
