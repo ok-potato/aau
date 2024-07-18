@@ -27,8 +27,8 @@ public class Config {
     }
     
     private Config(Config original) {
-        A = Util.copyReverse(original.A);
-        S = Util.copyReverse(original.S);
+        A = Util.copyAccurate(original.A);
+        S = Util.copyAccurate(original.S);
         r = Util.copyAccurate(original.r);
         alpha1 = original.alpha1;
         alpha2 = original.alpha2;
@@ -49,9 +49,9 @@ public class Config {
     
     @Override
     public String toString() {
-        String A_str = Util.joinString(A, "", "➰");
-        String S_str = Util.joinString(S, "", "➰");
-        String r_str = Util.joinString(r, ", ", "..");
-        return String.format("⧛⚫%s⚫%s⚫%s⚫%s,%s ⧚", A_str, S_str, r_str, alpha1, alpha2);
+        String A_str = Util.joinString(Util.copyReverse(A), " ", "➰");
+        String S_str = Util.joinString(Util.copyReverse(S), " ", "➰");
+        String r_str = Util.joinString(r, " ", "..");
+        return String.format("⧛ ⚫ %s ⚫ %s ⚫ %s ⚫ %s, %s ⧚", A_str, S_str, r_str, alpha1, alpha2);
     }
 }

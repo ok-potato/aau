@@ -46,7 +46,7 @@ public class Algorithm {
         Deque<Config> solved = new ArrayDeque<>();
         Config initCfg = new Config(lhs, rhs);
         branches.push(initCfg);
-        log.info("SOLVING :: {} :: λ={}{}", initCfg.A.peek(), lambda, R.toString("\n"));
+        log.info("SOLVING  ::  λ={}\n                   ::  {}{}", lambda, initCfg.A.peek(), R.toString("\n                   ::  "));
         
         BRANCHING:
         while (!branches.isEmpty()) {

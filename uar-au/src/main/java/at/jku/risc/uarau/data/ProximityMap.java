@@ -127,13 +127,13 @@ public class ProximityMap {
         return toString("");
     }
     
-    public String toString(String prepender) {
+    public String toString(String prefix) {
         if (proxClasses.isEmpty()) {
             return "💢";
         }
         StringBuilder sb = new StringBuilder();
         for (String k : proxClasses.keySet()) {
-            sb.append(String.format("%s💢%s ", prepender, k));
+            sb.append(String.format("%s💢%s ", prefix, k));
             proxClasses.get(k).forEach(pr -> sb.append(pr).append(" "));
         }
         return sb.substring(0, sb.length() - 1);
