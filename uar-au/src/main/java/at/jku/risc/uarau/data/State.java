@@ -1,4 +1,6 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data;
+
+import at.jku.risc.uarau.Util;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

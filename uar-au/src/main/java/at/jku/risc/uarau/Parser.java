@@ -1,5 +1,8 @@
 package at.jku.risc.uarau;
 
+import at.jku.risc.uarau.data.ProximityRelation;
+import at.jku.risc.uarau.data.Term;
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,13 +15,14 @@ public class Parser {
     
     public static List<Term> parseProblem(String string) {
         List<Term> terms = new ArrayList<>();
-        String[] tokens = string.split("=/?");
+        String[] tokens = string.split("\\?=");
         if (tokens.length != 2) {
             log.error("Need two terms per equation, {} supplied", tokens.length);
         }
-        for (String token : tokens) {
-            terms.add(parseTerm(token));
-        }
+        terms.add(parseTerm(tokens[0]));
+        log.debug("Parsed LHS: {}", terms.get(0));
+        terms.add(parseTerm(tokens[1]));
+        log.debug("Parsed RHS: {}", terms.get(1));
         return terms;
     }
     
@@ -26,15 +30,15 @@ public class Parser {
     public static Term parseTerm(String string) {
         string = string.replaceAll("\\s", "");
         // f(g(a,b),c,d) -> f(  g(  a  b  )  c  d  )
-        // split...    (?<=\() =>if last char was '('    , =>on ','    (?=\)) =>if next char is ')'
-        String[] tokens = string.split("(?<=\\() | , | (?=\\))");
+        // split...    (?<=\() => if last char was '('    , => on ','    (?=\)) => if next char is ')'
+        String[] tokens = string.split("(?<=\\()|,|(?=\\))");
         
-        Deque<TermBuilder> subTerms = new ArrayDeque<>();
-        subTerms.add(new TermBuilder(","));
+        Deque<Util.TermBuilder> subTerms = new ArrayDeque<>();
+        subTerms.add(new Util.TermBuilder(","));
         for (String token : tokens) {
             assert (subTerms.peek() != null);
             if (token.equals(")")) {
-                TermBuilder subTerm = subTerms.pop();
+                Util.TermBuilder subTerm = subTerms.pop();
                 if (subTerms.peek() == null) {
                     throw new IllegalArgumentException("Too many closing parentheses in term " + string);
                 }
@@ -42,7 +46,7 @@ public class Parser {
                 continue;
             }
             if (token.endsWith("(")) {
-                subTerms.push(new TermBuilder(token.substring(0, token.length() - 1)));
+                subTerms.push(new Util.TermBuilder(token.substring(0, token.length() - 1)));
                 continue;
             }
             assert (Arrays.stream(new String[]{"(", ",", ")"}).noneMatch(token::contains));
@@ -51,26 +55,7 @@ public class Parser {
         if (subTerms.size() > 1) {
             throw new IllegalArgumentException("Unclosed parentheses in term " + string);
         }
-        Term result = subTerms.pop().arguments.get(0);
-        log.debug("Parsed term: {}", result);
-        return result;
-    }
-    
-    private static class TermBuilder {
-        public String head;
-        public List<Term> arguments = new ArrayList<>();
-        
-        public TermBuilder(String head) {
-            this.head = head;
-        }
-        
-        public Term build() {
-            assert (arguments != null);
-            Term t = new Term(head, arguments.toArray(new Term[0]));
-            arguments = null;
-            log.trace("Parsed term: {}", t);
-            return t;
-        }
+        return subTerms.pop().arguments.get(0);
     }
     
     // relations =>  f g {<arg-map>} [<proximity>]  separated by ';'
@@ -84,51 +69,67 @@ public class Parser {
                 log.error("Multiple declarations of relation {} <-> {}", pr.f, pr.g);
                 throw new IllegalArgumentException();
             }
-            log.trace("Parsed relation: {}", pr);
+            log.trace("Parsed PR: {}", pr);
             proximityRelations.add(pr);
         }
         log.debug("Parsed PRs: {}", proximityRelations);
         return proximityRelations;
     }
     
-    public static ProximityRelation parseProximityRelation(String token) {
+    public static ProximityRelation parseProximityRelation(String string) {
         String proximity;
         String argMap;
         // find proximity + argument map
         try {
-            proximity = token.substring(token.lastIndexOf('[') + 1, token.indexOf(']'));
-            argMap = token.substring(token.lastIndexOf('{') + 1, token.indexOf('}'));
+            proximity = string.substring(string.lastIndexOf('['), string.indexOf(']') + 1);
+            argMap = string.substring(string.lastIndexOf('{'), string.indexOf('}') + 1);
         } catch (StringIndexOutOfBoundsException e) {
-            log.error("Couldn't parse proximity or argument map from {}", token);
+            log.error("Couldn't parse proximity or argument map from {}", string);
             throw new IllegalArgumentException();
         }
         
         // find function symbols
-        String[] partialSplit = token.split(Pattern.quote(proximity) + " | " + Pattern.quote(argMap));
-        List<String> rest = new ArrayList<>();
-        for (String part : partialSplit) {
-            rest.addAll(Arrays.asList(part.trim().split("\\s+")));
-        }
+        String[] split = string.split(Pattern.quote(proximity) + "|" + Pattern.quote(argMap));
+        List<String> rest = Arrays.stream(split)
+                .flatMap(s -> Arrays.stream(s.split("\\s+")))
+                .filter(s -> !StringUtils.isBlank(s))
+                .collect(Collectors.toList());
         if (rest.size() != 2) {
-            log.error("Couldn't parse two function symbols from {}", token);
+            log.error("Couldn't parse two function symbols from {}", string);
             throw new IllegalArgumentException();
         }
-        return new ProximityRelation(rest.get(0), rest.get(1), Float.parseFloat(proximity), parseArgRelation(argMap));
+        
+        return new ProximityRelation(rest.get(0), rest.get(1), parseProximity(proximity), parseArgRelation(argMap));
+    }
+    
+    public static float parseProximity(String string) {
+        return Float.parseFloat(string.substring(1, string.length() - 1));
     }
     
     public static List<List<Integer>> parseArgRelation(String string) {
-        List<Integer> argRelations = Arrays.stream(string.split("[(),]")).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> argRelations = Arrays.stream(string.substring(1, string.length() - 1).split("[(),]+"))
+                .filter(s -> !StringUtils.isBlank(s))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+        
         if (argRelations.size() % 2 != 0) {
             log.error("Odd number of argument relations in {{}}", string);
             throw new IllegalArgumentException();
         }
+        
         int maxFrom = 0;
         for (int i = 0; i < argRelations.size() / 2; i++) {
             maxFrom = Math.max(maxFrom, argRelations.get(i * 2));
         }
-        List<List<Integer>> parsedArgRelations = Collections.nCopies(maxFrom, new ArrayList<>());
+        
+        List<List<Integer>> parsedArgRelations = new ArrayList<>(maxFrom);
+        for (int i = 0; i < maxFrom; i++) {
+            parsedArgRelations.add(new ArrayList<>());
+        }
+        
         for (int i = 0; i < argRelations.size() / 2; i++) {
-            parsedArgRelations.get(argRelations.get(i * 2)).add(argRelations.get(i * 2 + 1));
+            // 1-index -> 0-index
+            parsedArgRelations.get(argRelations.get(i * 2) - 1).add(argRelations.get(i * 2 + 1) - 1);
         }
         return parsedArgRelations;
     }

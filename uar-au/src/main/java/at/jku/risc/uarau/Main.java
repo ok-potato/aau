@@ -1,5 +1,8 @@
 package at.jku.risc.uarau;
 
+import at.jku.risc.uarau.data.ProximityRelation;
+import at.jku.risc.uarau.data.Term;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

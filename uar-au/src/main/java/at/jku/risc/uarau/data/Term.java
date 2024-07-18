@@ -1,4 +1,4 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data;
 
 import org.junit.platform.commons.util.StringUtils;
 
@@ -18,7 +18,7 @@ public class Term {
     public Term(String head, Term[] arguments) {
         assert (!StringUtils.isBlank(head));
         this.var = UNUSED_VAR;
-        this.head = head;
+        this.head = head.intern();
         this.arguments = arguments;
     }
     

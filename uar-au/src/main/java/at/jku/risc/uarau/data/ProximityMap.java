@@ -1,4 +1,4 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,13 +22,19 @@ public class ProximityMap {
         }).collect(Collectors.toSet());
         calcArities(rhs, lhs, proximityRelations);
         log.trace("Arities {}", arities);
-        log.trace("PR's {}", proximityRelations);
         for (ProximityRelation relation : proximityRelations) {
+            for (int i = relation.get(relation.f).size(); i < arity(relation.f); i++) {
+                relation.get(relation.f).add(new ArrayList<>());
+            }
+            for (int i = relation.get(relation.g).size(); i < arity(relation.g); i++) {
+                relation.get(relation.g).add(new ArrayList<>());
+            }
             Set<ProximityRelation> fClass = proxClass(relation.f);
             Set<ProximityRelation> gClass = proxClass(relation.g);
             fClass.add(relation);
             gClass.add(relation);
         }
+        log.trace("PR's {}", proximityRelations);
     }
     
     private void calcArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
@@ -81,7 +87,7 @@ public class ProximityMap {
             Set<String> tProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
             commonProx.retainAll(tProx);
         }
-        log.trace("CP{} = {} {}", T, commonProx, this);
+        log.trace("comProx{} = {} {}", T, commonProx, this);
         return commonProx;
     }
     
@@ -120,7 +126,7 @@ public class ProximityMap {
         }
         StringBuilder sb = new StringBuilder();
         for (String k : proxClasses.keySet()) {
-            sb.append("💢");
+            sb.append(String.format("💢%s ", k));
             proxClasses.get(k).forEach(pr -> sb.append(pr).append(" "));
         }
         return sb.substring(0, sb.length() - 1);

@@ -1,5 +1,6 @@
 package at.jku.risc.uarau;
 
+import at.jku.risc.uarau.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,6 @@ public class Algorithm {
         Set<Config> children = new HashSet<>();
         Set<String> heads = aut.T1.stream().map(t -> t.head).collect(Collectors.toSet());
         heads.addAll(aut.T2.stream().map(t -> t.head).collect(Collectors.toSet()));
-        log.trace("{} U {} = {}", aut.T1, aut.T2, heads);
         
         for (String h : R.commonProximates(heads)) {
             float[] childAlpha1 = new float[]{cfg.alpha1}; // => pass by reference
@@ -127,7 +127,7 @@ public class Algorithm {
             ProximityRelation proxRelation = R.proxRelation(h, t.head);
             for (int i = 0; i < hArity; i++) {
                 for (int p : proxRelation.get(h, i)) {
-                    assert (!t.isVar());
+                    assert (!t.isVar() && t.arguments != null);
                     Term tArg = t.arguments[p];
                     Q.get(i).add(tArg);
                 }

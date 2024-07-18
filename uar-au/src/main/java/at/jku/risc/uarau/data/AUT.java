@@ -1,4 +1,6 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data;
+
+import at.jku.risc.uarau.data.Term;
 
 import java.util.Collections;
 import java.util.Set;

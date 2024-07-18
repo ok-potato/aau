@@ -1,4 +1,6 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data;
+
+import at.jku.risc.uarau.Util;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -58,6 +60,6 @@ public class Config {
         if (joinS.length() == 0) {
             joinS.add("..");
         }
-        return String.format("🟡⚫%s⚫%s⚫%s⚫%s,%s", joinA, joinS, r, alpha1, alpha2);
+        return String.format("⚙️⚫%s⚫%s⚫%s⚫%s,%s", joinA, joinS, r, alpha1, alpha2);
     }
 }
