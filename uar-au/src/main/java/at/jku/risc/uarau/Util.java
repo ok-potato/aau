@@ -11,10 +11,18 @@ public class Util {
     
     // collection operations
     
-    public static <T> Deque<T> copy(Deque<T> original) {
+    public static <T> Deque<T> copyReverse(Deque<T> original) {
         Deque<T> copy = new ArrayDeque<>(original.size());
         for (T aut : original) {
             copy.push(aut);
+        }
+        return copy;
+    }
+    
+    public static <T> Deque<T> copyAccurate(Deque<T> original) {
+        Deque<T> copy = new ArrayDeque<>(original.size());
+        for (T aut : original) {
+            copy.addLast(aut);
         }
         return copy;
     }

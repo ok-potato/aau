@@ -27,9 +27,9 @@ public class Config {
     }
     
     private Config(Config original) {
-        A = Util.copy(original.A);
-        S = Util.copy(original.S);
-        r = Util.copy(original.r);
+        A = Util.copyReverse(original.A);
+        S = Util.copyReverse(original.S);
+        r = Util.copyAccurate(original.r);
         alpha1 = original.alpha1;
         alpha2 = original.alpha2;
         freshVar = original.freshVar;
@@ -52,6 +52,6 @@ public class Config {
         String A_str = Util.join(A, "", "➰");
         String S_str = Util.join(S, "", "➰");
         String r_str = Util.join(r, ", ", "..");
-        return String.format("⧛ ⚫%s⚫%s⚫%s⚫%s,%s ⧚", A_str, S_str, r_str, alpha1, alpha2);
+        return String.format("⧛⚫%s⚫%s⚫%s⚫%s,%s ⧚", A_str, S_str, r_str, alpha1, alpha2);
     }
 }

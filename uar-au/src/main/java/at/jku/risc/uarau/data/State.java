@@ -24,7 +24,7 @@ public class State {
     }
     
     private State(State original) {
-        this.pairs = Util.copy(original.pairs);
+        this.pairs = Util.copyReverse(original.pairs);
         this.alpha = original.alpha;
         this.freshVar = original.freshVar;
     }

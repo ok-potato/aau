@@ -55,7 +55,7 @@ public class Algorithm {
                 AUT aut = cfg.A.pop();
                 // TRIVIAL
                 if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-                    cfg.r.push(new Substitution(aut.var, Term.ANON));
+                    cfg.r.addLast(new Substitution(aut.var, Term.ANON));
                     log.debug("TRI => {}", cfg);
                     continue;
                 }
@@ -69,7 +69,7 @@ public class Algorithm {
                     continue BRANCHING;
                 }
                 // SOLVE
-                cfg.r.push(new Substitution(aut.var, Term.ANON));
+                cfg.r.addLast(new Substitution(aut.var, Term.ANON));
                 log.debug("SOL => {}", cfg);
             }
             assert (cfg.A.isEmpty());
@@ -107,7 +107,7 @@ public class Algorithm {
                 hArgs[i] = new Term(yi);
                 child.A.push(new AUT(yi, Q1.get(i), Q2.get(i)));
             }
-            child.r.push(new Substitution(aut.var, new Term(h, hArgs)));
+            child.r.addLast(new Substitution(aut.var, new Term(h, hArgs)));
             child.alpha1 = childAlpha1[0];
             child.alpha2 = childAlpha2[0];
             
