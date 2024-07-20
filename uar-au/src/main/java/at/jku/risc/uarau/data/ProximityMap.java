@@ -13,9 +13,10 @@ public class ProximityMap {
     public final Map<String, Set<ProximityRelation>> proxClasses = new HashMap<>();
     private final Map<String, Integer> arities = new HashMap<>();
     
-    private static final String ID_RELATION_VIOLATION = "By definition, the proximity of a function to itself must be 1, with Id argument mapping. {} violates this rule.";
+    private static final String ID_RELATION_VIOLATION = "By definition, the proximity of a function to itself must be 1, with Id argument mapping. {} violates this rule!";
     
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
+        // filter out relations with proximity < λ
         proximityRelations = proximityRelations.stream().filter(relation -> {
             if (relation.f == relation.g && relation.proximity < 1.0f) {
                 log.error(ID_RELATION_VIOLATION, relation);
@@ -27,7 +28,8 @@ public class ProximityMap {
             }
             return true;
         }).collect(Collectors.toSet());
-        calcArities(rhs, lhs, proximityRelations);
+        
+        calculateArities(rhs, lhs, proximityRelations);
         log.trace("Arities {}", arities);
         for (ProximityRelation relation : proximityRelations) {
             // check id argument relation violations
@@ -42,18 +44,14 @@ public class ProximityMap {
                         throw new IllegalArgumentException();
                     }
                 }
-                log.debug("It isn't necessary to explicitly define proximity relations of functions to themselves ({})", relation);
+                log.info("It's not necessary to explicitly define functions' proximity to themselves ({})", relation);
             }
             // if the last argument position of f/g doesn't show up in the relation, we have to pad it accordingly
-            // note: if f/g doesn't show up in a term, we assume its arity equals the max arity found in R
-            //   if this assumption is wrong, we're missing some non-relevant positions, and could possibly
-            //   misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM)
-            //   if this is undesirable, arities have to be manually specified where f/g doesn't appear in a term
-            for (int i = relation.get(relation.f).size(); i < arity(relation.f); i++) {
-                relation.get(relation.f).add(new ArrayList<>());
+            for (int i = relation.f_to_g.size(); i < arity(relation.f); i++) {
+                relation.f_to_g.add(new ArrayList<>());
             }
-            for (int i = relation.get(relation.g).size(); i < arity(relation.g); i++) {
-                relation.get(relation.g).add(new ArrayList<>());
+            for (int i = relation.g_to_f.size(); i < arity(relation.g); i++) {
+                relation.g_to_f.add(new ArrayList<>());
             }
             Set<ProximityRelation> fClass = proxClass(relation.f);
             Set<ProximityRelation> gClass = proxClass(relation.g);
@@ -63,24 +61,27 @@ public class ProximityMap {
         log.trace("PR's {}", Util.joinString(proximityRelations));
     }
     
-    private void calcArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
+    private void calculateArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
         Map<String, Integer> termArities = new HashMap<>();
-        calcArities(rhs, termArities);
-        calcArities(lhs, termArities);
+        getAritiesFromTerm(rhs, termArities);
+        getAritiesFromTerm(lhs, termArities);
+        // note: if f/g doesn't show up in a term, we assume its arity equals the max arity found in R
+        //   if this assumption is wrong, we're missing some non-relevant positions, and could possibly
+        //   misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM)
+        //   otherwise, arities of functions would have to be manually specified if they don't appear in a term
         arities.putAll(termArities);
-        
         for (ProximityRelation relation : proximityRelations) {
-            int minF = relation.get(relation.f).size();
-            int minG = relation.get(relation.g).size();
+            int minF = relation.f_to_g.size();
+            int minG = relation.g_to_f.size();
             
             Integer termArityF = termArities.get(relation.f);
             Integer termArityG = termArities.get(relation.g);
             if (termArityF != null && termArityF < minF) {
-                log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem declaration ({})", relation.f, minF, termArityF);
+                log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem terms ({})", relation.f, minF, termArityF);
                 throw new IllegalArgumentException();
             }
             if (termArityG != null && termArityG < minG) {
-                log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem declaration ({})", relation.g, minG, termArityG);
+                log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem terms ({})", relation.g, minG, termArityG);
                 throw new IllegalArgumentException();
             }
             int prevF = arities.getOrDefault(relation.f, 0);
@@ -90,16 +91,16 @@ public class ProximityMap {
         }
     }
     
-    private void calcArities(Term t, Map<String, Integer> map) {
+    private void getAritiesFromTerm(Term t, Map<String, Integer> map) {
         assert (!t.isVar());
         Integer existing = map.get(t.head);
         if (existing != null && existing != t.arguments.length) {
-            log.error("Found multiple arities of '{}' in problem declaration", t.head);
+            log.error("Found multiple arities of '{}' in the posed problem!", t.head);
             throw new IllegalArgumentException();
         }
         map.put(t.head, t.arguments.length);
         for (Term arg : t.arguments) {
-            calcArities(arg, map);
+            getAritiesFromTerm(arg, map);
         }
     }
     
@@ -133,13 +134,10 @@ public class ProximityMap {
         });
     }
     
-    public ProximityRelation proxRelation(String f, String g) throws NoSuchElementException {
+    public ProximityRelation getProximityRelation(String f, String g) {
         assert (proxClasses.containsKey(f) && proxClasses.containsKey(g));
-        assert ((proxClasses.get(f).stream().anyMatch(relation -> relation.other(f) == g)) && (proxClasses.get(g)
-                .stream()
-                .anyMatch(relation -> relation.other(g) == f)));
-        Set<ProximityRelation> fProxClass = proxClasses.get(f);
-        return fProxClass.stream().filter(pr -> pr.other(f) == g).findFirst().orElseThrow(NoSuchElementException::new);
+        assert (!Collections.disjoint(proxClasses.get(f), proxClasses.get(g)));
+        return proxClasses.get(f).stream().filter(pr -> pr.other(f) == g).findFirst().get();
     }
     
     public int arity(String f) {

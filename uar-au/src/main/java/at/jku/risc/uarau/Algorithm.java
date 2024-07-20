@@ -87,17 +87,18 @@ public class Algorithm {
         heads.addAll(aut.T2.stream().map(t -> t.head).collect(Collectors.toSet()));
         
         for (String h : R.commonProximates(heads)) {
-            float[] childAlpha1 = new float[]{cfg.alpha1}; // => pass by reference
-            float[] childAlpha2 = new float[]{cfg.alpha2}; // (feel free to email me your opinions on this)
-            List<Set<Term>> Q1 = map(h, aut.T1, childAlpha1);
-            List<Set<Term>> Q2 = map(h, aut.T2, childAlpha2);
+            float[] mapAlpha1 = new float[]{cfg.alpha1}; // => pass by reference
+            float[] mapAlpha2 = new float[]{cfg.alpha2}; // (feel free to email me your opinions on this)
+            List<Set<Term>> Q1 = map(h, aut.T1, mapAlpha1);
+            List<Set<Term>> Q2 = map(h, aut.T2, mapAlpha2);
             
             // CHECK DEC
-            if (childAlpha1[0] < lambda || childAlpha2[0] < lambda) {
+            if (mapAlpha1[0] < lambda || mapAlpha2[0] < lambda) {
                 continue;
             }
-            if (Q1.stream().anyMatch(q -> !consistent(q, childAlpha1[0])) || Q2.stream()
-                    .anyMatch(q -> !consistent(q, childAlpha2[0]))) {
+            assert (Q1 != null && Q2 != null);
+            if (Q1.stream().anyMatch(q -> !consistent(q, mapAlpha1[0])) || Q2.stream()
+                    .anyMatch(q -> !consistent(q, mapAlpha2[0]))) {
                 continue;
             }
             
@@ -110,8 +111,8 @@ public class Algorithm {
                 child.A.push(new AUT(yi, Q1.get(i), Q2.get(i)));
             }
             child.r.addLast(new Substitution(aut.var, new Term(h, hArgs)));
-            child.alpha1 = childAlpha1[0];
-            child.alpha2 = childAlpha2[0];
+            child.alpha1 = mapAlpha1[0];
+            child.alpha2 = mapAlpha2[0];
             
             children.add(child);
         }
@@ -119,27 +120,32 @@ public class Algorithm {
     }
     
     private List<Set<Term>> map(String h, Set<Term> T, float[] beta) {
-        int hArity = R.arity(h);
-        // Q[i] => set of args which h|i maps to
-        List<Set<Term>> Q = new ArrayList<>(hArity);
-        for (int i = 0; i < hArity; i++) {
+        int h_arity = R.arity(h);
+        List<Set<Term>> Q = new ArrayList<>(h_arity);
+        for (int i = 0; i < h_arity; i++) {
             Q.add(new HashSet<>());
         }
         for (Term t : T) {
-            ProximityRelation proxRelation = R.proxRelation(h, t.head);
-            for (int i = 0; i < hArity; i++) {
-                for (int p : proxRelation.get(h, i)) {
-                    assert (!t.isVar() && t.arguments != null);
-                    Term tArg = t.arguments[p];
+            assert (!t.isVar() && t.arguments != null);
+            ProximityRelation proximityRelation = R.getProximityRelation(h, t.head);
+            List<List<Integer>> h_to_t = proximityRelation.get(h);
+            for (int i = 0; i < h_arity; i++) {
+                for (int t_mapped_idx : h_to_t.get(i)) {
+                    Term tArg = t.arguments[t_mapped_idx];
+                    // Q[i] => set of args which h|i maps to
                     Q.get(i).add(tArg);
                 }
             }
-            beta[0] = tNorm.apply(beta[0], proxRelation.proximity);
+            beta[0] = tNorm.apply(beta[0], proximityRelation.proximity);
+            if (beta[0] < lambda) {
+                return null; // if this gets dereferenced, there's a bug somewhere else
+            }
         }
         return Q;
     }
     
     private boolean consistent(Set<Term> terms, float alpha) {
+        assert (!(alpha < lambda));
         Deque<State> branches = new ArrayDeque<>();
         branches.push(new State(terms, Term.UNUSED_VAR, alpha));
         log.trace("  {}", branches);
@@ -156,16 +162,17 @@ public class Algorithm {
                 }
                 // REDUCE
                 for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(Collectors.toSet()))) {
-                    float[] childAlpha = new float[]{state.alpha}; // => pass by reference
-                    List<Set<Term>> Q = map(h, expr.T, childAlpha);
-                    if (childAlpha[0] < lambda) {
+                    float[] mapAlpha = new float[]{state.alpha}; // => pass by reference
+                    List<Set<Term>> Q = map(h, expr.T, mapAlpha);
+                    if (mapAlpha[0] < lambda) {
                         continue;
                     }
+                    assert (Q != null);
                     State childState = state.copy();
                     for (Set<Term> q : Q) {
                         childState.expressions.push(new Expression(Term.UNUSED_VAR, q));
                     }
-                    childState.alpha = childAlpha[0];
+                    childState.alpha = mapAlpha[0];
                     branches.push(childState);
                 }
                 log.trace("  RED => {} {}", state, branches);

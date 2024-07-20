@@ -22,29 +22,27 @@ public class ProximityRelation {
         this.g = g.intern();
         this.proximity = proximity;
         this.f_to_g = argRelation;
-        this.g_to_f = reverse(argRelation);
-        assert (symmetric());
+        this.g_to_f = flip(argRelation);
+        assert (isSymmetric());
     }
     
-    private boolean symmetric() {
+    private boolean isSymmetric() {
         for (int i = 0; i < f_to_g.size(); i++) {
-            int finalI = i;
-            if (f_to_g.get(i).stream().anyMatch(j -> g_to_f.get(j).stream().noneMatch(v -> v == finalI))) {
-                log.error("Sanity check failed: {} {} {}", f_to_g.get(i), g_to_f, i);
+            final int i_but_cooler = i;
+            if (f_to_g.get(i).stream().anyMatch(j -> g_to_f.get(j).stream().noneMatch(v -> v == i_but_cooler))) {
                 return false;
             }
         }
         for (int i = 0; i < g_to_f.size(); i++) {
-            int finalI = i;
-            if (g_to_f.get(i).stream().anyMatch(j -> f_to_g.get(j).stream().noneMatch(v -> v == finalI))) {
-                log.error("Sanity check failed: {} {} {}", g_to_f.get(i), f_to_g, i);
+            final int i_but_cooler = i;
+            if (g_to_f.get(i).stream().anyMatch(j -> f_to_g.get(j).stream().noneMatch(v -> v == i_but_cooler))) {
                 return false;
             }
         }
         return true;
     }
     
-    private List<List<Integer>> reverse(List<List<Integer>> map) {
+    private List<List<Integer>> flip(List<List<Integer>> map) {
         int maxToIdx = map.stream().flatMap(Collection::stream).max(Comparator.naturalOrder()).orElse(-1) + 1;
         List<List<Integer>> reversed = new ArrayList<>(maxToIdx);
         for (int i = 0; i < maxToIdx; i++) {
@@ -59,13 +57,9 @@ public class ProximityRelation {
         return reversed;
     }
     
-    public List<List<Integer>> get(String from) {
-        assert (from == this.f || from == this.g);
-        return from == this.f ? f_to_g : g_to_f;
-    }
-    
-    public List<Integer> get(String from, int index) {
-        return get(from).get(index);
+    public List<List<Integer>> get(String f) {
+        assert (f == this.f || f == this.g);
+        return f == this.f ? f_to_g : g_to_f;
     }
     
     public String other(String f) {
@@ -82,7 +76,6 @@ public class ProximityRelation {
             return false;
         }
         ProximityRelation otherRelation = (ProximityRelation) other;
-        
         if (f == otherRelation.f) {
             return g == otherRelation.g;
         }
