@@ -40,6 +40,15 @@ public class SigmaTest {
         String problem = "f(a, b) ?= g(a, c, d)";
         String relations = "b c [0.5]{} ; c d [0.6]{} ; h f [0.7]{1 1, 3 2, 4 2} ; h g [0.8]{1 1, 3 3}";
         Algorithm.solve(problem, relations, 0.5f);
+        String relationsSol = "b c [0.5]{} ; c d [0.6]{} ; h f [0.7]{1 1, 1 2, 4 2} ; h g [0.8]{1 1, 3 3}";
+        Algorithm.solve(problem, relationsSol, 0.5f);
+    }
+    
+    @Test
+    public void example7() {
+        String problem = "p(f1(a), g1(b)) ?= p(f2(a), g2(b))";
+        String relations = "f1 h1 [0.6]{1 1} ; f2 h2 [0.7]{1 1} ; g1 h1 [0.8]{1 2} ; g2 h2 [0.9]{1 2}";
+        Algorithm.solve(problem, relations, 0.5f);
     }
     
     @Test
