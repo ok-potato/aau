@@ -49,8 +49,8 @@ public class Config {
     
     @Override
     public String toString() {
-        String A_str = Util.joinString(Util.copyReverse(A), " ", "➰");
-        String S_str = Util.joinString(Util.copyReverse(S), " ", "➰");
+        String A_str = Util.joinString(A, " ", "➰");
+        String S_str = Util.joinString(S, " ", "➰");
         String r_str = Util.joinString(r, " ", "..");
         return String.format("⧛ ⚫ %s ⚫ %s ⚫ %s ⚫ %s, %s ⧚", A_str, S_str, r_str, alpha1, alpha2);
     }

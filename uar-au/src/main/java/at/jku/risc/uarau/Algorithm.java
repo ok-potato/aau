@@ -77,6 +77,7 @@ public class Algorithm {
         }
         log.info("SOLVED: {}", Util.joinString(solved, "\n                   ::          ", "--"));
         // TODO post-process
+        
         log.info("~~~~~~~~~~~~~~~~~~~~~~~~  done  ~~~~~~~~~~~~~~~~~~~~~~~~");
     }
     
@@ -139,40 +140,42 @@ public class Algorithm {
     }
     
     private boolean consistent(Set<Term> terms, float alpha) {
-        Deque<State> init = new ArrayDeque<>();
-        init.push(new State(terms, Term.UNUSED_VAR, alpha));
-        Deque<Deque<State>> branches = new ArrayDeque<>();
-        branches.push(init);
+        Deque<State> branches = new ArrayDeque<>();
+        branches.push(new State(terms, Term.UNUSED_VAR, alpha));
+        log.trace("  {}", branches);
         
         BRANCHING:
         while (!branches.isEmpty()) {
-            Deque<State> states = branches.pop();
-            while (!states.isEmpty()) {
-                State state = states.pop();
-                State.Pair pair = state.pairs.pop();
+            State state = branches.pop();
+            while (!state.expressions.isEmpty()) {
+                Expression expr = state.expressions.pop();
                 // REMOVE
-                if (pair.T.size() <= 1) {
+                if (expr.T.size() <= 1) {
+                    log.trace("  REM => {} {} {}", state, state, branches);
                     continue;
                 }
                 // REDUCE
-                for (String h : R.commonProximates(pair.T.stream().map(t -> t.head).collect(Collectors.toSet()))) {
+                for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(Collectors.toSet()))) {
                     float[] childAlpha = new float[]{state.alpha}; // => pass by reference
-                    List<Set<Term>> Q = map(h, pair.T, childAlpha);
+                    List<Set<Term>> Q = map(h, expr.T, childAlpha);
                     if (childAlpha[0] < lambda) {
                         continue;
                     }
-                    State child = state.copy();
+                    State childState = state.copy();
                     for (Set<Term> q : Q) {
-                        child.pairs.push(new State.Pair(Term.UNUSED_VAR, q));
+                        childState.expressions.push(new Expression(Term.UNUSED_VAR, q));
                     }
-                    child.alpha = childAlpha[0];
-                    states.push(child);
+                    childState.alpha = childAlpha[0];
+                    branches.push(childState);
                 }
-                branches.push(states);
+                log.trace("  RED => {} {}", state, branches);
+                branches.push(state);
                 continue BRANCHING;
             }
+            log.trace("  TRUE");
             return true;
         }
+        log.trace("  FALSE");
         return false;
     }
 }
