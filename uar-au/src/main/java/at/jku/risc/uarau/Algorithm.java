@@ -157,7 +157,6 @@ public class Algorithm {
                 Expression expr = state.expressions.pop();
                 // REMOVE
                 if (expr.T.size() <= 1) {
-                    log.trace("  REM => {} {} {}", state, state, branches);
                     continue;
                 }
                 // REDUCE
@@ -174,15 +173,14 @@ public class Algorithm {
                     }
                     childState.alpha = mapAlpha[0];
                     branches.push(childState);
+                    log.trace("  RED => {}", childState);
                 }
-                log.trace("  RED => {} {}", state, branches);
-                branches.push(state);
                 continue BRANCHING;
             }
-            log.trace("  TRUE");
+            log.trace("  => consistent");
             return true;
         }
-        log.trace("  FALSE");
+        log.trace("  => NOT consistent");
         return false;
     }
 }

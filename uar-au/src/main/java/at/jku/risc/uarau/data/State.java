@@ -12,19 +12,15 @@ public class State {
     
     private int freshVar;
     
-    private State(int freshVar, float alpha) {
+    public State(Set<Term> T, int freshVar, float alpha) {
         this.expressions = new ArrayDeque<>();
         this.freshVar = freshVar;
         this.alpha = alpha;
-    }
-    
-    public State(Set<Term> T, int freshVar, float alpha) {
-        this(freshVar, alpha);
         expressions.push(new Expression(freshVar(), T));
     }
     
     private State(State original) {
-        this.expressions = Util.copyReverse(original.expressions);
+        this.expressions = Util.copyAccurate(original.expressions);
         this.alpha = original.alpha;
         this.freshVar = original.freshVar;
     }
