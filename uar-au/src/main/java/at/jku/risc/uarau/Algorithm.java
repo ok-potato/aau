@@ -69,7 +69,7 @@ public class Algorithm {
                     continue BRANCHING;
                 }
                 // SOLVE
-                cfg.S.push(aut);
+                cfg.S.addLast(aut);
                 log.debug("SOL => {}", cfg);
             }
             assert (cfg.A.isEmpty());
@@ -108,7 +108,7 @@ public class Algorithm {
             for (int i = 0; i < hArgs.length; i++) {
                 int yi = child.freshVar();
                 hArgs[i] = new Term(yi);
-                child.A.push(new AUT(yi, Q1.get(i), Q2.get(i)));
+                child.A.addLast(new AUT(yi, Q1.get(i), Q2.get(i)));
             }
             child.r.addLast(new Substitution(aut.var, new Term(h, hArgs)));
             child.alpha1 = mapAlpha1[0];
