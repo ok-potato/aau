@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class ProximityMap {
     private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
     
-    public final Map<String, Set<ProximityRelation>> proxClasses = new HashMap<>();
+    public final Map<String, Map<String, ProximityRelation>> relations = new HashMap<>();
     private final Map<String, Integer> arities = new HashMap<>();
     
     private static final String ID_RELATION_VIOLATION = "By definition, the proximity of a function to itself must be 1, with Id argument mapping. {} violates this rule!";
@@ -53,10 +53,8 @@ public class ProximityMap {
             for (int i = relation.g_to_f.size(); i < arity(relation.g); i++) {
                 relation.g_to_f.add(new ArrayList<>());
             }
-            Set<ProximityRelation> fClass = proxClass(relation.f);
-            Set<ProximityRelation> gClass = proxClass(relation.g);
-            fClass.add(relation);
-            gClass.add(relation);
+            proxClass(relation.f).put(relation.g, relation);
+            proxClass(relation.g).put(relation.f, relation);
         }
         log.trace("PR's {}", Util.joinString(proximityRelations));
     }
@@ -109,19 +107,18 @@ public class ProximityMap {
         Set<String> commonProx = null;
         for (String t : T) {
             if (commonProx == null) {
-                commonProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
+                commonProx = proxClass(t).values().stream().map(pr -> pr.other(t)).collect(Collectors.toSet());
                 continue;
             }
-            Set<String> tProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
+            Set<String> tProx = proxClass(t).values().stream().map(pr -> pr.other(t)).collect(Collectors.toSet());
             commonProx.retainAll(tProx);
         }
         log.trace("  comProx{} = {}", T, commonProx);
         return commonProx;
     }
     
-    private Set<ProximityRelation> proxClass(String f) {
-        return proxClasses.computeIfAbsent(f, head -> {
-            Set<ProximityRelation> proxClass = new HashSet<>();
+    private Map<String, ProximityRelation> proxClass(String f) {
+        return relations.computeIfAbsent(f, head -> {
             // initialize with id-relation
             assert (arities.containsKey(head));
             int arity = arities.get(head);
@@ -129,15 +126,17 @@ public class ProximityMap {
             for (int i = 0; i < arity; i++) {
                 mapping.add(Collections.singletonList(i));
             }
-            proxClass.add(new ProximityRelation(f, f, 1.0f, mapping));
+            Map<String, ProximityRelation> proxClass = new HashMap<>();
+            proxClass.put(f, new ProximityRelation(f, f, 1.0f, mapping));
+            relations.put(f, proxClass);
             return proxClass;
         });
     }
     
     public ProximityRelation getProximityRelation(String f, String g) {
-        assert (proxClasses.containsKey(f) && proxClasses.containsKey(g));
-        assert (!Collections.disjoint(proxClasses.get(f), proxClasses.get(g)));
-        return proxClasses.get(f).stream().filter(pr -> pr.other(f) == g).findFirst().get();
+        assert (relations.containsKey(f) && relations.containsKey(g));
+        assert (!Collections.disjoint(relations.get(f).values(), relations.get(g).values()));
+        return relations.get(f).get(g);
     }
     
     public int arity(String f) {
@@ -151,13 +150,13 @@ public class ProximityMap {
     }
     
     public String toString(String prefix) {
-        if (proxClasses.isEmpty()) {
+        if (relations.isEmpty()) {
             return "💢";
         }
         StringBuilder sb = new StringBuilder();
-        for (String k : proxClasses.keySet()) {
+        for (String k : relations.keySet()) {
             sb.append(String.format("%s💢%s ", prefix, k));
-            proxClasses.get(k).forEach(pr -> sb.append(pr).append(" "));
+            relations.get(k).values().forEach(pr -> sb.append(pr).append(" "));
         }
         return sb.substring(0, sb.length() - 1);
     }

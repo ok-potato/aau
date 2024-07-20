@@ -11,10 +11,18 @@ public class SigmaTest {
         Algorithm.solve(problem, relations, 0.5f);
     }
     
-        @Test
+    @Test
     public void pimple() {
         String problem = "f(h(a,b,c,d),b) ?= g(f(a,b),f(b,c),f(c,d))";
         String relations = "h {(1,1),(3,2),(4,2)}[0.7] f; h g {(1,1),(3,3)}[0.8]; c d {}[0.6]";
+        Algorithm.solve(problem, relations, 0.5f);
+    }
+    
+    // slow with logging
+    //@Test
+    public void bigBoy() {
+        String problem = "f(h(f(c, d), g(c, d, h(a, b, c, f(a, b))) ,c ,d ), b) ?= g(f(a, b) ,f(h(g(c, d, e) ,g(a, c, f(a, b)) ,c, d) ,c) ,f(g(a, b, d), d))";
+        String relations = "h {1 1,2 1,3 2,4 2)}[0.7] f ; h g {1 1,3 3,2 3,4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2,2 3,2 1)}";
         Algorithm.solve(problem, relations, 0.5f);
     }
     
