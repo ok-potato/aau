@@ -127,8 +127,8 @@ public class Algorithm {
         }
         for (Term t : T) {
             assert (!t.isVar() && t.arguments != null);
-            ProximityRelation proximityRelation = R.getProximityRelation(h, t.head);
-            List<List<Integer>> h_to_t = proximityRelation.get(h);
+            ProximityRelation proximityRelation = R.proximityRelation(h, t.head);
+            List<List<Integer>> h_to_t = proximityRelation.argRelation;
             for (int i = 0; i < h_arity; i++) {
                 for (int t_mapped_idx : h_to_t.get(i)) {
                     Term tArg = t.arguments[t_mapped_idx];
