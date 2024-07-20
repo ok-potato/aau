@@ -84,18 +84,18 @@ public class Parser {
     
     public static ProximityRelation parseProximityRelation(String string) {
         String proximity;
-        String argMap;
-        // find proximity + argument map
+        String argRelation;
+        // find proximity + argument relation
         try {
             proximity = string.substring(string.lastIndexOf('['), string.indexOf(']') + 1);
-            argMap = string.substring(string.lastIndexOf('{'), string.indexOf('}') + 1);
+            argRelation = string.substring(string.lastIndexOf('{'), string.indexOf('}') + 1);
         } catch (StringIndexOutOfBoundsException e) {
-            log.error("Couldn't parse proximity or argument map from \"{}\"", string);
+            log.error("Couldn't parse proximity or argument relation from \"{}\"", string);
             throw new IllegalArgumentException();
         }
         
         // find function symbols
-        String[] split = string.split(Pattern.quote(proximity) + "|" + Pattern.quote(argMap));
+        String[] split = string.split(Pattern.quote(proximity) + "|" + Pattern.quote(argRelation));
         List<String> rest = Arrays.stream(split)
                 .flatMap(s -> Arrays.stream(s.split("\\s+")))
                 .filter(s -> !StringUtils.isBlank(s))
@@ -104,18 +104,17 @@ public class Parser {
             log.error("Couldn't parse two function symbols from \"{}\"", string);
             throw new IllegalArgumentException();
         }
-        
-        return new ProximityRelation(rest.get(0), rest.get(1), parseProximity(proximity), parseArgRelation(argMap));
+        return new ProximityRelation(rest.get(0), rest.get(1), parseProximity(proximity), parseArgumentRelation(argRelation));
     }
     
     public static float parseProximity(String string) {
         return Float.parseFloat(string.substring(1, string.length() - 1));
     }
     
-    public static List<List<Integer>> parseArgRelation(String string) {
+    public static List<List<Integer>> parseArgumentRelation(String string) {
         List<Integer> argRelations;
         try {
-            argRelations = Arrays.stream(string.substring(1, string.length() - 1).split("[(),]+"))
+            argRelations = Arrays.stream(string.substring(1, string.length() - 1).split("[(),\\s]+"))
                     .filter(s -> !StringUtils.isBlank(s))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
