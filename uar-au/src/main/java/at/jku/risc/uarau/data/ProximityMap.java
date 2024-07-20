@@ -13,49 +13,54 @@ public class ProximityMap {
     private final Map<String, Map<String, ProximityRelation>> relations = new HashMap<>();
     private final Map<String, Integer> arities = new HashMap<>();
     
-    private static final String ID_RELATION_VIOLATION = "By definition, the proximity of a function to itself must be 1, with Id argument mapping. {} violates this rule!";
-    
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
-        // filter out relations with proximity < λ
-        proximityRelations = proximityRelations.stream().filter(relation -> {
-            if (relation.f == relation.g && relation.proximity < 1.0f) {
-                log.error(ID_RELATION_VIOLATION, relation);
+        // disallow explicit definition of proximity relations, because dealing with them is too annoying
+        proximityRelations.forEach(relation -> {
+            if (relation.f == relation.g) {
+                log.error("Input includes proximity relation of a function onto itself: {}", relation);
                 throw new IllegalArgumentException();
             }
-            if (relation.proximity < lambda) {
-                log.info("Discarding relation {} with proximity < λ [{}]", relation, lambda);
-                return false;
-            }
-            return true;
-        }).collect(Collectors.toSet());
-        
-        calculateArities(rhs, lhs, proximityRelations);
-        log.trace("Arities {}", arities);
-        for (ProximityRelation relation : proximityRelations) {
-            // check id argument relation violations
-            if (relation.f == relation.g) {
-                if (relation.argRelation.size() != arity(relation.f)) {
-                    log.error(ID_RELATION_VIOLATION, relation);
+        });
+        // add flipped relations
+        List<ProximityRelation> allProximityRelations = new ArrayList<>(proximityRelations.size() * 2);
+        proximityRelations.forEach(relation -> {
+            ProximityRelation flipped = relation.flipped();
+            assert (symmetric(relation, flipped));
+            allProximityRelations.add(relation);
+            allProximityRelations.add(flipped);
+        });
+        // check for duplicates (don't care if they're equivalent)
+        for (int i = 0; i < allProximityRelations.size() - 1; i++) {
+            for (int k = i + 1; k < allProximityRelations.size(); k++) {
+                ProximityRelation first = allProximityRelations.get(i);
+                ProximityRelation second = allProximityRelations.get(k);
+                if (first.f == second.f && first.g == second.g) {
+                    log.error("Duplicate proximity relation found: {} {}", first, second);
                     throw new IllegalArgumentException();
                 }
-                for (int i = 0; i < relation.argRelation.size(); i++) {
-                    if (relation.argRelation.get(i).size() != 1 || relation.argRelation.get(i).get(0) != i) {
-                        log.error(ID_RELATION_VIOLATION, relation);
-                        throw new IllegalArgumentException();
-                    }
-                }
-                log.info("It's not necessary to explicitly define functions' proximity to themselves ({})", relation);
             }
+        }
+        // filter out relations with proximity < λ
+        allProximityRelations.removeIf(relation -> {
+            if (relation.proximity < lambda) {
+                log.info("Discarding relation {} with proximity < λ [{}]", relation, lambda);
+                return true;
+            }
+            return false;
+        });
+        
+        calculateArities(rhs, lhs, allProximityRelations);
+        log.trace("Arities {}", arities);
+        
+        for (ProximityRelation relation : allProximityRelations) {
             // if the last argument position of f/g doesn't show up in the relation, we have to pad it accordingly
             for (int i = relation.argRelation.size(); i < arity(relation.f); i++) {
                 relation.argRelation.add(new ArrayList<>());
             }
-            ProximityRelation flipped = relation.flipped();
-            assert (symmetric(relation, flipped));
             proximityClass(relation.f).put(relation.g, relation);
-            proximityClass(relation.g).put(relation.f, flipped);
         }
-        log.trace("PR's {}", Util.joinString(proximityRelations));
+        
+        log.trace("PR's {}", Util.joinString(allProximityRelations));
     }
     
     private void calculateArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {

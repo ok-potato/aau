@@ -71,10 +71,6 @@ public class Parser {
                 continue;
             }
             ProximityRelation pr = parseProximityRelation(token);
-            if (proximityRelations.contains(pr)) {
-                log.error("Multiple declarations of relation '{}' <-> '{}'", pr.f, pr.g);
-                throw new IllegalArgumentException();
-            }
             log.trace("Parsed PR: {}", pr);
             proximityRelations.add(pr);
         }

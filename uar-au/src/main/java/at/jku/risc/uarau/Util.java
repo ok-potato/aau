@@ -43,9 +43,6 @@ public class Util {
         }
         StringJoiner joiner = new StringJoiner(separator);
         collection.forEach(t -> joiner.add(t.toString()));
-        if (collection.size() == 1) {
-            return joiner.toString();
-        }
         return open + joiner + close;
     }
     

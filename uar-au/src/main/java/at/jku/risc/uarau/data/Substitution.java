@@ -1,7 +1,5 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.data.Term;
-
 public class Substitution {
     public final int var;
     public final Term term;

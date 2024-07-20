@@ -12,18 +12,27 @@ public class SigmaTest {
     }
     
     @Test
-    public void pimple() {
+    public void medium() {
         String problem = "f(h(a,b,c,d),b) ?= g(f(a,b),f(b,c),f(c,d))";
         String relations = "h {(1,1),(3,2),(4,2)}[0.7] f; h g {(1,1),(3,3)}[0.8]; c d {}[0.6]";
         Algorithm.solve(problem, relations, 0.5f);
     }
     
     // slow with logging
-    //@Test
-    public void bigBoy() {
+    // @Test
+    public void hard() {
         String problem = "f(h(f(c, d), g(c, d, h(a, b, c, f(a, b))) ,c ,d ), b) ?= g(f(a, b) ,f(h(g(c, d, e) ,g(a, c, f(a, b)) ,c, d) ,c) ,f(g(a, b, d), d))";
         String relations = "h {1 1,2 1,3 2,4 2)}[0.7] f ; h g {1 1,3 3,2 3,4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2,2 3,2 1)}";
         Algorithm.solve(problem, relations, 0.5f);
+    }
+    
+    // example 1 doesn't apply
+    
+    @Test
+    public void example5() {
+        String relations = "a b [0.9]{} ; b c [0.8]{} ; h f [0.7]{1 1 1 2} ; h g [0.6]{1 1}";
+        Algorithm.solve("f(a, c) ?= g(a)", relations, 0.5f);
+        Algorithm.solve("f(a, d) ?= g(a)", relations, 0.5f);
     }
     
     @Test
@@ -66,6 +75,6 @@ public class SigmaTest {
         assertThrows(IllegalArgumentException.class, () -> Algorithm.solve("f() ?= g()", "f f [0.9f]{}", 0.8f));
         assertThrows(IllegalArgumentException.class, () -> Algorithm.solve("f(a) ?= g()", "f f [1.0f]{}", 1.0f));
         assertThrows(IllegalArgumentException.class, () -> Algorithm.solve("f(a,b) ?= g()", "f f [1.0f]{(1,1),(1,2)}", 1.0f));
-        Algorithm.solve("f(a,b) ?= g()", "f f [1.0f]{(1,1),(2,2)}", 1.0f);
+        assertThrows(IllegalArgumentException.class, () -> Algorithm.solve("f(a,b) ?= g()", "f f [1.0f]{(1,1),(2,2)}", 1.0f));
     }
 }
