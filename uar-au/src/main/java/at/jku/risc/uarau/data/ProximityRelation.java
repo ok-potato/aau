@@ -14,8 +14,8 @@ public class ProximityRelation {
     
     public final float proximity;
     public final String f, g;
-    private final List<List<Integer>> f_to_g;
-    private final List<List<Integer>> g_to_f;
+    public final List<List<Integer>> f_to_g;
+    public final List<List<Integer>> g_to_f;
     
     public ProximityRelation(String f, String g, float proximity, List<List<Integer>> argRelation) {
         this.f = f.intern();

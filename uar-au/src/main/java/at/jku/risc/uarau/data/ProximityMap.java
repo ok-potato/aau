@@ -13,8 +13,14 @@ public class ProximityMap {
     public final Map<String, Set<ProximityRelation>> proxClasses = new HashMap<>();
     private final Map<String, Integer> arities = new HashMap<>();
     
+    private static final String ID_RELATION_VIOLATION = "By definition, the proximity of a function to itself must be 1, with Id argument mapping. {} violates this rule.";
+    
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
         proximityRelations = proximityRelations.stream().filter(relation -> {
+            if (relation.f == relation.g && relation.proximity < 1.0f) {
+                log.error(ID_RELATION_VIOLATION, relation);
+                throw new IllegalArgumentException();
+            }
             if (relation.proximity < lambda) {
                 log.info("Discarding relation {} with proximity < λ [{}]", relation, lambda);
                 return false;
@@ -24,6 +30,25 @@ public class ProximityMap {
         calcArities(rhs, lhs, proximityRelations);
         log.trace("Arities {}", arities);
         for (ProximityRelation relation : proximityRelations) {
+            // check id argument relation violations
+            if (relation.f == relation.g) {
+                if (relation.f_to_g.size() != arity(relation.f)) {
+                    log.error(ID_RELATION_VIOLATION, relation);
+                    throw new IllegalArgumentException();
+                }
+                for (int i = 0; i < relation.f_to_g.size(); i++) {
+                    if (relation.f_to_g.get(i).size() != 1 || relation.f_to_g.get(i).get(0) != i) {
+                        log.error(ID_RELATION_VIOLATION, relation);
+                        throw new IllegalArgumentException();
+                    }
+                }
+                log.debug("It isn't necessary to explicitly define proximity relations of functions to themselves ({})", relation);
+            }
+            // if the last argument position of f/g doesn't show up in the relation, we have to pad it accordingly
+            // note: if f/g doesn't show up in a term, we assume its arity equals the max arity found in R
+            //   if this assumption is wrong, we're missing some non-relevant positions, and could possibly
+            //   misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM)
+            //   if this is undesirable, arities have to be manually specified where f/g doesn't appear in a term
             for (int i = relation.get(relation.f).size(); i < arity(relation.f); i++) {
                 relation.get(relation.f).add(new ArrayList<>());
             }
@@ -89,7 +114,7 @@ public class ProximityMap {
             Set<String> tProx = proxClass(t).stream().map(relation -> relation.other(t)).collect(Collectors.toSet());
             commonProx.retainAll(tProx);
         }
-        log.trace("comProx{} = {}", T, commonProx);
+        log.trace("  comProx{} = {}", T, commonProx);
         return commonProx;
     }
     
