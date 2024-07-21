@@ -120,19 +120,28 @@ public class ProximityMap {
     
     // #################################################################################################################
     
+    public Map<Set<String>, Set<String>> mem = new HashMap<>();
+    
     public Set<String> commonProximates(Set<String> T) {
         assert (T != null && !T.isEmpty());
-        Set<String> commonProximates = null;
-        for (String t : T) {
-            if (commonProximates == null) {
-                commonProximates = proximityClass(t).values().stream().map(pr -> pr.g).collect(Collectors.toSet());
-                continue;
+        Set<String> proximates = null;
+        if (T.size() < 5 && mem.containsKey(T)) {
+            proximates = mem.get(T);
+        } else {
+            for (String t : T) {
+                if (proximates == null) {
+                    proximates = proximityClass(t).values().stream().map(rel -> rel.g).collect(Collectors.toSet());
+                    continue;
+                }
+                Set<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(Collectors.toSet());
+                proximates.retainAll(t_prox);
             }
-            Set<String> tProx = proximityClass(t).values().stream().map(pr -> pr.g).collect(Collectors.toSet());
-            commonProximates.retainAll(tProx);
+            if (T.size() < 5) {
+                mem.put(T, proximates);
+            }
         }
-        log.trace("  comProx{} = {}", T, commonProximates);
-        return commonProximates;
+        log.trace("  commonProximates{} = {}", T, proximates);
+        return proximates;
     }
     
     private Map<String, ProximityRelation> proximityClass(String f) {

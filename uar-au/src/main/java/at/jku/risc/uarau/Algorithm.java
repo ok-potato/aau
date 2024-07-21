@@ -79,6 +79,7 @@ public class Algorithm {
         // TODO post-process
         
         log.info("~~~~~~~~~~~~~~~~~~~~~~~~  done  ~~~~~~~~~~~~~~~~~~~~~~~~");
+        log.debug("Common proximate memory ({}): {}", R.mem.size(), R.mem);
     }
     
     private Set<Config> decompose(AUT aut, Config cfg) {
