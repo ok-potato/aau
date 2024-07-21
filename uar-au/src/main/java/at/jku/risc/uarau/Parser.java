@@ -52,6 +52,10 @@ public class Parser {
                 continue;
             }
             assert (Arrays.stream(new String[]{"(", ",", ")"}).noneMatch(token::contains));
+            if (StringUtils.isBlank(token)) {
+                log.error("Missing argument in sub-term of {}", string);
+                throw new IllegalArgumentException();
+            }
             subTerms.peek().arguments.add(new Term(token));
         }
         if (subTerms.size() > 1) {

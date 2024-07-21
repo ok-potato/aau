@@ -18,12 +18,20 @@ public class SigmaTest {
         Algorithm.solve(problem, relations, 0.5f);
     }
     
-    // slow with logging
     // @Test
-    public void hard() {
-        String problem = "f(h(f(c, d), g(c, d, h(a, b, c, f(a, b))) ,c ,d ), b) ?= g(f(a, b) ,f(h(g(c, d, e) ,g(a, c, f(a, b)) ,c, d) ,c) ,f(g(a, b, d), d))";
-        String relations = "h {1 1,2 1,3 2,4 2)}[0.7] f ; h g {1 1,3 3,2 3,4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2,2 3,2 1)}";
-        Algorithm.solve(problem, relations, 0.5f);
+    public void benchmark() { // |f| = 2  |g| = 3  |h| = 4
+        String problem1 = "f(h(f(c, d), g(c, d, h(a, b, c, f(a, b))) ,c ,d ), b) ?= g(f(a, b) ,f(h(g(c, d, e) ,g(a, c, f(a, b)) ,c, d) ,c) ,f(g(a, b, d), d))";
+        String relations1 = "h f {1 1,2 1,3 2,4 2)}[0.7] ; h g {1 1,3 3,2 3,4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2,2 3,2 1)}";
+        String problem2 = "g(h(c, g (c, h(a, b, c, f(a, b)), d), a, f(a ,b)), b, d) ?= g(f(a, b) ,f(h(g(c, d, e) ,g(a, c, f(a, b)) ,c, d) ,c) ,f(g(a, b, d), d))";
+        String relations2 = "h f {1 1,2 1,3 2,4 2)}[0.7] ; h g {1 1,3 3,2 3,4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2,2 3,2 1)}";
+        int n = 100;
+        long now = System.currentTimeMillis();
+        for (int i = 0; i < n; i++) {
+            Algorithm.solve(problem1, relations1, 0.5f);
+            Algorithm.solve(problem2, relations2, 0.5f);
+        }
+        now = System.currentTimeMillis() - now;
+        System.out.println(now);
     }
     
     // TODO example 1 - 4
