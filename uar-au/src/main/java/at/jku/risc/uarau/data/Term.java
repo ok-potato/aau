@@ -36,20 +36,31 @@ public class Term {
         this.arguments = null;
     }
     
+    public boolean isVar() {
+        return var > UNUSED_VAR;
+    }
+    
+    @Override
+    public String toString() {
+        if (var == ANON.var) {
+            return "_";
+        }
+        if (isVar()) {
+            return String.format("%s", var);
+        }
+        return head + Util.joinString(Arrays.asList(arguments), ",", "()", "(", ")");
+    }
+    
     @Override
     public int hashCode() {
         if (hash == null) {
             if (isVar()) {
-                hash = Integer.hashCode(var);
+                hash = var;
             } else {
                 hash = head.hashCode() + 31 * Arrays.hashCode(arguments);
             }
         }
         return hash;
-    }
-    
-    public boolean isVar() {
-        return var > UNUSED_VAR;
     }
     
     @Override
@@ -70,14 +81,4 @@ public class Term {
         return head.equals(otherTerm.head) && Arrays.equals(arguments, otherTerm.arguments);
     }
     
-    @Override
-    public String toString() {
-        if (var == ANON.var) {
-            return "_";
-        }
-        if (isVar()) {
-            return String.format("%s", var);
-        }
-        return head + Util.joinString(Arrays.asList(arguments), ",", "()", "(", ")");
-    }
 }

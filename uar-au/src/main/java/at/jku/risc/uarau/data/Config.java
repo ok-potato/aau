@@ -54,4 +54,21 @@ public class Config {
         String r_str = Util.joinString(r, " ", "..");
         return String.format("⧛ ⚫ %s ⚫ %s ⚫ %s ⚫ %s, %s ⧚", A_str, S_str, r_str, alpha1, alpha2);
     }
+    
+    @Override
+    public int hashCode() {
+        return A.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Config)) {
+            return false;
+        }
+        Config cfg = (Config) obj;
+        return A.equals(cfg.A);
+    }
 }

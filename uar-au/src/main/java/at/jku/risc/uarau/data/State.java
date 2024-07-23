@@ -8,20 +8,20 @@ import java.util.Set;
 
 public class State {
     public final Deque<Expression> expressions;
-    public float alpha;
+    public final Deque<Substitution> s;
     
     private int freshVar;
     
-    public State(Set<Term> T, int freshVar, float alpha) {
+    public State(Set<Term> T, int freshVar) {
         this.expressions = new ArrayDeque<>();
+        this.s = new ArrayDeque<>();
         this.freshVar = freshVar;
-        this.alpha = alpha;
         expressions.push(new Expression(freshVar(), T));
     }
     
     private State(State original) {
         this.expressions = Util.copyAccurate(original.expressions);
-        this.alpha = original.alpha;
+        this.s = Util.copyAccurate(original.s);
         this.freshVar = original.freshVar;
     }
     
