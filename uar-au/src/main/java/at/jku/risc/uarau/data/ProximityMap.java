@@ -11,7 +11,7 @@ public class ProximityMap {
     private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
     
     private final Map<String, Map<String, ProximityRelation>> relations = new HashMap<>();
-    private final Map<String, Integer> arities = new HashMap<>();
+    private final Map<String, Integer> arities;
     
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
         // disallow explicit definition of proximity relations, because dealing with them is too annoying
@@ -49,7 +49,7 @@ public class ProximityMap {
             return false;
         });
         
-        calculateArities(rhs, lhs, allProximityRelations);
+        arities = calculateArities(rhs, lhs, allProximityRelations);
         log.trace("Arities {}", arities);
         
         for (ProximityRelation relation : allProximityRelations) {
@@ -63,7 +63,7 @@ public class ProximityMap {
         log.trace("PR's {}", Util.joinString(allProximityRelations));
     }
     
-    private void calculateArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
+    private Map<String, Integer> calculateArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
         Map<String, Integer> termArities = new HashMap<>();
         getAritiesFromTerm(rhs, termArities);
         getAritiesFromTerm(lhs, termArities);
@@ -71,7 +71,7 @@ public class ProximityMap {
         //   if this assumption is wrong, we're missing some non-relevant positions, and could possibly
         //   misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM)
         //   otherwise, arities of functions would have to be manually specified if they don't appear in a term
-        arities.putAll(termArities);
+        Map<String, Integer> allArities = new HashMap<>(termArities);
         for (ProximityRelation relation : proximityRelations) {
             int relationArity = relation.argRelation.size();
             Integer termArity = termArities.get(relation.f);
@@ -79,9 +79,10 @@ public class ProximityMap {
                 log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem terms ({})", relation.f, relationArity, termArity);
                 throw new IllegalArgumentException();
             }
-            int previousMax = arities.getOrDefault(relation.f, 0);
-            arities.put(relation.f, Math.max(previousMax, relationArity));
+            int previousMax = allArities.getOrDefault(relation.f, 0);
+            allArities.put(relation.f, Math.max(previousMax, relationArity));
         }
+        return Collections.unmodifiableMap(allArities);
     }
     
     private void getAritiesFromTerm(Term t, Map<String, Integer> map) {

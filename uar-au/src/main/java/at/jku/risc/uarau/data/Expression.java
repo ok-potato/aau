@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import java.util.Collections;
 import java.util.Set;
 
 public class Expression {
@@ -8,7 +9,7 @@ public class Expression {
     
     public Expression(int x, Set<Term> t) {
         this.x = x;
-        T = t;
+        T = Collections.unmodifiableSet(t);
     }
     
     @Override

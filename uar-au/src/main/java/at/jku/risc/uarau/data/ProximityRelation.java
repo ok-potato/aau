@@ -1,8 +1,6 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +8,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public class ProximityRelation {
-    Logger log = LoggerFactory.getLogger(ProximityRelation.class);
-    
     public final float proximity;
     public final String f, g;
     public final List<List<Integer>> argRelation;
