@@ -12,17 +12,13 @@ public class Config {
     
     private int freshVar;
     
-    private Config() {
+    public Config(Term T1, Term T2) {
         A = new ArrayDeque<>();
         S = new ArrayDeque<>();
         r = new ArrayDeque<>();
         alpha1 = 1.0f;
         alpha2 = 1.0f;
         freshVar = 0;
-    }
-    
-    public Config(Term T1, Term T2) {
-        this();
         A.push(new AUT(freshVar(), T1, T2));
     }
     

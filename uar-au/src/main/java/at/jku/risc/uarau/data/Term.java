@@ -13,9 +13,11 @@ public class Term {
     public final String head;
     public final Term[] arguments;
     
+    private boolean inputVar = false;
+    private Integer depth = null;
     private Integer hash = null;
     
-    // function term
+    // function/constant term
     public Term(String head, Term[] arguments) {
         assert (!StringUtils.isBlank(head));
         this.var = UNUSED_VAR;
@@ -23,9 +25,10 @@ public class Term {
         this.arguments = arguments;
     }
     
-    // constant term
+    // mapped variable term
     public Term(String head) {
         this(head, new Term[0]);
+        inputVar = true;
     }
     
     // variable term
@@ -34,6 +37,17 @@ public class Term {
         this.var = var;
         this.head = null;
         this.arguments = null;
+    }
+    
+    public int depth() {
+        if (depth == null) {
+            if (arguments == null || arguments.length == 0) {
+                depth = 0;
+            } else {
+                depth = 1 + Arrays.stream(arguments).map(Term::depth).max(Integer::compare).orElse(0);
+            }
+        }
+        return depth;
     }
     
     public boolean isVar() {
@@ -47,6 +61,9 @@ public class Term {
         }
         if (isVar()) {
             return String.format("%s", var);
+        }
+        if (inputVar) {
+            return head;
         }
         return head + Util.joinString(Arrays.asList(arguments), ",", "()", "(", ")");
     }
@@ -80,5 +97,4 @@ public class Term {
         }
         return head.equals(otherTerm.head) && Arrays.equals(arguments, otherTerm.arguments);
     }
-    
 }

@@ -35,7 +35,7 @@ public class Parser {
         String[] tokens = string.split("(?<=\\()|,|(?=\\))");
         
         Deque<Util.TermBuilder> subTerms = new ArrayDeque<>();
-        subTerms.add(new Util.TermBuilder(","));
+        subTerms.add(new Util.TermBuilder(",")); // dummyTerm
         for (String token : tokens) {
             assert (subTerms.peek() != null);
             if (token.equals(")")) {
@@ -62,7 +62,12 @@ public class Parser {
             log.error("Unclosed parentheses in term \"{}\"", string);
             throw new IllegalArgumentException();
         }
-        return subTerms.pop().arguments.get(0);
+        Util.TermBuilder dummyTerm = subTerms.pop();
+        if (dummyTerm.arguments.size() > 1) {
+            log.error("Multiple top level terms on one side: {}", string);
+            throw new IllegalArgumentException();
+        }
+        return dummyTerm.arguments.get(0);
     }
     
     // relations =>  f g {<arg-map>} [<proximity>]  separated by ';'

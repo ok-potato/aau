@@ -18,6 +18,14 @@ public class SigmaTest {
         Algorithm.solve(problem, relations, 0.5f);
     }
     
+    @Test
+    public void testConj() {
+        String conj = "h(f(c,d),g(a,c,a),c,d)";
+        // String conj = "h(g(c,d,e),g(a,c,f(a,b)),c,d)";
+        String relations = "h f {1 1,2 1,3 2,4 2)}[0.7] ; h g {1 1,3 3,2 3,4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2,2 3,2 1)}";
+        Algorithm.runConjunction(relations, conj);
+    }
+    
     // @Test
     public void benchmark() { // |f| = 2  |g| = 3  |h| = 4
         String problem1 = "f(h(f(c, d), g(c, d, h(a, b, c, f(a, b))) ,c ,d ), b) ?= g(f(a, b) ,f(h(g(c, d, e) ,g(a, c, f(a, b)) ,c, d) ,c) ,f(g(a, b, d), d))";

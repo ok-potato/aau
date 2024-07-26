@@ -167,6 +167,11 @@ public final class Algorithm {
         return !conjunction(terms, new int[]{Term.UNUSED_VAR}).isEmpty();
     }
     
+    public static Set<Term> runConjunction(String proximityRelations, String term) {
+        Algorithm algo = new Algorithm(Parser.parseTerm(term), Parser.parseTerm(term), Parser.parseProximityRelations(proximityRelations), Math::min, 0.0f, false, false);
+        return algo.conjunction(Collections.singleton(Parser.parseTerm(term)), new int[]{0});
+    }
+    
     private Set<Term> conjunction(Set<Term> terms, int[] freshVar) {
         boolean consCheck = freshVar[0] == Term.UNUSED_VAR;
         float[] alpha = new float[1];
@@ -206,7 +211,9 @@ public final class Algorithm {
                     freshVar[0] = Math.max(freshVar[0], childState.freshVar());
                     childState.s.addLast(new Substitution(expr.x, new Term(h, hArgs)));
                     branches.push(childState);
-                    log.trace("  RED => {}", childState);
+                    if (log.isTraceEnabled()) {
+                        log.trace("  RED => {}", childState);
+                    }
                 }
                 continue BRANCHING;
             }
@@ -219,7 +226,9 @@ public final class Algorithm {
         if (consCheck) {
             log.trace("  => NOT consistent");
         } else {
-            log.trace("  => {}", solutions);
+            if (log.isTraceEnabled()) {
+                log.trace("  => {}", solutions);
+            }
         }
         return solutions;
     }

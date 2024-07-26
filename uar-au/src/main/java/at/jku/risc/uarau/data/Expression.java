@@ -14,6 +14,6 @@ public class Expression {
     
     @Override
     public String toString() {
-        return String.format("%s : %s", x, T);
+        return String.format("%s in %s", x, T);
     }
 }
