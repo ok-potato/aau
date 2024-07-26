@@ -76,11 +76,13 @@ public final class Algorithm {
         
         // POST PROCESS
         
+        Set<Solution> linearSolutions = solutionConfigs.stream()
+                .map(c -> new Solution(c.S))
+                .collect(Collectors.toSet());
+        assert (linearSolutions.size() == solutionConfigs.size());
+        log.info("Solutions (LINEAR): {}", Util.joinString(linearSolutions, "\n                   ::  ", "--"));
         if (linear && !witness) {
-            Set<Solution> linear = solutionConfigs.stream().map(c -> new Solution(c.S)).collect(Collectors.toSet());
-            assert (linear.size() == solutionConfigs.size());
-            log.info("Solutions (LINEAR): {}", Util.joinString(linear, "\n                   ::  ", "--"));
-            return linear;
+            return linearSolutions;
         }
         
         Set<Solution> expandedSolutions = new HashSet<>(solutionConfigs.size());
@@ -96,6 +98,9 @@ public final class Algorithm {
         }
         assert (expandedSolutions.size() == solutionConfigs.size());
         log.info("Solutions (EXPANDED): {}", Util.joinString(expandedSolutions, "\n                   ::  ", "--"));
+        if (linear) {
+            return expandedSolutions;
+        }
         
         log.info("~~~~~~~~~~~~~~~~~~~~~~~~  done  ~~~~~~~~~~~~~~~~~~~~~~~~");
         return null;
@@ -129,7 +134,9 @@ public final class Algorithm {
                 hArgs[i] = new Term(yi);
                 child.A.addLast(new AUT(yi, Q1.get(i), Q2.get(i)));
             }
-            child.r.addLast(new Substitution(aut.var, new Term(h, hArgs)));
+            Term hTerm = R.isMappedVar(h) ? new Term(h) : new Term(h, hArgs);
+            assert (!(hTerm.mappedVar && hArgs.length > 0));
+            child.r.addLast(new Substitution(aut.var, hTerm));
             child.alpha1 = mapAlpha1[0];
             child.alpha2 = mapAlpha2[0];
             
@@ -167,7 +174,7 @@ public final class Algorithm {
         return !conjunction(terms, new int[]{Term.UNUSED_VAR}).isEmpty();
     }
     
-    public static Set<Term> runConjunction(String proximityRelations, String term) {
+    public static Set<Term> runConjunction(String term, String proximityRelations) {
         Algorithm algo = new Algorithm(Parser.parseTerm(term), Parser.parseTerm(term), Parser.parseProximityRelations(proximityRelations), Math::min, 0.0f, false, false);
         return algo.conjunction(Collections.singleton(Parser.parseTerm(term)), new int[]{0});
     }
@@ -209,7 +216,9 @@ public final class Algorithm {
                         childState.expressions.push(new Expression(yi, Q.get(i)));
                     }
                     freshVar[0] = Math.max(freshVar[0], childState.freshVar());
-                    childState.s.addLast(new Substitution(expr.x, new Term(h, hArgs)));
+                    Term hTerm = R.isMappedVar(h) ? new Term(h) : new Term(h, hArgs);
+                    assert (!(hTerm.mappedVar && hArgs.length > 0));
+                    childState.s.addLast(new Substitution(expr.x, hTerm));
                     branches.push(childState);
                     if (log.isTraceEnabled()) {
                         log.trace("  RED => {}", childState);

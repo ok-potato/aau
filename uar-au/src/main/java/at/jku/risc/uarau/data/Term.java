@@ -13,7 +13,7 @@ public class Term {
     public final String head;
     public final Term[] arguments;
     
-    private boolean inputVar = false;
+    public final boolean mappedVar;
     private Integer depth = null;
     private Integer hash = null;
     
@@ -22,13 +22,18 @@ public class Term {
         assert (!StringUtils.isBlank(head));
         this.var = UNUSED_VAR;
         this.head = head.intern();
-        this.arguments = arguments;
+        if (arguments == null) {
+            this.arguments = new Term[0];
+            mappedVar = true;
+        } else {
+            this.arguments = arguments;
+            mappedVar = false;
+        }
     }
     
     // mapped variable term
     public Term(String head) {
-        this(head, new Term[0]);
-        inputVar = true;
+        this(head, null);
     }
     
     // variable term
@@ -37,6 +42,7 @@ public class Term {
         this.var = var;
         this.head = null;
         this.arguments = null;
+        mappedVar = false;
     }
     
     public int depth() {
@@ -62,7 +68,7 @@ public class Term {
         if (isVar()) {
             return String.format("%s", var);
         }
-        if (inputVar) {
+        if (mappedVar) {
             return head;
         }
         return head + Util.joinString(Arrays.asList(arguments), ",", "()", "(", ")");

@@ -12,6 +12,7 @@ public class ProximityMap {
     
     private final Map<String, Map<String, ProximityRelation>> relations = new HashMap<>();
     private final Map<String, Integer> arities;
+    private final Set<String> mappedVars = new HashSet<>();
     
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
         // disallow explicit definition of proximity relations, because dealing with them is too annoying
@@ -74,6 +75,10 @@ public class ProximityMap {
         Map<String, Integer> allArities = new HashMap<>(termArities);
         for (ProximityRelation relation : proximityRelations) {
             int relationArity = relation.argRelation.size();
+            if (mappedVars.contains(relation.f)) {
+                log.error("Non-zero proximity between '{}' and '{}' is not allowed, since variables can only be close to themselves!", relation.f, relation.g);
+                throw new IllegalArgumentException();
+            }
             Integer termArity = termArities.get(relation.f);
             if (termArity != null && termArity < relationArity) {
                 log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem terms ({})", relation.f, relationArity, termArity);
@@ -91,6 +96,14 @@ public class ProximityMap {
         if (existing != null && existing != t.arguments.length) {
             log.error("Found multiple arities of '{}' in the posed problem!", t.head);
             throw new IllegalArgumentException();
+        }
+        boolean mappedVar = mappedVars.contains(t.head);
+        if (existing != null && !mappedVar && t.mappedVar || mappedVar && !t.mappedVar) {
+            log.error("'{}' appears both as a variable and a function/constant symbol!", t.head);
+            throw new IllegalArgumentException();
+        }
+        if (!mappedVar && t.mappedVar) {
+            mappedVars.add(t.head);
         }
         map.put(t.head, t.arguments.length);
         for (Term arg : t.arguments) {
@@ -120,6 +133,10 @@ public class ProximityMap {
     }
     
     // #################################################################################################################
+    
+    public boolean isMappedVar(String h) {
+        return mappedVars.contains(h);
+    }
     
     public Map<Set<String>, Set<String>> mem = new HashMap<>();
     

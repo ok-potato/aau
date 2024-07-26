@@ -48,10 +48,18 @@ public class Parser {
                 continue;
             }
             if (token.endsWith("(")) {
-                subTerms.push(new Util.TermBuilder(token.substring(0, token.length() - 1)));
+                String head = token.substring(0, token.length() - 1);
+                if (StringUtils.isBlank(head)) {
+                    log.error("Missing function name in {}", string);
+                    throw new IllegalArgumentException();
+                }
+                subTerms.push(new Util.TermBuilder(head));
                 continue;
             }
-            assert (Arrays.stream(new String[]{"(", ",", ")"}).noneMatch(token::contains));
+            if (Arrays.stream(new String[]{"(", ",", ")"}).anyMatch(token::contains)) {
+                log.error("Bad syntax in term {}", string);
+                throw new IllegalArgumentException();
+            }
             if (StringUtils.isBlank(token)) {
                 log.error("Missing argument in sub-term of {}", string);
                 throw new IllegalArgumentException();
