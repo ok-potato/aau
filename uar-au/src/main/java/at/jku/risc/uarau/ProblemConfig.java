@@ -12,11 +12,11 @@ public class ProblemConfig {
     private final Term lhs, rhs;
     private Collection<ProximityRelation> proximityRelations = new HashSet<>();
     private float lambda = 1.0f;
-    private TNorm tNorm = Math::min;
+    private TNorm t_norm = Math::min;
     private boolean linear = true, witness = true;
     
     public void solve() {
-        Algorithm.solve(this.lhs, this.rhs, this.proximityRelations, this.lambda, this.tNorm, this.linear, this.witness);
+        Algorithm.solve(this.lhs, this.rhs, this.proximityRelations, this.lambda, this.t_norm, this.linear, this.witness);
     }
     
     // CONSTRUCTORS
@@ -52,8 +52,8 @@ public class ProblemConfig {
         return this;
     }
     
-    public ProblemConfig tNorm(TNorm tNorm) {
-        this.tNorm = tNorm;
+    public ProblemConfig t_norm(TNorm t_norm) {
+        this.t_norm = t_norm;
         return this;
     }
     

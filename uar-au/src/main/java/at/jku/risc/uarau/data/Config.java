@@ -23,16 +23,24 @@ public class Config {
     }
     
     private Config(Config original) {
-        A = Util.copyAccurate(original.A);
-        S = Util.copyAccurate(original.S);
-        r = Util.copyAccurate(original.r);
-        alpha1 = original.alpha1;
-        alpha2 = original.alpha2;
-        freshVar = original.freshVar;
+        this(original, original.S);
+    }
+    
+    private Config(Config original, Deque<AUT> S) {
+        this.A = Util.copyAccurate(original.A);
+        this.S = Util.copyAccurate(S);
+        this.r = Util.copyAccurate(original.r);
+        this.alpha1 = original.alpha1;
+        this.alpha2 = original.alpha2;
+        this.freshVar = original.freshVar;
     }
     
     public Config copy() {
         return new Config(this);
+    }
+    
+    public Config transformSolution(Deque<AUT> S) {
+        return new Config(this, S);
     }
     
     public int freshVar() {

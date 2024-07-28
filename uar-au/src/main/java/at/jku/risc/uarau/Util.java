@@ -50,10 +50,10 @@ public class Util {
         StringBuilder sb = new StringBuilder("{");
         for (Collection<T> c : map) {
             sb.append("[");
-            String innerSep = "";
+            String valueSeparator = "";
             for (T t : c) {
-                sb.append(innerSep).append(t);
-                innerSep = ",";
+                sb.append(valueSeparator).append(t);
+                valueSeparator = ",";
             }
             sb.append("]");
         }

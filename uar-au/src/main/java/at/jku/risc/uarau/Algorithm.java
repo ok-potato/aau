@@ -8,34 +8,34 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Algorithm {
-    public static Set<Solution> solve(String problem, String proximityRelations, float lambda) {
+    public static Set<Config> solve(String problem, String proximityRelations, float lambda) {
         List<Term> sides = Parser.parseProblem(problem);
         return solve(sides.get(0), sides.get(1), Parser.parseProximityRelations(proximityRelations), lambda, Math::min, true, true);
     }
     
-    public static Set<Solution> solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, float lambda, TNorm tNorm, boolean linear, boolean witness) {
-        return new Algorithm(lhs, rhs, relations, tNorm, lambda, linear, witness).run();
+    public static Set<Config> solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, float lambda, TNorm t_norm, boolean linear, boolean witness) {
+        return new Algorithm(lhs, rhs, relations, t_norm, lambda, linear, witness).run();
     }
     
     Logger log = LoggerFactory.getLogger(Algorithm.class);
     
     private final ProximityMap R;
     private final Term lhs, rhs;
-    private final TNorm tNorm;
+    private final TNorm t_norm;
     private final float lambda;
     private final boolean linear, witness;
     
-    private Algorithm(Term lhs, Term rhs, Collection<ProximityRelation> relations, TNorm tNorm, float lambda, boolean linear, boolean witness) {
+    private Algorithm(Term lhs, Term rhs, Collection<ProximityRelation> relations, TNorm t_norm, float lambda, boolean linear, boolean witness) {
         this.rhs = rhs;
         this.lhs = lhs;
         this.R = new ProximityMap(rhs, lhs, relations, lambda);
-        this.tNorm = tNorm;
+        this.t_norm = t_norm;
         this.lambda = lambda;
         this.linear = linear;
         this.witness = witness;
     }
     
-    private Set<Solution> run() {
+    private Set<Config> run() {
         // TODO analyze for correspondence/mapping properties
         
         Deque<Config> branches = new ArrayDeque<>();
@@ -75,34 +75,34 @@ public final class Algorithm {
         log.debug("Common proximate memory ({}): {}", R.mem.size(), R.mem);
         
         // POST PROCESS
-        
-        Set<Solution> linearSolutions = solutionConfigs.stream()
-                .map(c -> new Solution(c.S))
-                .collect(Collectors.toSet());
-        assert (linearSolutions.size() == solutionConfigs.size());
-        log.info("Solutions (LINEAR): {}", Util.joinString(linearSolutions, "\n                   ::  ", "--"));
+
+        log.info("Solutions (LINEAR): {}", Util.joinString(solutionConfigs, "\n                   ::  ", "--"));
         if (linear && !witness) {
-            return linearSolutions;
+            return new HashSet<>(solutionConfigs);
         }
         
-        Set<Solution> expandedSolutions = new HashSet<>(solutionConfigs.size());
+        Set<Config> expandedSolutions = new HashSet<>(solutionConfigs.size());
         for (Config solution : solutionConfigs) {
             int[] freshVar = new int[]{solution.peekVar()};
+            
             Deque<AUT> expanded = new ArrayDeque<>();
             for (AUT aut : solution.S) {
                 Set<Term> T1 = conjunction(aut.T1, freshVar);
                 Set<Term> T2 = conjunction(aut.T2, freshVar);
                 expanded.addLast(new AUT(aut.var, T1, T2));
             }
-            expandedSolutions.add(new Solution(expanded));
+            expandedSolutions.add(solution.transformSolution(expanded));
         }
+        
         assert (expandedSolutions.size() == solutionConfigs.size());
         log.info("Solutions (EXPANDED): {}", Util.joinString(expandedSolutions, "\n                   ::  ", "--"));
         if (linear) {
             return expandedSolutions;
         }
         
-        log.info("~~~~~~~~~~~~~~~~~~~~~~~~  done  ~~~~~~~~~~~~~~~~~~~~~~~~");
+        
+        
+        log.info("Hey now, don't do that");
         return null;
     }
     
@@ -128,15 +128,15 @@ public final class Algorithm {
             
             // APPLY DEC
             Config child = cfg.copy();
-            Term[] hArgs = new Term[R.arity(h)];
-            for (int i = 0; i < hArgs.length; i++) {
+            Term[] h_args = new Term[R.arity(h)];
+            for (int i = 0; i < h_args.length; i++) {
                 int yi = child.freshVar();
-                hArgs[i] = new Term(yi);
+                h_args[i] = new Term(yi);
                 child.A.addLast(new AUT(yi, Q1.get(i), Q2.get(i)));
             }
-            Term hTerm = R.isMappedVar(h) ? new Term(h) : new Term(h, hArgs);
-            assert (!(hTerm.mappedVar && hArgs.length > 0));
-            child.r.addLast(new Substitution(aut.var, hTerm));
+            Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
+            assert (!(h_term.mappedVar && h_args.length > 0));
+            child.r.addLast(new Substitution(aut.var, h_term));
             child.alpha1 = mapAlpha1[0];
             child.alpha2 = mapAlpha2[0];
             
@@ -157,12 +157,11 @@ public final class Algorithm {
             List<List<Integer>> h_to_t = proximityRelation.argRelation;
             for (int i = 0; i < h_arity; i++) {
                 for (int t_mapped_idx : h_to_t.get(i)) {
-                    Term tArg = t.arguments[t_mapped_idx];
                     // Q[i] => set of args which h|i maps to
-                    Q.get(i).add(tArg);
+                    Q.get(i).add(t.arguments[t_mapped_idx]);
                 }
             }
-            beta[0] = tNorm.apply(beta[0], proximityRelation.proximity);
+            beta[0] = t_norm.apply(beta[0], proximityRelation.proximity);
             if (beta[0] < lambda) {
                 return null; // if this gets dereferenced, there's a bug somewhere else
             }
@@ -180,14 +179,13 @@ public final class Algorithm {
     }
     
     private Set<Term> conjunction(Set<Term> terms, int[] freshVar) {
-        boolean consCheck = freshVar[0] == Term.UNUSED_VAR;
-        float[] alpha = new float[1];
+        boolean consistencyCheck = freshVar[0] == Term.UNUSED_VAR;
         Deque<State> branches = new ArrayDeque<>();
         branches.push(new State(terms, freshVar[0]));
         log.trace("  {}", branches);
         
         Set<Term> solutions;
-        if (consCheck) {
+        if (consistencyCheck) {
             solutions = new HashSet<>(1);
         } else {
             solutions = new HashSet<>();
@@ -198,27 +196,26 @@ public final class Algorithm {
             while (!state.expressions.isEmpty()) {
                 Expression expr = state.expressions.pop();
                 // REMOVE
-                if (consCheck && expr.T.size() <= 1 || expr.T.isEmpty()) {
+                if (consistencyCheck && expr.T.size() <= 1 || expr.T.isEmpty()) {
                     state.s.addLast(new Substitution(expr.x, Term.ANON));
                     continue;
                 }
                 // REDUCE
                 for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(Collectors.toSet()))) {
-                    alpha[0] = 1.0f;
-                    List<Set<Term>> Q = map(h, expr.T, alpha);
+                    List<Set<Term>> Q = map(h, expr.T, new float[]{1.0f});
                     assert (Q != null);
                     State childState = state.copy();
                     
-                    Term[] hArgs = new Term[R.arity(h)];
-                    for (int i = 0; i < hArgs.length; i++) {
+                    Term[] h_args = new Term[R.arity(h)];
+                    for (int i = 0; i < h_args.length; i++) {
                         int yi = childState.freshVar();
-                        hArgs[i] = new Term(yi);
+                        h_args[i] = new Term(yi);
                         childState.expressions.push(new Expression(yi, Q.get(i)));
                     }
                     freshVar[0] = Math.max(freshVar[0], childState.freshVar());
-                    Term hTerm = R.isMappedVar(h) ? new Term(h) : new Term(h, hArgs);
-                    assert (!(hTerm.mappedVar && hArgs.length > 0));
-                    childState.s.addLast(new Substitution(expr.x, hTerm));
+                    Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
+                    assert (!(h_term.mappedVar && h_args.length > 0));
+                    childState.s.addLast(new Substitution(expr.x, h_term));
                     branches.push(childState);
                     if (log.isTraceEnabled()) {
                         log.trace("  RED => {}", childState);
@@ -226,13 +223,13 @@ public final class Algorithm {
                 }
                 continue BRANCHING;
             }
-            if (consCheck) {
+            if (consistencyCheck) {
                 log.trace("  => consistent");
                 return Collections.singleton(Term.ANON);
             }
             solutions.add(Substitution.apply(state.s));
         }
-        if (consCheck) {
+        if (consistencyCheck) {
             log.trace("  => NOT consistent");
         } else {
             if (log.isTraceEnabled()) {
