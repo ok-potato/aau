@@ -33,6 +33,10 @@ public class State {
         return freshVar++;
     }
     
+    public int peekVar() {
+        return freshVar;
+    }
+    
     @Override
     public String toString() {
         return expressions.toString();

@@ -7,7 +7,8 @@ import java.util.Deque;
 
 public class Config {
     public final Deque<AUT> A, S;
-    public final Deque<Substitution> r;
+    public final Deque<Substitution> substitutions;
+    
     public float alpha1, alpha2;
     
     private int freshVar;
@@ -15,7 +16,7 @@ public class Config {
     public Config(Term T1, Term T2) {
         A = new ArrayDeque<>();
         S = new ArrayDeque<>();
-        r = new ArrayDeque<>();
+        substitutions = new ArrayDeque<>();
         alpha1 = 1.0f;
         alpha2 = 1.0f;
         freshVar = 0;
@@ -29,7 +30,7 @@ public class Config {
     private Config(Config original, Deque<AUT> S) {
         this.A = Util.copyAccurate(original.A);
         this.S = Util.copyAccurate(S);
-        this.r = Util.copyAccurate(original.r);
+        this.substitutions = Util.copyAccurate(original.substitutions);
         this.alpha1 = original.alpha1;
         this.alpha2 = original.alpha2;
         this.freshVar = original.freshVar;
@@ -39,7 +40,7 @@ public class Config {
         return new Config(this);
     }
     
-    public Config transformSolution(Deque<AUT> S) {
+    public Config update_S(Deque<AUT> S) {
         return new Config(this, S);
     }
     
@@ -55,8 +56,8 @@ public class Config {
     public String toString() {
         String A_str = Util.joinString(A, " ", "➰");
         String S_str = Util.joinString(S, " ", "➰");
-        String r_str = Util.joinString(r, " ", "..");
-        return String.format("⧛ ⚫ %s ⚫ %s ⚫ %s ⚫ %s, %s ⧚", A_str, S_str, r_str, alpha1, alpha2);
+        String r = Substitution.apply(Util.copyAccurate(substitutions), Term.VAR_0).toString();
+        return String.format("⧛ ⚫ %s ⚫ %s 🔅 %s ⚫ %s, %s ⧚", A_str, S_str, r, alpha1, alpha2);
     }
     
     @Override
@@ -65,14 +66,14 @@ public class Config {
     }
     
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-        if (!(obj instanceof Config)) {
+        if (!(object instanceof Config)) {
             return false;
         }
-        Config cfg = (Config) obj;
-        return A.equals(cfg.A);
+        Config that = (Config) object;
+        return that.A.size() == this.A.size() && that.A.containsAll(this.A);
     }
 }

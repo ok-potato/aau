@@ -8,6 +8,7 @@ import java.util.Arrays;
 public class Term {
     public static final int UNUSED_VAR = -2;
     public static final Term ANON = new Term(UNUSED_VAR + 1);
+    public static final int VAR_0 = UNUSED_VAR + 2;
     
     public final int var;
     public final String head;

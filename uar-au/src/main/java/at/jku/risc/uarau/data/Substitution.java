@@ -11,11 +11,13 @@ public class Substitution {
         this.term = term;
     }
     
-    public static Term apply(Deque<Substitution> subs) {
-        assert(!subs.isEmpty());
-        Term t = subs.getFirst().term;
-        while(!subs.isEmpty()) {
-            t = apply(t, subs.pop());
+    public static Term apply(Deque<Substitution> substitutions, int baseVariable) {
+        if (substitutions.isEmpty()) {
+            return new Term(baseVariable);
+        }
+        Term t = substitutions.getFirst().term;
+        while (!substitutions.isEmpty()) {
+            t = apply(t, substitutions.pop());
         }
         return t;
     }
@@ -27,10 +29,11 @@ public class Substitution {
         if (t.isVar()) {
             return t;
         }
+        Term[] arguments = new Term[t.arguments.length];
         for (int i = 0; i < t.arguments.length; i++) {
-            t.arguments[i] = apply(t.arguments[i], substitution);
+            arguments[i] = apply(t.arguments[i], substitution);
         }
-        return t;
+        return new Term(t.head, arguments);
     }
     
     @Override

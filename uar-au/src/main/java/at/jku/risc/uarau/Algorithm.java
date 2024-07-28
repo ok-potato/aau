@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public final class Algorithm {
     public static Set<Config> solve(String problem, String proximityRelations, float lambda) {
         List<Term> sides = Parser.parseProblem(problem);
-        return solve(sides.get(0), sides.get(1), Parser.parseProximityRelations(proximityRelations), lambda, Math::min, true, true);
+        return solve(sides.get(0), sides.get(1), Parser.parseProximityRelations(proximityRelations), lambda, Math::min, false, true);
     }
     
     public static Set<Config> solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, float lambda, TNorm t_norm, boolean linear, boolean witness) {
@@ -37,13 +37,13 @@ public final class Algorithm {
     
     private Set<Config> run() {
         // TODO analyze for correspondence/mapping properties
-        
-        Deque<Config> branches = new ArrayDeque<>();
-        Deque<Config> solutionConfigs = new ArrayDeque<>();
         Config initCfg = new Config(lhs, rhs);
-        branches.push(initCfg);
         log.info("SOLVING  ::  λ={}\n                   ::  {}{}", lambda, initCfg.A.peek(), R.toString("\n                   ::  "));
         
+        Deque<Config> branches = new ArrayDeque<>();
+        branches.push(initCfg);
+        // APPLY RULES
+        Deque<Config> linearSolutions = new ArrayDeque<>();
         BRANCHING:
         while (!branches.isEmpty()) {
             assert (new HashSet<>(branches).size() == branches.size());
@@ -52,7 +52,7 @@ public final class Algorithm {
                 AUT aut = config.A.pop();
                 // TRIVIAL
                 if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-                    config.r.addLast(new Substitution(aut.var, Term.ANON));
+                    config.substitutions.addLast(new Substitution(aut.var, Term.ANON));
                     log.debug("TRI => {}", config);
                     continue;
                 }
@@ -70,37 +70,69 @@ public final class Algorithm {
                 log.debug("SOL => {}", config);
             }
             assert (config.A.isEmpty());
-            solutionConfigs.addLast(config);
+            linearSolutions.addLast(config);
         }
-        log.debug("Common proximate memory ({}): {}", R.mem.size(), R.mem);
+        log.debug("Common proximate memory ({}): {}", R.proximatesMemory.size(), R.proximatesMemory);
         
         // POST PROCESS
-
-        log.info("Solutions (LINEAR): {}", Util.joinString(solutionConfigs, "\n                   ::  ", "--"));
+        assert (linearSolutions.stream().distinct().count() == linearSolutions.size());
+        log.info("Solutions (LINEAR): {}", Util.joinString(linearSolutions, "\n                   ::  ", "--"));
         if (linear && !witness) {
-            return new HashSet<>(solutionConfigs);
+            return new HashSet<>(linearSolutions);
         }
-        
-        Set<Config> expandedSolutions = new HashSet<>(solutionConfigs.size());
-        for (Config solution : solutionConfigs) {
-            int[] freshVar = new int[]{solution.peekVar()};
-            
-            Deque<AUT> expanded = new ArrayDeque<>();
-            for (AUT aut : solution.S) {
+        // EXPAND
+        Deque<Config> expandedSolutions = new ArrayDeque<>(linearSolutions.size());
+        for (Config linearSolution : linearSolutions) {
+            Deque<AUT> expanded_S = new ArrayDeque<>();
+            for (AUT aut : linearSolution.S) {
+                int[] freshVar = new int[]{linearSolution.peekVar()};
                 Set<Term> T1 = conjunction(aut.T1, freshVar);
                 Set<Term> T2 = conjunction(aut.T2, freshVar);
-                expanded.addLast(new AUT(aut.var, T1, T2));
+                expanded_S.addLast(new AUT(aut.var, T1, T2));
             }
-            expandedSolutions.add(solution.transformSolution(expanded));
+            expandedSolutions.addLast(linearSolution.update_S(expanded_S));
         }
         
-        assert (expandedSolutions.size() == solutionConfigs.size());
+        assert (expandedSolutions.stream().distinct().count() == expandedSolutions.size());
         log.info("Solutions (EXPANDED): {}", Util.joinString(expandedSolutions, "\n                   ::  ", "--"));
+        for (Config solution : expandedSolutions) {
+            listWitnesses(solution);
+        }
         if (linear) {
-            return expandedSolutions;
+            return new HashSet<>(expandedSolutions);
         }
         
-        
+        if (true) {
+            return null;
+        }
+        // MERGE - not working
+        for (Config expandedSolution : expandedSolutions) {
+            Deque<AUT> E = Util.copyAccurate(expandedSolution.S);
+            while (!E.isEmpty()) {
+                int[] freshVar = new int[]{expandedSolution.peekVar()};
+                AUT a = E.pop();
+                Set<Term> R11 = new HashSet<>(a.T1);
+                Set<Term> R12 = new HashSet<>(a.T2);
+                E.removeIf(e -> {
+                    Set<Term> R1 = new HashSet<>(R11);
+                    R1.addAll(e.T1);
+                    Set<Term> R2 = new HashSet<>(R12);
+                    R2.addAll(e.T2);
+                    // CHECK MERGE
+                    Set<Term> Q1 = conjunction(R1, freshVar);
+                    if (Q1.isEmpty()) {
+                        return false;
+                    }
+                    Set<Term> Q2 = conjunction(R2, freshVar);
+                    if (Q2.isEmpty()) {
+                        return false;
+                    }
+                    // APPLY MERGE
+                    
+                    return true;
+                });
+            }
+        }
         
         log.info("Hey now, don't do that");
         return null;
@@ -136,7 +168,7 @@ public final class Algorithm {
             }
             Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
             assert (!(h_term.mappedVar && h_args.length > 0));
-            child.r.addLast(new Substitution(aut.var, h_term));
+            child.substitutions.addLast(new Substitution(aut.var, h_term));
             child.alpha1 = mapAlpha1[0];
             child.alpha2 = mapAlpha2[0];
             
@@ -173,6 +205,7 @@ public final class Algorithm {
         return !conjunction(terms, new int[]{Term.UNUSED_VAR}).isEmpty();
     }
     
+    // for testing; delete when this is no longer needed
     public static Set<Term> runConjunction(String term, String proximityRelations) {
         Algorithm algo = new Algorithm(Parser.parseTerm(term), Parser.parseTerm(term), Parser.parseProximityRelations(proximityRelations), Math::min, 0.0f, false, false);
         return algo.conjunction(Collections.singleton(Parser.parseTerm(term)), new int[]{0});
@@ -227,7 +260,7 @@ public final class Algorithm {
                 log.trace("  => consistent");
                 return Collections.singleton(Term.ANON);
             }
-            solutions.add(Substitution.apply(state.s));
+            solutions.add(Substitution.apply(state.s, state.peekVar()));
         }
         if (consistencyCheck) {
             log.trace("  => NOT consistent");
@@ -237,5 +270,40 @@ public final class Algorithm {
             }
         }
         return solutions;
+    }
+    
+    public void listWitnesses(Config solution) {
+        Deque<AUT> S = Util.copyAccurate(solution.S);
+        Deque<Term> W1 = new ArrayDeque<>();
+        Deque<Term> W2 = new ArrayDeque<>();
+        W1.addLast(Substitution.apply(Util.copyAccurate(solution.substitutions), Term.VAR_0));
+        W2.addLast(Substitution.apply(Util.copyAccurate(solution.substitutions), Term.VAR_0));
+        for (AUT aut : S) {
+            Deque<Term> temp = new ArrayDeque<>();
+            while (!W1.isEmpty()) {
+                Term base = W1.removeFirst();
+                for (Term t : aut.T1) {
+                    temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
+                }
+            }
+            W1.addAll(temp);
+            temp = new ArrayDeque<>();
+            while (!W2.isEmpty()) {
+                Term base = W2.removeFirst();
+                for (Term t : aut.T2) {
+                    temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
+                }
+            }
+            W2.addAll(temp);
+            
+            System.out.println("\n --- " + aut);
+            for (Term t : W1) {
+                System.out.println(t);
+            }
+            System.out.println();
+            for (Term t : W2) {
+                System.out.println(t);
+            }
+        }
     }
 }

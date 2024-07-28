@@ -138,13 +138,13 @@ public class ProximityMap {
         return mappedVars.contains(h);
     }
     
-    public Map<Set<String>, Set<String>> mem = new HashMap<>();
+    public Map<Set<String>, Set<String>> proximatesMemory = new HashMap<>();
     
     public Set<String> commonProximates(Set<String> T) {
         assert (T != null && !T.isEmpty());
         Set<String> proximates = null;
-        if (T.size() < 5 && mem.containsKey(T)) {
-            proximates = mem.get(T);
+        if (T.size() < 5 && proximatesMemory.containsKey(T)) {
+            proximates = proximatesMemory.get(T);
         } else {
             for (String t : T) {
                 if (proximates == null) {
@@ -155,7 +155,7 @@ public class ProximityMap {
                 proximates.retainAll(t_prox);
             }
             if (T.size() < 5) {
-                mem.put(T, proximates);
+                proximatesMemory.put(T, proximates);
             }
         }
         log.trace("  commonProximates{} = {}", T, proximates);
