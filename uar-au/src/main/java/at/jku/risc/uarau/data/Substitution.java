@@ -26,7 +26,7 @@ public class Substitution {
         if (t.var == substitution.var) {
             return substitution.term;
         }
-        if (t.isVar()) {
+        if (t.isVar() || t.mappedVar) {
             return t;
         }
         Term[] arguments = new Term[t.arguments.length];

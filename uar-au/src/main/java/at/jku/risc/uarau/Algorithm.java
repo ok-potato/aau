@@ -265,6 +265,7 @@ public final class Algorithm {
         if (consistencyCheck) {
             log.trace("  => NOT consistent");
         } else {
+            log.debug("terms: {} -> solutions: {}", terms, solutions.size());
             if (log.isTraceEnabled()) {
                 log.trace("  => {}", solutions);
             }
