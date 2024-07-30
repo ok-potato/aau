@@ -1,5 +1,7 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.Util;
+
 import java.util.Deque;
 
 public class Substitution {
@@ -16,6 +18,7 @@ public class Substitution {
         if (substitutions.isEmpty()) {
             return new Term(baseVariable);
         }
+        substitutions = Util.copyAccurate(substitutions);
         Term t = substitutions.removeFirst().term;
         while (!substitutions.isEmpty()) {
             t = apply(t, substitutions.pop());

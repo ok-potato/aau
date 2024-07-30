@@ -83,56 +83,71 @@ public final class Algorithm {
         // EXPAND
         Deque<Config> expandedSolutions = new ArrayDeque<>(linearSolutions.size());
         for (Config linearSolution : linearSolutions) {
-            Deque<AUT> expanded_S = new ArrayDeque<>();
+            Deque<AUT> S_expanded = new ArrayDeque<>();
             for (AUT aut : linearSolution.S) {
                 int[] freshVar = new int[]{linearSolution.peekVar()};
-                Set<Term> T1 = conjunction(aut.T1, freshVar);
-                Set<Term> T2 = conjunction(aut.T2, freshVar);
-                expanded_S.addLast(new AUT(aut.var, T1, T2));
+                Set<Term> T1 = conjunction(freshVar, aut.T1);
+                Set<Term> T2 = conjunction(freshVar, aut.T2);
+                S_expanded.addLast(new AUT(aut.var, T1, T2));
             }
-            expandedSolutions.addLast(linearSolution.update_S(expanded_S));
+            expandedSolutions.addLast(linearSolution.update_S(S_expanded));
         }
         
         assert (expandedSolutions.stream().distinct().count() == expandedSolutions.size());
         log.info("Solutions (EXPANDED):\n                   ::  {}", Util.joinString(expandedSolutions, "\n                   ::  ", "--"));
-        for (Config solution : expandedSolutions) {
-            listWitnesses(solution);
-        }
         if (linear) {
+            listWitnesses(expandedSolutions);
             return new HashSet<>(expandedSolutions);
         }
         
         // MERGE
+        Deque<Config> mergedSolutions = new ArrayDeque<>();
         for (Config expandedSolution : expandedSolutions) {
-            Deque<AUT> E = Util.copyAccurate(expandedSolution.S);
-            while (!E.isEmpty()) {
+            Deque<AUT> S_expanded = Util.copyAccurate(expandedSolution.S);
+            Deque<AUT> S_merged = new ArrayDeque<>();
+            while (!S_expanded.isEmpty()) {
                 int[] freshVar = new int[]{expandedSolution.peekVar()};
-                AUT a = E.pop();
-                Set<Term> R11 = new HashSet<>(a.T1);
-                Set<Term> R12 = new HashSet<>(a.T2);
-                E.removeIf(e -> {
-                    Set<Term> R1 = new HashSet<>(R11);
-                    R1.addAll(e.T1);
-                    Set<Term> R2 = new HashSet<>(R12);
-                    R2.addAll(e.T2);
+                
+                AUT collector = S_expanded.removeFirst();
+                Set<Term> R11 = new HashSet<>(collector.T1);
+                Set<Term> R12 = new HashSet<>(collector.T2);
+                
+                Deque<AUT> S_expanded_rest = new ArrayDeque<>();
+                Deque<Integer> X = new ArrayDeque<>();
+                X.add(collector.var);
+                for (AUT merging : S_expanded) {
                     // CHECK MERGE
-                    Set<Term> Q1 = conjunction(R1, freshVar);
+                    Set<Term> Q1 = conjunction(freshVar, R11, merging.T1);
                     if (Q1.isEmpty()) {
-                        return false;
+                        S_expanded_rest.add(merging);
+                        continue;
                     }
-                    Set<Term> Q2 = conjunction(R2, freshVar);
+                    Set<Term> Q2 = conjunction(freshVar, R12, merging.T2);
                     if (Q2.isEmpty()) {
-                        return false;
+                        S_expanded_rest.add(merging);
+                        continue;
                     }
                     // APPLY MERGE
-                    
-                    return true;
-                });
+                    X.add(merging.var);
+                    R11 = Q1;
+                    R12 = Q2;
+                }
+                S_expanded = S_expanded_rest;
+                if (X.size() == 1) { // nothing merged
+                    S_merged.addLast(collector);
+                } else {
+                    Term y = new Term(freshVar[0]);
+                    for (int x_i : X) {
+                        expandedSolution.substitutions.addLast(new Substitution(x_i, y));
+                    }
+                    S_merged.addLast(new AUT(freshVar[0], R11, R12));
+                }
             }
+            mergedSolutions.addLast(expandedSolution.update_S(S_merged));
         }
-        
-        log.info("🚧 under construction 🚧");
-        return null;
+        log.info("Solutions (MERGED):\n                   ::  {}", Util.joinString(mergedSolutions, "\n                   ::  ", "--"));
+        listWitnesses(mergedSolutions);
+        return new HashSet<>(mergedSolutions);
     }
     
     private Set<Config> decompose(AUT aut, Config cfg) {
@@ -199,10 +214,16 @@ public final class Algorithm {
     }
     
     private boolean consistent(Set<Term> terms) {
-        return !conjunction(terms, new int[]{Term.UNUSED_VAR}).isEmpty();
+        return !conjunction(new int[]{Term.UNUSED_VAR}, terms).isEmpty();
     }
     
-    private Set<Term> conjunction(Set<Term> terms, int[] freshVar) {
+    private Set<Term> conjunction(int[] freshVar, Set<Term> terms1, Set<Term> terms2) {
+        Set<Term> joinedTerms = new HashSet<>(terms1);
+        joinedTerms.addAll(terms2);
+        return conjunction(freshVar, joinedTerms);
+    }
+    
+    private Set<Term> conjunction(int[] freshVar, Set<Term> terms) {
         boolean consistencyCheck = freshVar[0] == Term.UNUSED_VAR;
         Deque<State> branches = new ArrayDeque<>();
         terms = terms.stream().filter(t -> !Term.ANON.equals(t)).collect(Collectors.toSet());
@@ -238,7 +259,7 @@ public final class Algorithm {
                         Q.get(i).removeIf(Term.ANON::equals);
                         childState.expressions.push(new Expression(yi, Q.get(i)));
                     }
-                    freshVar[0] = Math.max(freshVar[0], childState.freshVar());
+                    freshVar[0] = Math.max(freshVar[0], childState.peekVar());
                     Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
                     assert (!(h_term.mappedVar && h_args.length > 0));
                     childState.s.addLast(new Substitution(expr.x, h_term));
@@ -270,34 +291,33 @@ public final class Algorithm {
         return solutions;
     }
     
-    public void listWitnesses(Config solution) {
-        Deque<AUT> S = Util.copyAccurate(solution.S);
-        Deque<Term> W1 = new ArrayDeque<>();
-        Deque<Term> W2 = new ArrayDeque<>();
-        W1.addLast(Substitution.apply(Util.copyAccurate(solution.substitutions), Term.VAR_0));
-        W2.addLast(Substitution.apply(Util.copyAccurate(solution.substitutions), Term.VAR_0));
-        for (AUT aut : S) {
-            Deque<Term> temp = new ArrayDeque<>();
-            while (!W1.isEmpty()) {
-                Term base = W1.removeFirst();
-                for (Term t : aut.T1) {
-                    temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
-                }
-            }
-            W1.addAll(temp);
-            temp = new ArrayDeque<>();
-            while (!W2.isEmpty()) {
-                Term base = W2.removeFirst();
-                for (Term t : aut.T2) {
-                    temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
-                }
-            }
-            W2.addAll(temp);
+    public void listWitnesses(Deque<Config> solutions) {
+        for (Config solution : solutions) {
+            Deque<Term> W1 = new ArrayDeque<>();
+            Deque<Term> W2 = new ArrayDeque<>();
+            W1.addLast(Substitution.apply(solution.substitutions, Term.VAR_0));
+            W2.addLast(Substitution.apply(solution.substitutions, Term.VAR_0));
             
-            log.debug("👀{}", aut);
-            log.debug(Util.joinString(W1, "   ", ""));
-            log.debug(Util.joinString(W2, "   ", ""));
+            log.debug("👀{}", solution.S);
+            for (AUT aut : solution.S) {
+                Deque<Term> temp = new ArrayDeque<>();
+                for (Term base : W1) {
+                    for (Term t : aut.T1) {
+                        temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
+                    }
+                }
+                W1 = temp;
+                temp = new ArrayDeque<>();
+                for (Term base : W2) {
+                    for (Term t : aut.T2) {
+                        temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
+                    }
+                }
+                W2 = temp;
+                
+            }
+            log.debug(Util.joinString(W1, " , ", ""));
+            log.debug(Util.joinString(W2, " , ", ""));
         }
-        System.out.println();
     }
 }
