@@ -47,9 +47,9 @@ public final class Algorithm {
         BRANCHING:
         while (!branches.isEmpty()) {
             assert (new HashSet<>(branches).size() == branches.size());
-            Config config = branches.pop();
+            Config config = branches.removeFirst();
             while (!config.A.isEmpty()) {
-                AUT aut = config.A.pop();
+                AUT aut = config.A.removeFirst();
                 // TRIVIAL
                 if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
                     config.substitutions.addLast(new Substitution(aut.var, Term.ANON));
@@ -60,9 +60,9 @@ public final class Algorithm {
                 Set<Config> children = decompose(aut, config);
                 if (!children.isEmpty()) {
                     for (Config child : children) {
-                        branches.push(child);
+                        branches.addLast(child);
                     }
-                    log.debug("DEC => {}", Util.joinString(children, "   ", "⚠️"));
+                    log.debug("DEC => {}", Util.joinString(children, " ", ""));
                     continue BRANCHING;
                 }
                 // SOLVE
@@ -76,7 +76,7 @@ public final class Algorithm {
         
         // POST PROCESS
         assert (linearSolutions.stream().distinct().count() == linearSolutions.size());
-        log.info("Solutions (LINEAR): {}", Util.joinString(linearSolutions, "\n                   ::  ", "--"));
+        log.info("Solutions (LINEAR):\n                   ::  {}", Util.joinString(linearSolutions, "\n                   ::  ", "--"));
         if (linear && !witness) {
             return new HashSet<>(linearSolutions);
         }
@@ -94,7 +94,7 @@ public final class Algorithm {
         }
         
         assert (expandedSolutions.stream().distinct().count() == expandedSolutions.size());
-        log.info("Solutions (EXPANDED): {}", Util.joinString(expandedSolutions, "\n                   ::  ", "--"));
+        log.info("Solutions (EXPANDED):\n                   ::  {}", Util.joinString(expandedSolutions, "\n                   ::  ", "--"));
         for (Config solution : expandedSolutions) {
             listWitnesses(solution);
         }
@@ -202,15 +202,10 @@ public final class Algorithm {
         return !conjunction(terms, new int[]{Term.UNUSED_VAR}).isEmpty();
     }
     
-    // for testing; delete when this is no longer needed
-    public static Set<Term> runConjunction(String term, String proximityRelations) {
-        Algorithm algo = new Algorithm(Parser.parseTerm(term), Parser.parseTerm(term), Parser.parseProximityRelations(proximityRelations), Math::min, 0.0f, false, false);
-        return algo.conjunction(Collections.singleton(Parser.parseTerm(term)), new int[]{0});
-    }
-    
     private Set<Term> conjunction(Set<Term> terms, int[] freshVar) {
         boolean consistencyCheck = freshVar[0] == Term.UNUSED_VAR;
         Deque<State> branches = new ArrayDeque<>();
+        terms = terms.stream().filter(t -> !Term.ANON.equals(t)).collect(Collectors.toSet());
         branches.push(new State(terms, freshVar[0]));
         log.trace("  {}", branches);
         
@@ -240,6 +235,7 @@ public final class Algorithm {
                     for (int i = 0; i < h_args.length; i++) {
                         int yi = childState.freshVar();
                         h_args[i] = new Term(yi);
+                        Q.get(i).removeIf(Term.ANON::equals);
                         childState.expressions.push(new Expression(yi, Q.get(i)));
                     }
                     freshVar[0] = Math.max(freshVar[0], childState.freshVar());
@@ -298,14 +294,10 @@ public final class Algorithm {
             }
             W2.addAll(temp);
             
-            System.out.println("\n --- " + aut);
-            for (Term t : W1) {
-                System.out.println(t);
-            }
-            System.out.println();
-            for (Term t : W2) {
-                System.out.println(t);
-            }
+            log.debug("👀{}", aut);
+            log.debug(Util.joinString(W1, "   ", ""));
+            log.debug(Util.joinString(W2, "   ", ""));
         }
+        System.out.println();
     }
 }

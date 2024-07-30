@@ -1,13 +1,9 @@
 import at.jku.risc.uarau.Algorithm;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SigmaTest {
-    Logger log = LoggerFactory.getLogger(SigmaTest.class);
-    
     @Test
     public void simple() {
         String problem = "f(a, b) ?= g(a, c, d)";
@@ -20,18 +16,6 @@ public class SigmaTest {
         String problem = "f(h(a, b(), c(), d()), b()) ?= g(f(a, b()), f(b(), c()), f(c(), d()))";
         String relations = "h {(1, 1), (3, 2), (4, 2)}[0.7] f; h g {(1, 1), (3, 3)}[0.8]; c d {}[0.6]";
         Algorithm.solve(problem, relations, 0.5f);
-    }
-    
-    @Test
-    public void testConj() {
-        // String conj1 = "h(g(c(), d(), e()), g(a(), c(), f(a(), b())), c(), d())";
-        String conj1 = "h(f(a(), d()), g(a(), c(), f(b(), c())), c(), d())";
-        // String rel1 = "h f {1 1, 2 1, 3 2, 4 2)}[0.7] ; h g {1 1, 3 3, 2 3, 4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2, 2 3, 2 1)}";
-        // log.info("test: {} --- relations: {}", conj1, rel1);
-        // Algorithm.runConjunction(conj1, rel1);
-        String rel2 = "h f {1 1, 2 1, 3 2, 4 2)}[0.7] ; h g {1 1, 3 3, 2 3, 4 2)}[0.8] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2, 2 3, 2 1)}";
-        log.info("test: {} --- relations: {}", conj1, rel2);
-        Algorithm.runConjunction(conj1, rel2);
     }
     
     // @Test

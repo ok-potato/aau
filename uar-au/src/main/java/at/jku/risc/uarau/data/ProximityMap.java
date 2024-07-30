@@ -41,6 +41,8 @@ public class ProximityMap {
                 }
             }
         }
+        arities = calculateArities(rhs, lhs, allProximityRelations);
+        log.trace("Arities {}", arities);
         // filter out relations with proximity < λ
         allProximityRelations.removeIf(relation -> {
             if (relation.proximity < lambda) {
@@ -49,9 +51,6 @@ public class ProximityMap {
             }
             return false;
         });
-        
-        arities = calculateArities(rhs, lhs, allProximityRelations);
-        log.trace("Arities {}", arities);
         
         for (ProximityRelation relation : allProximityRelations) {
             // if the last argument position of f/g doesn't show up in the relation, we have to pad it accordingly

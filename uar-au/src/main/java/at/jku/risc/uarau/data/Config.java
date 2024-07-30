@@ -57,7 +57,7 @@ public class Config {
         String A_str = Util.joinString(A, " ", "➰");
         String S_str = Util.joinString(S, " ", "➰");
         String r = Substitution.apply(Util.copyAccurate(substitutions), Term.VAR_0).toString();
-        return String.format("⧛ ⚫ %s ⚫ %s 🔅 %s ⚫ %s, %s ⧚", A_str, S_str, r, alpha1, alpha2);
+        return String.format("⚓ ⚫ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
     }
     
     @Override

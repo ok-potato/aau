@@ -7,9 +7,9 @@ public class Expression {
     public final int x;
     public final Set<Term> T;
     
-    public Expression(int x, Set<Term> t) {
+    public Expression(int x, Set<Term> T) {
         this.x = x;
-        T = Collections.unmodifiableSet(t);
+        this.T = Collections.unmodifiableSet(T);
     }
     
     @Override
