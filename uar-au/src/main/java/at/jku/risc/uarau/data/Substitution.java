@@ -7,6 +7,7 @@ public class Substitution {
     public final Term term;
     
     public Substitution(int var, Term term) {
+        assert (var != Term.ANON.var);
         this.var = var;
         this.term = term;
     }
@@ -15,7 +16,7 @@ public class Substitution {
         if (substitutions.isEmpty()) {
             return new Term(baseVariable);
         }
-        Term t = substitutions.getFirst().term;
+        Term t = substitutions.removeFirst().term;
         while (!substitutions.isEmpty()) {
             t = apply(t, substitutions.pop());
         }

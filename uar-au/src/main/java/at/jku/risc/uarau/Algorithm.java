@@ -102,10 +102,7 @@ public final class Algorithm {
             return new HashSet<>(expandedSolutions);
         }
         
-        if (true) {
-            return null;
-        }
-        // MERGE - not working
+        // MERGE
         for (Config expandedSolution : expandedSolutions) {
             Deque<AUT> E = Util.copyAccurate(expandedSolution.S);
             while (!E.isEmpty()) {
@@ -134,7 +131,7 @@ public final class Algorithm {
             }
         }
         
-        log.info("Hey now, don't do that");
+        log.info("🚧 under construction 🚧");
         return null;
     }
     
@@ -265,7 +262,11 @@ public final class Algorithm {
         if (consistencyCheck) {
             log.trace("  => NOT consistent");
         } else {
-            log.debug("terms: {} -> solutions: {}", terms, solutions.size());
+            if (solutions.size() < 20) {
+                log.debug("terms: {} -> conjunctions: ({}) {}", terms, solutions.size(), solutions);
+            } else {
+                log.debug("terms: {} -> conjunctions: ({})", terms, solutions.size());
+            }
             if (log.isTraceEnabled()) {
                 log.trace("  => {}", solutions);
             }
