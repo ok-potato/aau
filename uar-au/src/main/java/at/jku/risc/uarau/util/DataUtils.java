@@ -27,6 +27,10 @@ public class DataUtils {
         return copy;
     }
     
+    public static <T> T getAny(Set<T> set) {
+        return set.stream().findFirst().orElseThrow(IllegalArgumentException::new);
+    }
+    
     // stringify
     
     public static <T> String joinString(Collection<T> collection) {

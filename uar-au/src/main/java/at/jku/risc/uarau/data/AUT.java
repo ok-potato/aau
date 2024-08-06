@@ -4,6 +4,8 @@ import at.jku.risc.uarau.util.DataUtils;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AUT {
     public final int var;
@@ -19,6 +21,10 @@ public class AUT {
     
     public AUT(int var, Term T1, Term T2) {
         this(var, Collections.singleton(T1), Collections.singleton(T2));
+    }
+    
+    public Set<String> heads() {
+        return Stream.concat(T1.stream(), T2.stream()).map(t -> t.head).collect(Collectors.toSet());
     }
     
     @Override
