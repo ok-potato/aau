@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.Util;
+import at.jku.risc.uarau.util.DataUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +37,6 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return String.format("(%s►%s %s %s)", f, g, proximity, Util.mapString(argRelation));
+        return String.format("(%s►%s %s %s)", f, g, proximity, DataUtils.mapString(argRelation));
     }
 }

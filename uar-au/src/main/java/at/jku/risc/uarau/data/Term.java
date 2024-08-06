@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.Util;
+import at.jku.risc.uarau.util.DataUtils;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public class Term {
         if (mappedVar) {
             return head;
         }
-        return head + Util.joinString(Arrays.asList(arguments), ",", "()", "(", ")");
+        return head + DataUtils.joinString(Arrays.asList(arguments), ",", "()", "(", ")");
     }
     
     @Override

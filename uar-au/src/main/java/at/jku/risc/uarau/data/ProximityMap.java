@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.Util;
+import at.jku.risc.uarau.util.DataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class ProximityMap {
             proximityClass(relation.f).put(relation.g, relation);
         }
         
-        log.trace("PR's {}", Util.joinString(allProximityRelations));
+        log.trace("PR's {}", DataUtils.joinString(allProximityRelations));
     }
     
     private Map<String, Integer> calculateArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {

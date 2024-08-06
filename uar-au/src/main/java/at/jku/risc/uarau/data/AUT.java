@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.Util;
+import at.jku.risc.uarau.util.DataUtils;
 
 import java.util.Collections;
 import java.util.Set;
@@ -23,7 +23,7 @@ public class AUT {
     
     @Override
     public String toString() {
-        return String.format("➰%s: %s ?= %s", var, Util.joinString(T1, ", ", "{}", "{ ", " }"), Util.joinString(T2, ", ", "{}", "{ ", " }"));
+        return String.format("➰%s: %s ?= %s", var, DataUtils.joinString(T1, ", ", "{}", "{ ", " }"), DataUtils.joinString(T2, ", ", "{}", "{ ", " }"));
     }
     
     @Override

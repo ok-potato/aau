@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.Util;
+import at.jku.risc.uarau.util.DataUtils;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -20,8 +20,8 @@ public class State {
     }
     
     private State(State original) {
-        this.expressions = Util.copyAccurate(original.expressions);
-        this.s = Util.copyAccurate(original.s);
+        this.expressions = DataUtils.copyAccurate(original.expressions);
+        this.s = DataUtils.copyAccurate(original.s);
         this.freshVar = original.freshVar;
     }
     

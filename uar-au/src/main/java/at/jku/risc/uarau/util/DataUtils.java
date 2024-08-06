@@ -1,4 +1,4 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.util;
 
 import at.jku.risc.uarau.data.Term;
 import org.slf4j.Logger;
@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class Util {
-    static Logger log = LoggerFactory.getLogger(Util.class);
+public class DataUtils {
+    static Logger log = LoggerFactory.getLogger(DataUtils.class);
     
     // collection operations
     

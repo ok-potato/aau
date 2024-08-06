@@ -2,6 +2,7 @@ package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
 import at.jku.risc.uarau.data.Term;
+import at.jku.risc.uarau.util.DataUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,12 @@ public class Parser {
         // split...    (?<=\() => if last char was '('    , => on ','    (?=\)) => if next char is ')'
         String[] tokens = string.split("(?<=\\()|,|(?=\\))");
         
-        Deque<Util.TermBuilder> subTerms = new ArrayDeque<>();
-        subTerms.add(new Util.TermBuilder(",")); // dummyTerm
+        Deque<DataUtils.TermBuilder> subTerms = new ArrayDeque<>();
+        subTerms.add(new DataUtils.TermBuilder(",")); // dummyTerm
         for (String token : tokens) {
             assert (subTerms.peek() != null);
             if (token.equals(")")) {
-                Util.TermBuilder subTerm = subTerms.pop();
+                DataUtils.TermBuilder subTerm = subTerms.pop();
                 if (subTerms.peek() == null) {
                     log.error("Too many closing parentheses in term \"{}\"", string);
                     throw new IllegalArgumentException();
@@ -53,7 +54,7 @@ public class Parser {
                     log.error("Missing function name in {}", string);
                     throw new IllegalArgumentException();
                 }
-                subTerms.push(new Util.TermBuilder(head));
+                subTerms.push(new DataUtils.TermBuilder(head));
                 continue;
             }
             if (Arrays.stream(new String[]{"(", ",", ")"}).anyMatch(token::contains)) {
@@ -70,7 +71,7 @@ public class Parser {
             log.error("Unclosed parentheses in term \"{}\"", string);
             throw new IllegalArgumentException();
         }
-        Util.TermBuilder dummyTerm = subTerms.pop();
+        DataUtils.TermBuilder dummyTerm = subTerms.pop();
         if (dummyTerm.arguments.size() > 1) {
             log.error("Multiple top level terms on one side: {}", string);
             throw new IllegalArgumentException();
@@ -91,7 +92,7 @@ public class Parser {
             log.trace("Parsed PR: {}", pr);
             proximityRelations.add(pr);
         }
-        log.debug("Parsed PR's: {}", Util.joinString(proximityRelations));
+        log.debug("Parsed PR's: {}", DataUtils.joinString(proximityRelations));
         return proximityRelations;
     }
     

@@ -4,16 +4,16 @@ import java.util.Collections;
 import java.util.Set;
 
 public class Expression {
-    public final int x;
+    public final int var;
     public final Set<Term> T;
     
-    public Expression(int x, Set<Term> T) {
-        this.x = x;
+    public Expression(int var, Set<Term> T) {
+        this.var = var;
         this.T = Collections.unmodifiableSet(T);
     }
     
     @Override
     public String toString() {
-        return String.format("%s in %s", x, T);
+        return String.format("%s in %s", var, T);
     }
 }
