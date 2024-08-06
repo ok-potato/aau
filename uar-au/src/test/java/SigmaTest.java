@@ -18,7 +18,7 @@ public class SigmaTest extends BaseTest {
     
     @Test
     public void medium() {
-        String problem = "f(h(a, b(), c(), d()), b()) ?= g(f(a, b()), f(b(), c()), f(c(), d()))";
+        String problem = "f(h(a, b(), c(), d()), b()) ?= g(f(a, b()), b(), c())";
         String relations = "h {(1, 1), (3, 2), (4, 2)}[0.7] f; h g {(1, 1), (3, 3)}[0.8]; c d {}[0.6]";
         solve(problem, relations, 0.5f);
     }
@@ -42,6 +42,7 @@ public class SigmaTest extends BaseTest {
     @Test
     public void example5() {
         String relations = "a b [0.9]{} ; b c [0.8]{} ; h f [0.7]{1 1, 1 2} ; h g [0.6]{1 1}";
+        
         Set<Config> solutions = Algorithm.solve("f(a(), c()) ?= g(a())", relations, 0.5f);
         assert (solutions.size() == 1);
         check(DataUtils.getAny(solutions), "", "", "h(b())", 0.7f, 0.6f);

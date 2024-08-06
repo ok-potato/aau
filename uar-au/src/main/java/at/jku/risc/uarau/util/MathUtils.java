@@ -2,7 +2,6 @@ package at.jku.risc.uarau.util;
 
 public class MathUtils {
     public static boolean close(double a, double b) {
-        System.out.println("double");
         return Math.abs(a - b) < 0.00001f * Math.abs(a + b) / 2;
     }
     

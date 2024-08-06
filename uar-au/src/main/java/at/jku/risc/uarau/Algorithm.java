@@ -88,7 +88,7 @@ public final class Algorithm {
         for (Config linearSolution : linearSolutions) {
             Deque<AUT> S_expanded = new ArrayDeque<>();
             for (AUT aut : linearSolution.S) {
-                Pair<Set<Term>, Set<Term>> C = dualConjunction(aut.T1, aut.T2, linearSolution.peekVar());
+                Pair<Set<Term>, Set<Term>> C = pairConjunction(aut.T1, aut.T2, linearSolution.peekVar());
                 S_expanded.addLast(new AUT(aut.var, C.a, C.b));
             }
             expandedSolutions.addLast(linearSolution.update_S(S_expanded));
@@ -104,7 +104,7 @@ public final class Algorithm {
         // MERGE
         Deque<Config> mergedSolutions = new ArrayDeque<>();
         for (Config expandedSolution : expandedSolutions) {
-            Deque<AUT> S_expanded = DataUtils.copyAccurate(expandedSolution.S);
+            Deque<AUT> S_expanded = DataUtils.copyDeque(expandedSolution.S);
             Deque<AUT> S_merged = new ArrayDeque<>();
             while (!S_expanded.isEmpty()) {
                 int freshVar = expandedSolution.peekVar();
@@ -243,7 +243,7 @@ public final class Algorithm {
         return new Triple<>(C1.a, C2.a, C2.b);
     }
     
-    private Pair<Set<Term>, Set<Term>> dualConjunction(Set<Term> T1, Set<Term> T2, int freshVar) {
+    private Pair<Set<Term>, Set<Term>> pairConjunction(Set<Term> T1, Set<Term> T2, int freshVar) {
         Pair<Set<Term>, Integer> C1 = conjunction(T1, freshVar);
         freshVar = C1.b;
         Pair<Set<Term>, Integer> C2 = conjunction(T2, freshVar);
@@ -302,7 +302,7 @@ public final class Algorithm {
                 log.trace("  => consistent");
                 return new Pair<>(Collections.singleton(Term.ANON), freshVar);
             }
-            solutions.add(Substitution.apply(state.s, state.peekVar()));
+            solutions.add(Substitution.applyAll(state.s, state.peekVar()));
         }
         if (consistencyCheck) {
             log.trace("  => NOT consistent");
@@ -323,28 +323,17 @@ public final class Algorithm {
         for (Config solution : solutions) {
             Deque<Term> W1 = new ArrayDeque<>();
             Deque<Term> W2 = new ArrayDeque<>();
-            W1.addLast(Substitution.apply(solution.substitutions, Term.VAR_0));
-            W2.addLast(Substitution.apply(solution.substitutions, Term.VAR_0));
+            W1.addLast(Substitution.applyAll(solution.substitutions, Term.VAR_0));
+            W2.addLast(Substitution.applyAll(solution.substitutions, Term.VAR_0));
             
             log.debug("👀{}", solution.S);
             for (AUT aut : solution.S) {
-                Deque<Term> temp = new ArrayDeque<>();
-                for (Term base : W1) {
-                    for (Term t : aut.T1) {
-                        temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
-                    }
-                }
-                W1 = temp;
-                temp = new ArrayDeque<>();
-                for (Term base : W2) {
-                    for (Term t : aut.T2) {
-                        temp.addLast(Substitution.apply(base, new Substitution(aut.var, t)));
-                    }
-                }
-                W2 = temp;
+                Pair<Deque<Term>, Deque<Term>> applied = aut.pairApply(W1, W2);
+                W1 = applied.a;
+                W2 = applied.b;
             }
-            log.debug(DataUtils.joinString(W1, " , ", ""));
-            log.debug(DataUtils.joinString(W2, " , ", ""));
+            log.debug("LHS: " + DataUtils.joinString(W1, " , ", ""));
+            log.debug("RHS: " + DataUtils.joinString(W2, " , ", ""));
         }
     }
 }

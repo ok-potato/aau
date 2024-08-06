@@ -24,7 +24,7 @@ public abstract class BaseTest {
             assert (solution.S.stream().map(AUT::toString).allMatch(S_auts::contains));
         }
         if (r != null) {
-            assert (Substitution.apply(solution.substitutions, Term.VAR_0).toString().equals(r));
+            assert (Substitution.applyAll(solution.substitutions, Term.VAR_0).toString().equals(r));
         }
         if (alpha1 > 0 || MathUtils.close(alpha1, 0)) {
             assert (MathUtils.close(alpha1, solution.alpha1));

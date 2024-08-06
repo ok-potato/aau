@@ -20,8 +20,8 @@ public class State {
     }
     
     private State(State original) {
-        this.expressions = DataUtils.copyAccurate(original.expressions);
-        this.s = DataUtils.copyAccurate(original.s);
+        this.expressions = DataUtils.copyDeque(original.expressions);
+        this.s = DataUtils.copyDeque(original.s);
         this.freshVar = original.freshVar;
     }
     

@@ -1,8 +1,11 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.Pair;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +28,21 @@ public class AUT {
     
     public Set<String> heads() {
         return Stream.concat(T1.stream(), T2.stream()).map(t -> t.head).collect(Collectors.toSet());
+    }
+    
+    public Pair<Deque<Term>, Deque<Term>> pairApply(Deque<Term> Q1, Deque<Term> Q2) {
+        Pair<Deque<Term>, Deque<Term>> pair = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
+        for (Term baseTerm : Q1) {
+            for (Term t : T1) {
+                pair.a.addLast(Substitution.apply(new Substitution(var, t), baseTerm));
+            }
+        }
+        for (Term baseTerm : Q2) {
+            for (Term t : T2) {
+                pair.b.addLast(Substitution.apply(new Substitution(var, t), baseTerm));
+            }
+        }
+        return pair;
     }
     
     @Override

@@ -28,9 +28,9 @@ public class Config {
     }
     
     private Config(Config original, Deque<AUT> S) {
-        this.A = DataUtils.copyAccurate(original.A);
-        this.S = DataUtils.copyAccurate(S);
-        this.substitutions = DataUtils.copyAccurate(original.substitutions);
+        this.A = DataUtils.copyDeque(original.A);
+        this.S = DataUtils.copyDeque(S);
+        this.substitutions = DataUtils.copyDeque(original.substitutions);
         this.alpha1 = original.alpha1;
         this.alpha2 = original.alpha2;
         this.freshVar = original.freshVar;
@@ -56,7 +56,7 @@ public class Config {
     public String toString() {
         String A_str = DataUtils.joinString(A, " ", "➰");
         String S_str = DataUtils.joinString(S, " ", "➰");
-        String r = Substitution.apply(substitutions, Term.VAR_0).toString();
+        String r = Substitution.applyAll(substitutions, Term.VAR_0).toString();
         return String.format("⚓ ⚫ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
     }
     

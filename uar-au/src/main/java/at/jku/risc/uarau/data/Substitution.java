@@ -1,7 +1,9 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.Pair;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class Substitution {
@@ -14,30 +16,30 @@ public class Substitution {
         this.term = term;
     }
     
-    public static Term apply(Deque<Substitution> substitutions, int baseVariable) {
+    public static Term applyAll(Deque<Substitution> substitutions, int baseVariable) {
         if (substitutions.isEmpty()) {
             return new Term(baseVariable);
         }
-        substitutions = DataUtils.copyAccurate(substitutions);
-        Term t = substitutions.removeFirst().term;
+        substitutions = DataUtils.copyDeque(substitutions);
+        Term term = substitutions.removeFirst().term;
         while (!substitutions.isEmpty()) {
-            t = apply(t, substitutions.pop());
+            term = apply(substitutions.pop(), term);
         }
-        return t;
+        return term;
     }
     
-    public static Term apply(Term t, Substitution substitution) {
-        if (t.var == substitution.var) {
+    public static Term apply(Substitution substitution, Term term) {
+        if (term.var == substitution.var) {
             return substitution.term;
         }
-        if (t.isVar() || t.mappedVar) {
-            return t;
+        if (term.isVar() || term.mappedVar) {
+            return term;
         }
-        Term[] arguments = new Term[t.arguments.length];
-        for (int i = 0; i < t.arguments.length; i++) {
-            arguments[i] = apply(t.arguments[i], substitution);
+        Term[] arguments = new Term[term.arguments.length];
+        for (int i = 0; i < term.arguments.length; i++) {
+            arguments[i] = apply(substitution, term.arguments[i]);
         }
-        return new Term(t.head, arguments);
+        return new Term(term.head, arguments);
     }
     
     @Override
