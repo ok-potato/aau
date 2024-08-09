@@ -38,7 +38,7 @@ public class Parser {
         Deque<DataUtils.TermBuilder> subTerms = new ArrayDeque<>();
         subTerms.add(new DataUtils.TermBuilder(",")); // dummyTerm
         for (String token : tokens) {
-            assert (subTerms.peek() != null);
+            assert subTerms.peek() != null;
             if (token.equals(")")) {
                 DataUtils.TermBuilder subTerm = subTerms.pop();
                 if (subTerms.peek() == null) {

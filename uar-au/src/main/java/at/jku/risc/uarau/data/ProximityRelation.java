@@ -31,7 +31,7 @@ public class ProximityRelation {
             }
         }
         ProximityRelation flipped = new ProximityRelation(g, f, proximity, flippedArgRelation);
-        assert (symmetric(this, flipped));
+        assert symmetric(this, flipped);
         return flipped;
     }
     

@@ -1,10 +1,7 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.DataUtils;
-import at.jku.risc.uarau.util.Pair;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 
 public class Substitution {
@@ -12,7 +9,7 @@ public class Substitution {
     public final Term term;
     
     public Substitution(int var, Term term) {
-        assert (var != Term.ANON.var);
+        assert var != Term.ANON.var;
         this.var = var;
         this.term = term;
     }

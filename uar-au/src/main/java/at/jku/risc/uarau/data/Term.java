@@ -23,7 +23,7 @@ public class Term {
     
     // function/constant term
     public Term(String head, List<Term> arguments) {
-        assert (!StringUtils.isBlank(head));
+        assert !StringUtils.isBlank(head);
         this.var = UNUSED_VAR;
         this.head = head.intern();
         if (arguments == null) {
@@ -46,7 +46,7 @@ public class Term {
     
     // variable term
     public Term(int var) {
-        assert (var > UNUSED_VAR);
+        assert var > UNUSED_VAR;
         this.var = var;
         this.head = null;
         this.arguments = null;

@@ -86,7 +86,7 @@ public class ProximityMap {
     }
     
     private void findTermArities(Term t, Map<String, Integer> arityMap, Set<String> varSet) {
-        assert (!t.isVar()); // can only have mapped vars
+        assert !t.isVar(); // can only have mapped vars
         if (arityMap.containsKey(t.head)) {
             if (arityMap.get(t.head) != t.arguments.size()) {
                 log.error("Found multiple arities of '{}' in the posed problem", t.head);
@@ -107,7 +107,7 @@ public class ProximityMap {
         }
     }
     
-    // #################################################################################################################
+    // --- public
     
     public boolean isMappedVar(String h) {
         return vars.contains(h);
@@ -116,7 +116,7 @@ public class ProximityMap {
     public Map<Set<String>, Set<String>> proximatesMemory = new HashMap<>();
     
     public Set<String> commonProximates(Set<String> T) {
-        assert (T != null && !T.isEmpty());
+        assert T != null && !T.isEmpty();
         Set<String> proximates = null;
         if (T.size() < 5 && proximatesMemory.containsKey(T)) {
             proximates = proximatesMemory.get(T);
@@ -140,7 +140,7 @@ public class ProximityMap {
     private Map<String, ProximityRelation> proximityClass(String f) {
         return relations.computeIfAbsent(f, head -> {
             // initialize with id-relation
-            assert (arities.containsKey(head));
+            assert arities.containsKey(head);
             int arity = arities.get(head);
             List<List<Integer>> mapping = new ArrayList<>(arity);
             for (int i = 0; i < arity; i++) {
@@ -153,12 +153,12 @@ public class ProximityMap {
     }
     
     public ProximityRelation proximityRelation(String f, String g) {
-        assert (relations.containsKey(f) && relations.containsKey(g));
+        assert relations.containsKey(f) && relations.containsKey(g);
         return proximityClass(f).get(g);
     }
     
     public int arity(String f) {
-        assert (arities.containsKey(f));
+        assert arities.containsKey(f);
         return arities.get(f);
     }
     
