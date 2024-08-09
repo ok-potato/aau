@@ -310,14 +310,11 @@ public final class Algorithm {
         W1.addLast(Substitution.applyAll(config.substitutions, Term.VAR_0));
         W2.addLast(Substitution.applyAll(config.substitutions, Term.VAR_0));
         
-        log.debug("👀{}", config.S);
         for (AUT aut : config.S) {
             Pair<Deque<Term>, Deque<Term>> applied = aut.pairApply(W1, W2);
             W1 = applied.a;
             W2 = applied.b;
         }
-        log.debug("LHS: " + DataUtils.joinString(W1, " , ", ""));
-        log.debug("RHS: " + DataUtils.joinString(W2, " , ", ""));
         return new Pair<>(W1, W2);
     }
     
