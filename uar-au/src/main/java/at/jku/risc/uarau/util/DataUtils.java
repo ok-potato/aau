@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DataUtils {
@@ -16,6 +17,22 @@ public class DataUtils {
         for (int i = list.size(); i < newSize; i++) {
             list.add(supplier.get());
         }
+    }
+    
+    public static <T> boolean unique(Collection<T> collection) {
+        return unique(collection, Function.identity());
+    }
+    
+    public static <T, Key> boolean unique(Collection<T> collection, Function<T, Key> extractKey) {
+        Set<Key> keySet = new HashSet<>();
+        for (T t : collection) {
+            Key key = extractKey.apply(t);
+            if (keySet.contains(key)) {
+                return false;
+            }
+            keySet.add(key);
+        }
+        return true;
     }
     
     public static <T> Deque<T> copyDeque(Deque<T> original) {
@@ -74,7 +91,7 @@ public class DataUtils {
         }
         
         public Term build() {
-            assert (arguments != null);
+            assert arguments != null;
             Term t = new Term(head, arguments);
             arguments = null;
             log.trace("Parsed term: {}", t);

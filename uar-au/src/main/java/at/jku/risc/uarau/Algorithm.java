@@ -11,12 +11,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Algorithm {
-    public static Set<Config> solve(String problem, String proximityRelations, float lambda) {
+    public static Set<Solution> solve(String problem, String proximityRelations, float lambda) {
         List<Term> sides = Parser.parseProblem(problem);
         return solve(sides.get(0), sides.get(1), Parser.parseProximityRelations(proximityRelations), lambda, Math::min, false, true);
     }
     
-    public static Set<Config> solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, float lambda, TNorm t_norm, boolean linear, boolean witness) {
+    public static Set<Solution> solve(Term lhs, Term rhs, Collection<ProximityRelation> relations, float lambda, TNorm t_norm, boolean linear, boolean witness) {
         return new Algorithm(lhs, rhs, relations, t_norm, lambda, linear, witness).run();
     }
     
@@ -38,7 +38,7 @@ public final class Algorithm {
         this.witness = witness;
     }
     
-    private Set<Config> run() {
+    private Set<Solution> run() {
         // TODO analyze for correspondence/mapping properties
         Config initCfg = new Config(lhs, rhs);
         log.info("SOLVING  ::  λ={}\n                   ::  {}{}", lambda, initCfg.A.peek(), R.toString("\n                   ::  "));
@@ -50,7 +50,7 @@ public final class Algorithm {
         // APPLY RULES
         BRANCHING:
         while (!branches.isEmpty()) {
-            assert(branches.stream().distinct().count() == branches.size());
+            assert DataUtils.unique(branches);
             Config config = branches.removeFirst();
             while (!config.A.isEmpty()) {
                 AUT aut = config.A.removeFirst();
@@ -73,16 +73,16 @@ public final class Algorithm {
                 config.S.addLast(aut);
                 log.debug("SOL => {}", config);
             }
-            assert (config.A.isEmpty());
+            assert config.A.isEmpty();
             linearSolutions.addLast(config);
         }
         log.debug("Common proximate memory ({}): {}", R.proximatesMemory.size(), R.proximatesMemory);
         
         // POST PROCESS
-        assert (linearSolutions.stream().distinct().count() == linearSolutions.size());
+        assert DataUtils.unique(linearSolutions);
         log.info("Solutions (LINEAR):\n                   ::  {}", DataUtils.joinString(linearSolutions, "\n                   ::  ", "--"));
         if (linear && !witness) {
-            return new HashSet<>(linearSolutions);
+            return linearSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
         }
         // EXPAND
         Deque<Config> expandedSolutions = new ArrayDeque<>(linearSolutions.size());
@@ -95,11 +95,10 @@ public final class Algorithm {
             expandedSolutions.addLast(linearSolution.update_S(S_expanded));
         }
         
-        assert (expandedSolutions.stream().distinct().count() == expandedSolutions.size());
+        assert DataUtils.unique(expandedSolutions);
         log.info("Solutions (EXPANDED):\n                   ::  {}", DataUtils.joinString(expandedSolutions, "\n                   ::  ", "--"));
         if (linear) {
-            listWitnesses(expandedSolutions);
-            return new HashSet<>(expandedSolutions);
+            return expandedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
         }
         
         // MERGE
@@ -145,22 +144,9 @@ public final class Algorithm {
             }
             mergedSolutions.addLast(expandedSolution.update_S(S_merged));
         }
-        assert (mergedSolutions.stream().allMatch(merged -> isLinear(merged.S)));
+        assert mergedSolutions.stream().map(merged -> merged.S).allMatch(S -> DataUtils.unique(S, aut -> aut.var));
         log.info("Solutions (MERGED):\n                   ::  {}", DataUtils.joinString(mergedSolutions, "\n                   ::  ", "--"));
-        listWitnesses(mergedSolutions);
-        log.info("~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~ ~~~~~");
-        return new HashSet<>(mergedSolutions);
-    }
-    
-    private boolean isLinear(Collection<AUT> S) {
-        Set<Integer> occurred = new HashSet<>();
-        for (AUT aut : S) {
-            if (occurred.contains(aut.var)) {
-                return false;
-            }
-            occurred.add(aut.var);
-        }
-        return true;
+        return mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
     }
     
     private Set<Config> decompose(AUT aut, Config cfg) {
@@ -178,7 +164,7 @@ public final class Algorithm {
             if (alpha1 < lambda || alpha2 < lambda) {
                 continue;
             }
-            assert (Q1 != null && Q2 != null);
+            assert Q1 != null && Q2 != null;
             if (Q1.stream().anyMatch(q -> !consistent(q)) || Q2.stream().anyMatch(q -> !consistent(q))) {
                 continue;
             }
@@ -192,7 +178,6 @@ public final class Algorithm {
                 child.A.addLast(new AUT(y_i, Q1.get(i), Q2.get(i)));
             }
             Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
-            assert (!(h_term.mappedVar && h_args.length > 0));
             child.substitutions.addLast(new Substitution(aut.var, h_term));
             child.alpha1 = alpha1;
             child.alpha2 = alpha2;
@@ -209,7 +194,7 @@ public final class Algorithm {
             Q.add(new HashSet<>());
         }
         for (Term t : T) {
-            assert (!t.isVar() && t.arguments != null);
+            assert !t.isVar() && t.arguments != null;
             ProximityRelation proximityRelation = R.proximityRelation(h, t.head);
             List<List<Integer>> h_to_t = proximityRelation.argRelation;
             for (int i = 0; i < h_arity; i++) {
@@ -220,7 +205,7 @@ public final class Algorithm {
             }
             beta = t_norm.apply(beta, proximityRelation.proximity);
             if (beta < lambda) {
-                return new Pair<>(null, beta); // if this gets dereferenced, there's a bug somewhere else
+                return new Pair<>(null, beta); // should not be dereferenced
             }
         }
         return new Pair<>(Q, beta);
@@ -248,7 +233,7 @@ public final class Algorithm {
         Pair<Set<Term>, Integer> C1 = conjunction(T1, freshVar);
         freshVar = C1.b;
         Pair<Set<Term>, Integer> C2 = conjunction(T2, freshVar);
-        assert (!C1.a.isEmpty() || C2.a.isEmpty());
+        assert !C1.a.isEmpty() || C2.a.isEmpty();
         return new Pair<>(C1.a, C2.a);
     }
     
@@ -278,7 +263,7 @@ public final class Algorithm {
                 // REDUCE
                 for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(Collectors.toSet()))) {
                     List<Set<Term>> Q = map(h, expr.T, 1.0f).a;
-                    assert (Q != null);
+                    assert Q != null;
                     State childState = state.copy();
                     
                     Term[] h_args = new Term[R.arity(h)];
@@ -290,7 +275,6 @@ public final class Algorithm {
                     }
                     freshVar = Math.max(freshVar, childState.peekVar());
                     Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
-                    assert (!(h_term.mappedVar && h_args.length > 0));
                     childState.s.addLast(new Substitution(expr.var, h_term));
                     branches.push(childState);
                     if (log.isTraceEnabled()) {
@@ -320,21 +304,29 @@ public final class Algorithm {
         return new Pair<>(solutions, freshVar);
     }
     
-    public void listWitnesses(Deque<Config> solutions) {
-        for (Config solution : solutions) {
-            Deque<Term> W1 = new ArrayDeque<>();
-            Deque<Term> W2 = new ArrayDeque<>();
-            W1.addLast(Substitution.applyAll(solution.substitutions, Term.VAR_0));
-            W2.addLast(Substitution.applyAll(solution.substitutions, Term.VAR_0));
-            
-            log.debug("👀{}", solution.S);
-            for (AUT aut : solution.S) {
-                Pair<Deque<Term>, Deque<Term>> applied = aut.pairApply(W1, W2);
-                W1 = applied.a;
-                W2 = applied.b;
-            }
-            log.debug("LHS: " + DataUtils.joinString(W1, " , ", ""));
-            log.debug("RHS: " + DataUtils.joinString(W2, " , ", ""));
+    private Pair<Deque<Term>, Deque<Term>> calculateWitnesses(Config config) {
+        Deque<Term> W1 = new ArrayDeque<>();
+        Deque<Term> W2 = new ArrayDeque<>();
+        W1.addLast(Substitution.applyAll(config.substitutions, Term.VAR_0));
+        W2.addLast(Substitution.applyAll(config.substitutions, Term.VAR_0));
+        
+        log.debug("👀{}", config.S);
+        for (AUT aut : config.S) {
+            Pair<Deque<Term>, Deque<Term>> applied = aut.pairApply(W1, W2);
+            W1 = applied.a;
+            W2 = applied.b;
         }
+        log.debug("LHS: " + DataUtils.joinString(W1, " , ", ""));
+        log.debug("RHS: " + DataUtils.joinString(W2, " , ", ""));
+        return new Pair<>(W1, W2);
+    }
+    
+    private Solution toSolution(Config config) {
+        Term r = Substitution.applyAll(config.substitutions, Term.VAR_0);
+        if (!witness) {
+            return new Solution(r, null, null, config.alpha1, config.alpha2);
+        }
+        Pair<Deque<Term>, Deque<Term>> pair = calculateWitnesses(config);
+        return new Solution(r, pair.a, pair.b, config.alpha1, config.alpha2);
     }
 }
