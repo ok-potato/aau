@@ -45,11 +45,12 @@ public final class Algorithm {
         
         Deque<Config> branches = new ArrayDeque<>();
         branches.push(initCfg);
-        // APPLY RULES
         Deque<Config> linearSolutions = new ArrayDeque<>();
+        
+        // APPLY RULES
         BRANCHING:
         while (!branches.isEmpty()) {
-            assert (new HashSet<>(branches).size() == branches.size());
+            assert(branches.stream().distinct().count() == branches.size());
             Config config = branches.removeFirst();
             while (!config.A.isEmpty()) {
                 AUT aut = config.A.removeFirst();
@@ -214,7 +215,7 @@ public final class Algorithm {
             for (int i = 0; i < h_arity; i++) {
                 for (int t_mapped_idx : h_to_t.get(i)) {
                     // Q[i] => set of args which h|i maps to
-                    Q.get(i).add(t.arguments[t_mapped_idx]);
+                    Q.get(i).add(t.arguments.get(t_mapped_idx));
                 }
             }
             beta = t_norm.apply(beta, proximityRelation.proximity);

@@ -6,6 +6,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class Config {
+    // mutable
     public final Deque<AUT> A, S;
     public final Deque<Substitution> substitutions;
     

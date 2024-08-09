@@ -4,6 +4,7 @@ import at.jku.risc.uarau.util.DataUtils;
 import at.jku.risc.uarau.util.Pair;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 
 public class Substitution {
@@ -35,9 +36,9 @@ public class Substitution {
         if (term.isVar() || term.mappedVar) {
             return term;
         }
-        Term[] arguments = new Term[term.arguments.length];
-        for (int i = 0; i < term.arguments.length; i++) {
-            arguments[i] = apply(substitution, term.arguments[i]);
+        Term[] arguments = new Term[term.arguments.size()];
+        for (int i = 0; i < term.arguments.size(); i++) {
+            arguments[i] = apply(substitution, term.arguments.get(i));
         }
         return new Term(term.head, arguments);
     }

@@ -35,8 +35,9 @@ public class UnifyMain {
     
     @SuppressWarnings("ConstantConditions")
     public static void main(String[] args) {
-        // TODO remove args override
-        args = new String[]{"-j", "-m", "10", "-d", "f(g(x,b), X, b) =? f(g(y,x), g(a), b, b);f(g(x,b), X, b) =? f(g(y,x), g(a), b, b)"};
+        if (args.length == 0) {
+            args = new String[]{"-j", "-m", "10", "-d", "f(g(x,b), X, b) =? f(g(y,x), g(a), b, b);f(g(x,b), X, b) =? f(g(y,x), g(a), b, b)"};
+        }
         
         StringBuilder problemSet = new StringBuilder();
         for (int i = 0; i < args.length; i++) {

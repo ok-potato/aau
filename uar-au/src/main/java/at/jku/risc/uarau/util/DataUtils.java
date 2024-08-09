@@ -5,11 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class DataUtils {
     static Logger log = LoggerFactory.getLogger(DataUtils.class);
     
     // collection operations
+    
+    public static <T> void pad(List<T> list, Supplier<T> supplier, int newSize) {
+        for (int i = list.size(); i < newSize; i++) {
+            list.add(supplier.get());
+        }
+    }
     
     public static <T> Deque<T> copyDeque(Deque<T> original) {
         Deque<T> copy = new ArrayDeque<>(original.size());
@@ -68,7 +75,7 @@ public class DataUtils {
         
         public Term build() {
             assert (arguments != null);
-            Term t = new Term(head, arguments.toArray(new Term[0]));
+            Term t = new Term(head, arguments);
             arguments = null;
             log.trace("Parsed term: {}", t);
             return t;

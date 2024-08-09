@@ -69,6 +69,24 @@ public class SigmaTest extends BaseTest {
     }
     
     @Test
+    public void variableTerms() {
+        solve("a() ?= b()", "", 0.5f);
+        solve("a ?= b()", "", 0.5f);
+        solve("a() ?= b", "", 0.5f);
+        solve("a ?= b", "", 0.5f);
+    }
+    
+    @Test
+    public void parseArities() {
+        solve("f(a()) ?= f(b())", "", 0.5f);
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= a", "", 0.5f));
+        assertThrows(IllegalArgumentException.class, () -> solve("a ?= b()", "a b [0.6]{}", 0.5f));
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= a()", "a a [0.6]{}", 0.5f));
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b(c())", "a b [0.6]{1 1}", 0.5f));
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b(c())", "a b [0.6]{} ; a b [0.6]{}", 0.5f));
+    }
+    
+    @Test
     public void badSyntax() {
         // terms
         assertThrows(IllegalArgumentException.class, () -> solve(") ?= g()", "", 1.0f));

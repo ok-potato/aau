@@ -4,6 +4,8 @@ import at.jku.risc.uarau.util.DataUtils;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Term {
     public static final int UNUSED_VAR = -2;
@@ -12,29 +14,34 @@ public class Term {
     
     public final int var;
     public final String head;
-    public final Term[] arguments;
+    public final List<Term> arguments;
     
     public final boolean mappedVar;
+    
     private Integer depth = null;
     private Integer hash = null;
     
     // function/constant term
-    public Term(String head, Term[] arguments) {
+    public Term(String head, List<Term> arguments) {
         assert (!StringUtils.isBlank(head));
         this.var = UNUSED_VAR;
         this.head = head.intern();
         if (arguments == null) {
-            this.arguments = new Term[0];
+            this.arguments = Collections.emptyList();
             mappedVar = true;
         } else {
-            this.arguments = arguments;
+            this.arguments = Collections.unmodifiableList(arguments);
             mappedVar = false;
         }
     }
     
+    public Term(String head, Term[] arguments) {
+        this(head, Arrays.asList(arguments));
+    }
+    
     // mapped variable term
     public Term(String head) {
-        this(head, null);
+        this(head, (List<Term>) null);
     }
     
     // variable term
@@ -48,10 +55,10 @@ public class Term {
     
     public int depth() {
         if (depth == null) {
-            if (arguments == null || arguments.length == 0) {
+            if (arguments == null || arguments.isEmpty()) {
                 depth = 0;
             } else {
-                depth = 1 + Arrays.stream(arguments).map(Term::depth).max(Integer::compare).orElse(0);
+                depth = 1 + arguments.stream().map(Term::depth).max(Integer::compare).orElse(0);
             }
         }
         return depth;
@@ -72,7 +79,7 @@ public class Term {
         if (mappedVar) {
             return head;
         }
-        return head + DataUtils.joinString(Arrays.asList(arguments), ",", "()", "(", ")");
+        return head + DataUtils.joinString(arguments, ",", "()", "(", ")");
     }
     
     @Override
@@ -81,7 +88,7 @@ public class Term {
             if (isVar()) {
                 hash = var;
             } else {
-                hash = head.hashCode() + 31 * Arrays.hashCode(arguments);
+                hash = head.hashCode() + 31 * arguments.hashCode();
             }
         }
         return hash;
@@ -102,6 +109,6 @@ public class Term {
         if (isVar()) {
             return var == otherTerm.var;
         }
-        return head.equals(otherTerm.head) && Arrays.equals(arguments, otherTerm.arguments);
+        return head.equals(otherTerm.head) && arguments.equals(otherTerm.arguments);
     }
 }

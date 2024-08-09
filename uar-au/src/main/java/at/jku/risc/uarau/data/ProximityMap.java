@@ -1,6 +1,7 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,39 +13,38 @@ public class ProximityMap {
     
     private final Map<String, Map<String, ProximityRelation>> relations = new HashMap<>();
     private final Map<String, Integer> arities;
-    private final Set<String> mappedVars = new HashSet<>();
+    private final Set<String> vars;
     
-    public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
-        // disallow explicit definition of proximity relations, because dealing with them is too annoying
-        proximityRelations.forEach(relation -> {
+    public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> relations, float lambda) {
+        // add flipped relations - don't allow declaring identity relations, even if they follow the definition
+        List<ProximityRelation> allRelations = new ArrayList<>(relations.size() * 2);
+        relations.forEach(relation -> {
             if (relation.f == relation.g) {
-                log.error("Input includes proximity relation of a function onto itself: {}", relation);
+                log.error("Identity proximity relation: {}", relation);
                 throw new IllegalArgumentException();
             }
+            allRelations.add(relation);
+            allRelations.add(relation.flipped());
         });
-        // add flipped relations
-        List<ProximityRelation> allProximityRelations = new ArrayList<>(proximityRelations.size() * 2);
-        proximityRelations.forEach(relation -> {
-            ProximityRelation flipped = relation.flipped();
-            assert (symmetric(relation, flipped));
-            allProximityRelations.add(relation);
-            allProximityRelations.add(flipped);
-        });
-        // check for duplicates (don't care if they're equivalent)
-        for (int i = 0; i < allProximityRelations.size() - 1; i++) {
-            for (int k = i + 1; k < allProximityRelations.size(); k++) {
-                ProximityRelation first = allProximityRelations.get(i);
-                ProximityRelation second = allProximityRelations.get(k);
-                if (first.f == second.f && first.g == second.g) {
-                    log.error("Duplicate proximity relation found: {} {}", first, second);
-                    throw new IllegalArgumentException();
-                }
+        
+        // don't allow duplicates, even if they're equivalent
+        Map<String, ProximityRelation> existing = new HashMap<>();
+        for (ProximityRelation pr : allRelations) {
+            String key = pr.f + "," + pr.g;
+            if (existing.containsKey(key)) {
+                log.error("Duplicate proximity relation: {} {}", existing.get(key), pr);
+                throw new IllegalArgumentException();
             }
+            existing.put(key, pr);
         }
-        arities = calculateArities(rhs, lhs, allProximityRelations);
+        
+        Pair<Map<String, Integer>, Set<String>> pair = findArities(rhs, lhs, allRelations);
+        arities = Collections.unmodifiableMap(pair.a);
+        vars = Collections.unmodifiableSet(pair.b);
         log.trace("Arities {}", arities);
-        // filter out relations with proximity < λ
-        allProximityRelations.removeIf(relation -> {
+        
+        // optimization: remove relations with proximity < λ
+        allRelations.removeIf(relation -> {
             if (relation.proximity < lambda) {
                 log.info("Discarding relation {} with proximity < λ [{}]", relation, lambda);
                 return true;
@@ -52,89 +52,65 @@ public class ProximityMap {
             return false;
         });
         
-        for (ProximityRelation relation : allProximityRelations) {
-            // if the last argument position of f/g doesn't show up in the relation, we have to pad it accordingly
-            for (int i = relation.argRelation.size(); i < arity(relation.f); i++) {
-                relation.argRelation.add(new ArrayList<>());
-            }
+        for (ProximityRelation relation : allRelations) {
+            DataUtils.pad(relation.argRelation, ArrayList::new, arity(relation.f));
             proximityClass(relation.f).put(relation.g, relation);
         }
-        
-        log.trace("PR's {}", DataUtils.joinString(allProximityRelations));
+        log.trace("PR's {}", DataUtils.joinString(allRelations));
     }
     
-    private Map<String, Integer> calculateArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
+    private Pair<Map<String, Integer>, Set<String>> findArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
+        // note: if f/g doesn't show up in a term, we assume its arity equals the maximum arity found in R
+        //       if this assumption is wrong, we're missing some non-relevant positions, and could possibly
+        //       misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM)
+        //       otherwise, arities of functions would have to be manually specified if they don't appear in a term
         Map<String, Integer> termArities = new HashMap<>();
-        getAritiesFromTerm(rhs, termArities);
-        getAritiesFromTerm(lhs, termArities);
-        // note: if f/g doesn't show up in a term, we assume its arity equals the max arity found in R
-        //   if this assumption is wrong, we're missing some non-relevant positions, and could possibly
-        //   misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM)
-        //   otherwise, arities of functions would have to be manually specified if they don't appear in a term
+        Set<String> termVars = new HashSet<>();
+        findTermArities(rhs, termArities, termVars);
+        findTermArities(lhs, termArities, termVars);
         Map<String, Integer> allArities = new HashMap<>(termArities);
         for (ProximityRelation relation : proximityRelations) {
-            int relationArity = relation.argRelation.size();
-            if (mappedVars.contains(relation.f)) {
-                log.error("Non-zero proximity between '{}' and '{}' is not allowed, since variables can only be close to themselves!", relation.f, relation.g);
+            if (termVars.contains(relation.f)) {
+                log.error("'{}' cannot be close to '{}', since it is a variable", relation.f, relation.g);
                 throw new IllegalArgumentException();
             }
             Integer termArity = termArities.get(relation.f);
-            if (termArity != null && termArity < relationArity) {
-                log.error("Arity of '{}' according to proximity relations ({}) exceeds that found in problem terms ({})", relation.f, relationArity, termArity);
+            if (termArity != null && termArity < relation.argRelation.size()) {
+                log.error("'{}' appears in the problem with arity {}, which argument relation {} exceeds", relation.f, termArity, relation);
                 throw new IllegalArgumentException();
             }
-            int previousMax = allArities.getOrDefault(relation.f, 0);
-            allArities.put(relation.f, Math.max(previousMax, relationArity));
+            int newArity = Math.max(relation.argRelation.size(), allArities.getOrDefault(relation.f, 0));
+            allArities.put(relation.f, newArity);
         }
-        return Collections.unmodifiableMap(allArities);
+        return new Pair<>(allArities, termVars);
     }
     
-    private void getAritiesFromTerm(Term t, Map<String, Integer> map) {
-        assert (!t.isVar());
-        Integer existing = map.get(t.head);
-        if (existing != null && existing != t.arguments.length) {
-            log.error("Found multiple arities of '{}' in the posed problem!", t.head);
-            throw new IllegalArgumentException();
+    private void findTermArities(Term t, Map<String, Integer> arityMap, Set<String> varSet) {
+        assert (!t.isVar()); // can only have mapped vars
+        if (arityMap.containsKey(t.head)) {
+            if (arityMap.get(t.head) != t.arguments.size()) {
+                log.error("Found multiple arities of '{}' in the posed problem", t.head);
+                throw new IllegalArgumentException();
+            }
+            if (varSet.contains(t.head) != t.mappedVar) {
+                log.error("'{}' appears as both a variable and a function/constant symbol", t.head);
+                throw new IllegalArgumentException();
+            }
+        } else {
+            arityMap.put(t.head, t.arguments.size());
+            if (t.mappedVar) {
+                varSet.add(t.head);
+            }
         }
-        boolean mappedVar = mappedVars.contains(t.head);
-        if (existing != null && !mappedVar && t.mappedVar || mappedVar && !t.mappedVar) {
-            log.error("'{}' appears both as a variable and a function/constant symbol!", t.head);
-            throw new IllegalArgumentException();
-        }
-        if (!mappedVar && t.mappedVar) {
-            mappedVars.add(t.head);
-        }
-        map.put(t.head, t.arguments.length);
         for (Term arg : t.arguments) {
-            getAritiesFromTerm(arg, map);
+            findTermArities(arg, arityMap, varSet);
         }
-    }
-    
-    private static boolean symmetric(ProximityRelation f_to_g, ProximityRelation g_to_f) {
-        if (f_to_g.f != g_to_f.g || f_to_g.g != g_to_f.f || f_to_g.proximity != g_to_f.proximity) {
-            return false;
-        }
-        for (int i = 0; i < f_to_g.argRelation.size(); i++) {
-            for (int j : f_to_g.argRelation.get(i)) {
-                if (!g_to_f.argRelation.get(j).contains(i)) {
-                    return false;
-                }
-            }
-        }
-        for (int i = 0; i < g_to_f.argRelation.size(); i++) {
-            for (int j : g_to_f.argRelation.get(i)) {
-                if (!f_to_g.argRelation.get(j).contains(i)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
     
     // #################################################################################################################
     
     public boolean isMappedVar(String h) {
-        return mappedVars.contains(h);
+        return vars.contains(h);
     }
     
     public Map<Set<String>, Set<String>> proximatesMemory = new HashMap<>();
@@ -178,7 +154,6 @@ public class ProximityMap {
     
     public ProximityRelation proximityRelation(String f, String g) {
         assert (relations.containsKey(f) && relations.containsKey(g));
-        assert (symmetric(relations.get(f).get(g), relations.get(g).get(f)));
         return proximityClass(f).get(g);
     }
     

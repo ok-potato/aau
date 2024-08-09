@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.Set;
 
 public class State {
+    // mutable
     public final Deque<Expression> expressions;
     public final Deque<Substitution> s;
     

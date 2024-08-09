@@ -1,6 +1,6 @@
-<mxfile host="Electron" modified="2024-07-30T13:48:40.331Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.4.0 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="YOtD5uKvV5D4YPoY0oJU" version="24.4.0" type="device">
+<mxfile host="Electron" modified="2024-08-09T10:53:41.989Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.4.0 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="_GhB2bEYeoL8DzN2eA_j" version="24.4.0" type="device">
   <diagram name="Page-1" id="MV5HsdUabSFrRN66-z7L">
-    <mxGraphModel dx="749" dy="496" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1311" dy="868" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -337,8 +337,8 @@
         <mxCell id="6lFc_eY8YoypXEXzRmWN-26" value="&lt;font color=&quot;#ffd966&quot;&gt;is this check valid? -&amp;gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="520" y="295" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="6lFc_eY8YoypXEXzRmWN-27" value="&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;------------------&amp;gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;redundant in&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;case A2, but&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;is simple&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;O(1) check,&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;assuming&lt;/font&gt;&lt;span style=&quot;color: rgb(255, 217, 102); background-color: initial;&quot;&gt;&amp;nbsp;we&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;can do that&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;singleton check&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry y="577" width="110" height="130" as="geometry" />
+        <mxCell id="6lFc_eY8YoypXEXzRmWN-27" value="&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;-------------------&amp;gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;redundant in&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;case A2, but&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;is simple&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;O(1) check,&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;assuming&lt;/font&gt;&lt;span style=&quot;color: rgb(255, 217, 102); background-color: initial;&quot;&gt;&amp;nbsp;we&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;can do that&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font color=&quot;#ffd966&quot;&gt;singleton check&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry y="574" width="110" height="130" as="geometry" />
         </mxCell>
         <mxCell id="Q2FId8yKk_eVO32PVIF4-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Q2FId8yKk_eVO32PVIF4-1" target="6lFc_eY8YoypXEXzRmWN-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -500,9 +500,6 @@
         <mxCell id="WWlJEaZljJ-mq685sAvS-1" value="&lt;div&gt;map() ex.:&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;T1 = {&lt;font style=&quot;background-color: initial;&quot; color=&quot;#ff99cc&quot;&gt;f(a(), g(b()))&lt;/font&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;,&lt;/span&gt;&lt;span style=&quot;color: rgb(153, 153, 255); background-color: initial;&quot;&gt;g(c())&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;}&lt;/span&gt;&lt;/div&gt;&lt;div&gt;T2 = {}&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;div&gt;&lt;font color=&quot;#ff99cc&quot;&gt;h ={(1,1), (2, 1), (3, 2)}=&amp;gt; f&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#9999ff&quot;&gt;h ={(2,1), (3,1)}=&amp;gt; g&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;x =&amp;gt; h(y1, y2, y3)&lt;/div&gt;&lt;div style=&quot;&quot;&gt;yi : Qi1 ^ Qi2&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;font color=&quot;#ff99cc&quot;&gt;Q11 u= a()&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;font color=&quot;#ff99cc&quot;&gt;Q21 u= a()&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;font color=&quot;#ff99cc&quot;&gt;Q31 u= g(b())&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;font color=&quot;#9999ff&quot;&gt;Q21 u= c()&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;font color=&quot;#9999ff&quot;&gt;Q31 u= c()&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="280" y="760" width="160" height="260" as="geometry" />
         </mxCell>
-        <mxCell id="nS1F547-piA9_K0EXpSQ-2" value="&lt;font color=&quot;#ffd966&quot;&gt;note: C({}) = {_}&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="730" y="565" width="110" height="30" as="geometry" />
-        </mxCell>
         <mxCell id="nS1F547-piA9_K0EXpSQ-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="nS1F547-piA9_K0EXpSQ-9" target="nS1F547-piA9_K0EXpSQ-10" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -541,9 +538,6 @@
         </mxCell>
         <mxCell id="nS1F547-piA9_K0EXpSQ-27" value="&lt;div&gt;M u= a&lt;/div&gt;E.removeAll(J)&lt;div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="970" y="710" width="100" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="nS1F547-piA9_K0EXpSQ-46" value="&lt;div&gt;&lt;font color=&quot;#1c180b&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;&lt;u&gt;TODO: Example 7&lt;/u&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-          <mxGeometry x="1220" y="310" width="180" height="40" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
