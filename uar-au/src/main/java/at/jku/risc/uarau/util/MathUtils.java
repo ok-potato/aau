@@ -5,6 +5,7 @@ public class MathUtils {
         return Math.abs(a - b) < 0.00001f * Math.abs(a + b) / 2;
     }
     
+    // this has nothing to do with anything, but it's kind of cool
     public static long parseBits(String s) {
         s = s.replaceAll("_", "");
         if (s.length() > 64 || s.chars().anyMatch(c -> c != '1' && c != '0')) {

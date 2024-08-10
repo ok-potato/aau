@@ -3,9 +3,7 @@ package at.jku.risc.uarau.data;
 import at.jku.risc.uarau.util.DataUtils;
 import org.junit.platform.commons.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Term {
     public static final int UNUSED_VAR = -2;
@@ -17,9 +15,6 @@ public class Term {
     public final List<Term> arguments;
     
     public final boolean mappedVar;
-    
-    private Integer depth = null;
-    private Integer hash = null;
     
     // function/constant term
     public Term(String head, List<Term> arguments) {
@@ -53,6 +48,8 @@ public class Term {
         mappedVar = false;
     }
     
+    private Integer depth = null;
+    
     public int depth() {
         if (depth == null) {
             if (arguments == null || arguments.isEmpty()) {
@@ -62,6 +59,22 @@ public class Term {
             }
         }
         return depth;
+    }
+    
+    private Set<Integer> V = null;
+    
+    public Set<Integer> V() {
+        if (V == null) {
+            V = new HashSet<>();
+            if (arguments == null) {
+                V.add(var);
+            } else {
+                for (Term argument : arguments) {
+                    V.addAll(argument.V());
+                }
+            }
+        }
+        return V;
     }
     
     public boolean isVar() {
@@ -81,6 +94,8 @@ public class Term {
         }
         return head + DataUtils.joinString(arguments, ",", "()", "(", ")");
     }
+    
+    private Integer hash = null;
     
     @Override
     public int hashCode() {

@@ -30,7 +30,19 @@ public class AUT {
         return Stream.concat(T1.stream(), T2.stream()).map(t -> t.head).collect(Collectors.toSet());
     }
     
-    public Pair<Deque<Term>, Deque<Term>> pairApply(Deque<Term> Q1, Deque<Term> Q2) {
+    public static Pair<Deque<Term>, Deque<Term>> applyAll(Deque<AUT> auts, Term q1, Term q2) {
+        Pair<Deque<Term>, Deque<Term>> applied = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
+        applied.a.add(q1);
+        applied.b.add(q2);
+        for (AUT aut : auts) {
+            Pair<Deque<Term>, Deque<Term>> pair = aut.apply(applied.a, applied.b);
+            applied.a = pair.a;
+            applied.b = pair.b;
+        }
+        return applied;
+    }
+    
+    public Pair<Deque<Term>, Deque<Term>> apply(Deque<Term> Q1, Deque<Term> Q2) {
         Pair<Deque<Term>, Deque<Term>> pair = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
         for (Term baseTerm : Q1) {
             for (Term t : T1) {

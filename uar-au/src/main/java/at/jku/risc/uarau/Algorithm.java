@@ -304,26 +304,21 @@ public final class Algorithm {
         return new Pair<>(solutions, freshVar);
     }
     
-    private Pair<Deque<Term>, Deque<Term>> calculateWitnesses(Config config) {
-        Deque<Term> W1 = new ArrayDeque<>();
-        Deque<Term> W2 = new ArrayDeque<>();
-        W1.addLast(Substitution.applyAll(config.substitutions, Term.VAR_0));
-        W2.addLast(Substitution.applyAll(config.substitutions, Term.VAR_0));
-        
-        for (AUT aut : config.S) {
-            Pair<Deque<Term>, Deque<Term>> applied = aut.pairApply(W1, W2);
-            W1 = applied.a;
-            W2 = applied.b;
-        }
-        return new Pair<>(W1, W2);
-    }
-    
     private Solution toSolution(Config config) {
         Term r = Substitution.applyAll(config.substitutions, Term.VAR_0);
-        if (!witness) {
-            return new Solution(r, null, null, config.alpha1, config.alpha2);
-        }
-        Pair<Deque<Term>, Deque<Term>> pair = calculateWitnesses(config);
+        Pair<Witness, Witness> pair = witness ? calculateWitnesses(config, r) : new Pair<>(null, null);
         return new Solution(r, pair.a, pair.b, config.alpha1, config.alpha2);
+    }
+    
+    private Pair<Witness, Witness> calculateWitnesses(Config config, Term r) {
+        Map<Integer, Deque<Term>> W1 = new HashMap<>();
+        Map<Integer, Deque<Term>> W2 = new HashMap<>();
+        for (int var : r.V()) {
+            Term varTerm = new Term(var);
+            Pair<Deque<Term>, Deque<Term>> applied = AUT.applyAll(config.S, varTerm, varTerm);
+            W1.put(var, applied.a);
+            W2.put(var, applied.b);
+        }
+        return new Pair<>(new Witness(W1), new Witness(W2));
     }
 }
