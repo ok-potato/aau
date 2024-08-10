@@ -63,15 +63,15 @@ public class Term {
     
     private Set<Integer> V = null;
     
-    public Set<Integer> V() {
+    public Set<Integer> V_named() {
         if (V == null) {
             V = new HashSet<>();
-            if (arguments == null) {
-                V.add(var);
-            } else {
+            if (arguments != null) {
                 for (Term argument : arguments) {
-                    V.addAll(argument.V());
+                    V.addAll(argument.V_named());
                 }
+            } else if (this != ANON) {
+                V.add(var);
             }
         }
         return V;

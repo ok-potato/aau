@@ -313,7 +313,7 @@ public final class Algorithm {
     private Pair<Witness, Witness> calculateWitnesses(Config config, Term r) {
         Map<Integer, Deque<Term>> W1 = new HashMap<>();
         Map<Integer, Deque<Term>> W2 = new HashMap<>();
-        for (int var : r.V()) {
+        for (int var : r.V_named()) {
             Term varTerm = new Term(var);
             Pair<Deque<Term>, Deque<Term>> applied = AUT.applyAll(config.S, varTerm, varTerm);
             W1.put(var, applied.a);
