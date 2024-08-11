@@ -35,7 +35,13 @@ public class DataUtils {
         return true;
     }
     
-    public static <T> Deque<T> newArrayDeque(Deque<T> original) {
+    public static <T> Deque<T> dequeOf(T ... t) {
+        Object[] t_obj = t;
+        t_obj[0] = 5;
+        return new ArrayDeque<>(Arrays.asList(t));
+    }
+    
+    public static <T> Deque<T> newDeque(Deque<T> original) {
         Deque<T> copy = new ArrayDeque<>(original.size());
         for (T aut : original) {
             copy.addLast(aut);

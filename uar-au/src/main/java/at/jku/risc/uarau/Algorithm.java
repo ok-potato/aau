@@ -103,7 +103,7 @@ public final class Algorithm {
         // MERGE
         Deque<Config> mergedSolutions = new ArrayDeque<>();
         for (Config expandedSolution : expandedSolutions) {
-            Deque<AUT> S_expanded = DataUtils.newArrayDeque(expandedSolution.S);
+            Deque<AUT> S_expanded = DataUtils.newDeque(expandedSolution.S);
             Deque<AUT> S_merged = new ArrayDeque<>();
             while (!S_expanded.isEmpty()) {
                 int freshVar = expandedSolution.peekVar();

@@ -29,9 +29,9 @@ public class Config {
     }
     
     private Config(Config original, Deque<AUT> S) {
-        this.A = DataUtils.newArrayDeque(original.A);
-        this.S = DataUtils.newArrayDeque(S);
-        this.substitutions = DataUtils.newArrayDeque(original.substitutions);
+        this.A = DataUtils.newDeque(original.A);
+        this.S = DataUtils.newDeque(S);
+        this.substitutions = DataUtils.newDeque(original.substitutions);
         this.alpha1 = original.alpha1;
         this.alpha2 = original.alpha2;
         this.freshVar = original.freshVar;

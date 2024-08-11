@@ -18,7 +18,7 @@ public class Substitution {
         if (substitutions.isEmpty()) {
             return new Term(baseVariable);
         }
-        substitutions = DataUtils.newArrayDeque(substitutions);
+        substitutions = DataUtils.newDeque(substitutions);
         Term term = substitutions.removeFirst().term;
         while (!substitutions.isEmpty()) {
             term = apply(substitutions.pop(), term);

@@ -21,8 +21,8 @@ public class State {
     }
     
     private State(State original) {
-        this.expressions = DataUtils.newArrayDeque(original.expressions);
-        this.s = DataUtils.newArrayDeque(original.s);
+        this.expressions = DataUtils.newDeque(original.expressions);
+        this.s = DataUtils.newDeque(original.s);
         this.freshVar = original.freshVar;
     }
     
