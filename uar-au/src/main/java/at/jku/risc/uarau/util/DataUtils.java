@@ -1,22 +1,22 @@
 package at.jku.risc.uarau.util;
 
-import at.jku.risc.uarau.data.Term;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DataUtils {
-    static Logger log = LoggerFactory.getLogger(DataUtils.class);
-    
     // collection operations
     
     public static <T> void pad(List<T> list, Supplier<T> supplier, int newSize) {
         for (int i = list.size(); i < newSize; i++) {
             list.add(supplier.get());
         }
+    }
+    
+    public static <T> Set<T> conjunction(Set<T> a, Set<T> b) {
+        Set<T> s = new HashSet<>(a);
+        s.addAll(b);
+        return s;
     }
     
     public static <T> boolean unique(Collection<T> collection) {
@@ -35,7 +35,7 @@ public class DataUtils {
         return true;
     }
     
-    public static <T> Deque<T> copyDeque(Deque<T> original) {
+    public static <T> Deque<T> newArrayDeque(Deque<T> original) {
         Deque<T> copy = new ArrayDeque<>(original.size());
         for (T aut : original) {
             copy.addLast(aut);
@@ -78,24 +78,5 @@ public class DataUtils {
             sb.append("]");
         }
         return sb.append("}").toString();
-    }
-    
-    // build
-    
-    public static class TermBuilder {
-        public String head;
-        public List<Term> arguments = new ArrayList<>();
-        
-        public TermBuilder(String head) {
-            this.head = head;
-        }
-        
-        public Term build() {
-            assert arguments != null;
-            Term t = new Term(head, arguments);
-            arguments = null;
-            log.trace("Parsed term: {}", t);
-            return t;
-        }
     }
 }

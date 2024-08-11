@@ -35,12 +35,12 @@ public class Parser {
         // split...    (?<=\() => if last char was '('    , => on ','    (?=\)) => if next char is ')'
         String[] tokens = string.split("(?<=\\()|,|(?=\\))");
         
-        Deque<DataUtils.TermBuilder> subTerms = new ArrayDeque<>();
-        subTerms.add(new DataUtils.TermBuilder(",")); // dummyTerm
+        Deque<TermBuilder> subTerms = new ArrayDeque<>();
+        subTerms.add(new TermBuilder(",")); // dummyTerm
         for (String token : tokens) {
             assert subTerms.peek() != null;
             if (token.equals(")")) {
-                DataUtils.TermBuilder subTerm = subTerms.pop();
+                TermBuilder subTerm = subTerms.pop();
                 if (subTerms.peek() == null) {
                     log.error("Too many closing parentheses in term \"{}\"", string);
                     throw new IllegalArgumentException();
@@ -54,7 +54,7 @@ public class Parser {
                     log.error("Missing function name in {}", string);
                     throw new IllegalArgumentException();
                 }
-                subTerms.push(new DataUtils.TermBuilder(head));
+                subTerms.push(new TermBuilder(head));
                 continue;
             }
             if (Arrays.stream(new String[]{"(", ",", ")"}).anyMatch(token::contains)) {
@@ -71,7 +71,7 @@ public class Parser {
             log.error("Unclosed parentheses in term \"{}\"", string);
             throw new IllegalArgumentException();
         }
-        DataUtils.TermBuilder dummyTerm = subTerms.pop();
+        TermBuilder dummyTerm = subTerms.pop();
         if (dummyTerm.arguments.size() > 1) {
             log.error("Multiple top level terms on one side: {}", string);
             throw new IllegalArgumentException();
@@ -157,5 +157,22 @@ public class Parser {
             parsedArgRelations.get(argRelations.get(i * 2) - 1).add(argRelations.get(i * 2 + 1) - 1);
         }
         return parsedArgRelations;
+    }
+    
+    private static class TermBuilder {
+        public String head;
+        public List<Term> arguments = new ArrayList<>();
+        
+        public TermBuilder(String head) {
+            this.head = head;
+        }
+        
+        public Term build() {
+            assert arguments != null;
+            Term t = new Term(head, arguments);
+            arguments = null;
+            log.trace("Parsed term: {}", t);
+            return t;
+        }
     }
 }

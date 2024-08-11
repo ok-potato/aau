@@ -87,12 +87,11 @@ public final class Algorithm {
         // EXPAND
         Deque<Config> expandedSolutions = new ArrayDeque<>(linearSolutions.size());
         for (Config linearSolution : linearSolutions) {
-            Deque<AUT> S_expanded = new ArrayDeque<>();
-            for (AUT aut : linearSolution.S) {
-                Pair<Set<Term>, Set<Term>> C = pairConjunction(aut.T1, aut.T2, linearSolution.peekVar());
-                S_expanded.addLast(new AUT(aut.var, C.a, C.b));
-            }
-            expandedSolutions.addLast(linearSolution.update_S(S_expanded));
+            Deque<AUT> S_expanded = linearSolution.S.stream()
+                    .map(aut -> expand(aut, linearSolution.peekVar()))
+                    .collect(Collectors.toCollection(ArrayDeque::new));
+            
+            expandedSolutions.addLast(linearSolution.copy_update_S(S_expanded));
         }
         
         assert DataUtils.unique(expandedSolutions);
@@ -104,47 +103,42 @@ public final class Algorithm {
         // MERGE
         Deque<Config> mergedSolutions = new ArrayDeque<>();
         for (Config expandedSolution : expandedSolutions) {
-            Deque<AUT> S_expanded = DataUtils.copyDeque(expandedSolution.S);
+            Deque<AUT> S_expanded = DataUtils.newArrayDeque(expandedSolution.S);
             Deque<AUT> S_merged = new ArrayDeque<>();
             while (!S_expanded.isEmpty()) {
                 int freshVar = expandedSolution.peekVar();
                 
-                AUT collector = S_expanded.removeFirst();
-                Set<Term> R11 = new HashSet<>(collector.T1);
-                Set<Term> R12 = new HashSet<>(collector.T2);
+                AUT merger = S_expanded.removeFirst();
+                Set<Term> R11 = new HashSet<>(merger.T1);
+                Set<Term> R12 = new HashSet<>(merger.T2);
                 
-                Deque<AUT> S_expanded_rest = new ArrayDeque<>();
-                Deque<Integer> X = new ArrayDeque<>();
-                X.add(collector.var);
-                for (AUT merging : S_expanded) {
-                    // CHECK MERGE
-                    Triple<Set<Term>, Set<Term>, Integer> Q = merge(R11, merging.T1, R12, merging.T2, freshVar);
-                    
-                    if (Q.a.isEmpty() || Q.b.isEmpty()) {
-                        // couldn't merge
-                        S_expanded_rest.add(merging);
-                        continue;
+                Deque<AUT> unmerged = new ArrayDeque<>();
+                Deque<Integer> mergedVars = new ArrayDeque<>();
+                mergedVars.add(merger.var);
+                for (AUT candidate : S_expanded) {
+                    Triple<Set<Term>, Set<Term>, Integer> merged = merge(R11, candidate.T1, R12, candidate.T2, freshVar);
+                    if (merged.a.isEmpty() || merged.b.isEmpty()) {
+                        unmerged.add(candidate);
+                    } else { // APPLY MERGE
+                        mergedVars.add(candidate.var);
+                        R11 = merged.a;
+                        R12 = merged.b;
+                        freshVar = merged.c;
                     }
-                    // APPLY MERGE
-                    X.add(merging.var);
-                    R11 = Q.a;
-                    R12 = Q.b;
-                    freshVar = Q.c;
                 }
-                S_expanded = S_expanded_rest;
-                if (X.size() == 1) { // nothing merged
-                    S_merged.addLast(collector);
+                S_expanded = unmerged;
+                if (mergedVars.size() == 1) { // nothing merged -> substitution would be redundant
+                    S_merged.addLast(merger);
                 } else {
-                    Term y = new Term(freshVar);
-                    for (int x_i : X) {
-                        expandedSolution.substitutions.addLast(new Substitution(x_i, y));
-                    }
+                    final Term y = new Term(freshVar);
+                    mergedVars.forEach(var -> expandedSolution.substitutions.addLast(new Substitution(var, y)));
                     S_merged.addLast(new AUT(freshVar, R11, R12));
                 }
             }
-            mergedSolutions.addLast(expandedSolution.update_S(S_merged));
+            Config mergedSolution = expandedSolution.copy_update_S(S_merged);
+            assert DataUtils.unique(mergedSolution.S);
+            mergedSolutions.addLast(mergedSolution);
         }
-        assert mergedSolutions.stream().map(merged -> merged.S).allMatch(S -> DataUtils.unique(S, aut -> aut.var));
         log.info("Solutions (MERGED):\n                   ::  {}", DataUtils.joinString(mergedSolutions, "\n                   ::  ", "--"));
         return mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
     }
@@ -212,32 +206,38 @@ public final class Algorithm {
     }
     
     private boolean consistent(Set<Term> terms) {
-        return !conjunction(terms, Term.UNUSED_VAR).a.isEmpty();
+        return !specialConjunction(terms, Term.UNUSED_VAR).a.isEmpty();
+    }
+    
+    private AUT expand(AUT aut, int freshVar) {
+        Pair<Set<Term>, Integer> pair1 = specialConjunction(aut.T1, freshVar);
+        Set<Term> C1 = pair1.a;
+        freshVar = pair1.b;
+        
+        Pair<Set<Term>, Integer> pair2 = specialConjunction(aut.T2, freshVar);
+        Set<Term> C2 = pair2.a;
+        
+        assert !C1.isEmpty() && !C2.isEmpty();
+        return new AUT(aut.var, C1, C2);
     }
     
     private Triple<Set<Term>, Set<Term>, Integer> merge(Set<Term> T11, Set<Term> T12, Set<Term> T21, Set<Term> T22, int freshVar) {
-        Set<Term> T1 = new HashSet<>(T11);
-        T1.addAll(T12);
-        Pair<Set<Term>, Integer> C1 = conjunction(T1, freshVar);
-        if (C1.a.isEmpty()) {
-            return new Triple<>(C1.a, C1.a, C1.b);
+        Pair<Set<Term>, Integer> pair1 = specialConjunction(DataUtils.conjunction(T11, T12), freshVar);
+        Set<Term> Q1 = pair1.a;
+        freshVar = pair1.b;
+        
+        if (Q1.isEmpty()) { // optimization: merge fails if either side is empty, so we can stop here
+            return new Triple<>(Q1, Q1, freshVar);
         }
         
-        Set<Term> T2 = new HashSet<>(T21);
-        T2.addAll(T22);
-        Pair<Set<Term>, Integer> C2 = conjunction(T2, C1.b);
-        return new Triple<>(C1.a, C2.a, C2.b);
+        Pair<Set<Term>, Integer> pair2 = specialConjunction(DataUtils.conjunction(T21, T22), freshVar);
+        Set<Term> Q2 = pair2.a;
+        freshVar = pair2.b;
+        
+        return new Triple<>(Q1, Q2, freshVar);
     }
     
-    private Pair<Set<Term>, Set<Term>> pairConjunction(Set<Term> T1, Set<Term> T2, int freshVar) {
-        Pair<Set<Term>, Integer> C1 = conjunction(T1, freshVar);
-        freshVar = C1.b;
-        Pair<Set<Term>, Integer> C2 = conjunction(T2, freshVar);
-        assert !C1.a.isEmpty() || C2.a.isEmpty();
-        return new Pair<>(C1.a, C2.a);
-    }
-    
-    private Pair<Set<Term>, Integer> conjunction(Set<Term> terms, int freshVar) {
+    private Pair<Set<Term>, Integer> specialConjunction(Set<Term> terms, int freshVar) {
         boolean consistencyCheck = freshVar == Term.UNUSED_VAR;
         Deque<State> branches = new ArrayDeque<>();
         terms = terms.stream().filter(t -> !Term.ANON.equals(t)).collect(Collectors.toSet());

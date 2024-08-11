@@ -29,9 +29,9 @@ public class Config {
     }
     
     private Config(Config original, Deque<AUT> S) {
-        this.A = DataUtils.copyDeque(original.A);
-        this.S = DataUtils.copyDeque(S);
-        this.substitutions = DataUtils.copyDeque(original.substitutions);
+        this.A = DataUtils.newArrayDeque(original.A);
+        this.S = DataUtils.newArrayDeque(S);
+        this.substitutions = DataUtils.newArrayDeque(original.substitutions);
         this.alpha1 = original.alpha1;
         this.alpha2 = original.alpha2;
         this.freshVar = original.freshVar;
@@ -41,7 +41,7 @@ public class Config {
         return new Config(this);
     }
     
-    public Config update_S(Deque<AUT> S) {
+    public Config copy_update_S(Deque<AUT> S) {
         return new Config(this, S);
     }
     
