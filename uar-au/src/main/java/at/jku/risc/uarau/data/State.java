@@ -1,7 +1,5 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtils;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Set;
@@ -13,7 +11,7 @@ public class State {
     
     private int freshVar;
     
-    public State(Set<Term> T, int freshVar) {
+    public State(Deque<Term> T, int freshVar) {
         this.expressions = new ArrayDeque<>();
         this.s = new ArrayDeque<>();
         this.freshVar = freshVar;
@@ -21,8 +19,8 @@ public class State {
     }
     
     private State(State original) {
-        this.expressions = DataUtils.newDeque(original.expressions);
-        this.s = DataUtils.newDeque(original.s);
+        this.expressions = new ArrayDeque<>(original.expressions);
+        this.s = new ArrayDeque<>(original.s);
         this.freshVar = original.freshVar;
     }
     

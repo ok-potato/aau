@@ -1,39 +1,38 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.DataUtil;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.UnmodifiableDeque;
 
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.Deque;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AUT {
     public final int var;
-    public final Set<Term> T1, T2;
+    public final Deque<Term> T1, T2;
     
     private Integer hash = null;
     
-    public AUT(int var, Set<Term> T1, Set<Term> T2) {
+    public AUT(int var, Deque<Term> T1, Deque<Term> T2) {
         this.var = var;
-        this.T1 = Collections.unmodifiableSet(T1);
-        this.T2 = Collections.unmodifiableSet(T2);
+        this.T1 = new UnmodifiableDeque<>(T1);
+        this.T2 = new UnmodifiableDeque<>(T2);
     }
     
     public AUT(int var, Term T1, Term T2) {
-        this(var, Collections.singleton(T1), Collections.singleton(T2));
+        this(var, new UnmodifiableDeque<>(T1), new UnmodifiableDeque<>(T2));
     }
     
-    public Set<String> heads() {
-        return Stream.concat(T1.stream(), T2.stream()).map(t -> t.head).collect(Collectors.toSet());
+    public Deque<String> heads() {
+        return Stream.concat(T1.stream(), T2.stream()).map(t -> t.head).collect(Collectors.toCollection(ArrayDeque::new));
     }
     
     public static Pair<Deque<Term>, Deque<Term>> applyAll(Deque<AUT> auts, Term q1, Term q2) {
         Pair<Deque<Term>, Deque<Term>> applied = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
-        applied.a.add(q1);
-        applied.b.add(q2);
+        applied.a.addLast(q1);
+        applied.b.addLast(q2);
         for (AUT aut : auts) {
             Pair<Deque<Term>, Deque<Term>> pair = aut.apply(applied.a, applied.b);
             applied.a = pair.a;
@@ -59,7 +58,7 @@ public class AUT {
     
     @Override
     public String toString() {
-        return String.format("➰%s: %s ?= %s", var, DataUtils.joinString(T1, ", ", "{}", "{ ", " }"), DataUtils.joinString(T2, ", ", "{}", "{ ", " }"));
+        return String.format("➰%s: %s ?= %s", var, DataUtil.joinString(T1, ", ", "{}", "{ ", " }"), DataUtil.joinString(T2, ", ", "{}", "{ ", " }"));
     }
     
     @Override

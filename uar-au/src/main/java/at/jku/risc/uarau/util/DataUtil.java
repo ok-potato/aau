@@ -3,8 +3,10 @@ package at.jku.risc.uarau.util;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
-public class DataUtils {
+public class DataUtil {
     // collection operations
     
     public static <T> void pad(List<T> list, Supplier<T> supplier, int newSize) {
@@ -13,8 +15,9 @@ public class DataUtils {
         }
     }
     
-    public static <T> Set<T> conjunction(Set<T> a, Set<T> b) {
-        Set<T> s = new HashSet<>(a);
+    public static <T> Deque<T> conjunction(Deque<T> a, Deque<T> b) {
+        Deque<T> s = new ArrayDeque<>(a.size() + b.size());
+        s.addAll(a);
         s.addAll(b);
         return s;
     }
@@ -35,18 +38,8 @@ public class DataUtils {
         return true;
     }
     
-    public static <T> Deque<T> dequeOf(T ... t) {
-        Object[] t_obj = t;
-        t_obj[0] = 5;
-        return new ArrayDeque<>(Arrays.asList(t));
-    }
-    
-    public static <T> Deque<T> newDeque(Deque<T> original) {
-        Deque<T> copy = new ArrayDeque<>(original.size());
-        for (T aut : original) {
-            copy.addLast(aut);
-        }
-        return copy;
+    public static<T> Collector<T, ?, ArrayDeque<T>> toDeque() {
+        return Collectors.toCollection(ArrayDeque::new);
     }
     
     public static <T> T getAny(Set<T> set) {

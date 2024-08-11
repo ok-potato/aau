@@ -1,7 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtils;
-
+import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class Substitution {
@@ -18,7 +17,7 @@ public class Substitution {
         if (substitutions.isEmpty()) {
             return new Term(baseVariable);
         }
-        substitutions = DataUtils.newDeque(substitutions);
+        substitutions = new ArrayDeque<>(substitutions);
         Term term = substitutions.removeFirst().term;
         while (!substitutions.isEmpty()) {
             term = apply(substitutions.pop(), term);

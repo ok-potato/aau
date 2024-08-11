@@ -1,9 +1,10 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.*;
-import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.DataUtil;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Triple;
+import at.jku.risc.uarau.util.UnmodifiableDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public final class Algorithm {
         // APPLY RULES
         BRANCHING:
         while (!branches.isEmpty()) {
-            assert DataUtils.unique(branches);
+            assert DataUtil.unique(branches);
             Config config = branches.removeFirst();
             while (!config.A.isEmpty()) {
                 AUT aut = config.A.removeFirst();
@@ -61,12 +62,12 @@ public final class Algorithm {
                     continue;
                 }
                 // DECOMPOSE
-                Set<Config> children = decompose(aut, config);
+                Deque<Config> children = decompose(aut, config);
                 if (!children.isEmpty()) {
                     for (Config child : children) {
                         branches.addLast(child);
                     }
-                    log.debug("DEC => {}", DataUtils.joinString(children, " ", ""));
+                    log.debug("DEC => {}", DataUtil.joinString(children, " ", ""));
                     continue BRANCHING;
                 }
                 // SOLVE
@@ -79,8 +80,8 @@ public final class Algorithm {
         log.debug("Common proximate memory ({}): {}", R.proximatesMemory.size(), R.proximatesMemory);
         
         // POST PROCESS
-        assert DataUtils.unique(linearSolutions);
-        log.info("Solutions (LINEAR):\n                   ::  {}", DataUtils.joinString(linearSolutions, "\n                   ::  ", "--"));
+        assert DataUtil.unique(linearSolutions);
+        log.info("Solutions (LINEAR):\n                   ::  {}", DataUtil.joinString(linearSolutions, "\n                   ::  ", "--"));
         if (linear && !witness) {
             return linearSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
         }
@@ -94,8 +95,8 @@ public final class Algorithm {
             expandedSolutions.addLast(linearSolution.copy_update_S(S_expanded));
         }
         
-        assert DataUtils.unique(expandedSolutions);
-        log.info("Solutions (EXPANDED):\n                   ::  {}", DataUtils.joinString(expandedSolutions, "\n                   ::  ", "--"));
+        assert DataUtil.unique(expandedSolutions);
+        log.info("Solutions (EXPANDED):\n                   ::  {}", DataUtil.joinString(expandedSolutions, "\n                   ::  ", "--"));
         if (linear) {
             return expandedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
         }
@@ -103,24 +104,24 @@ public final class Algorithm {
         // MERGE
         Deque<Config> mergedSolutions = new ArrayDeque<>();
         for (Config expandedSolution : expandedSolutions) {
-            Deque<AUT> S_expanded = DataUtils.newDeque(expandedSolution.S);
+            Deque<AUT> S_expanded = new ArrayDeque<>(expandedSolution.S);
             Deque<AUT> S_merged = new ArrayDeque<>();
             while (!S_expanded.isEmpty()) {
                 int freshVar = expandedSolution.peekVar();
                 
                 AUT merger = S_expanded.removeFirst();
-                Set<Term> R11 = new HashSet<>(merger.T1);
-                Set<Term> R12 = new HashSet<>(merger.T2);
+                Deque<Term> R11 = new ArrayDeque<>(merger.T1);
+                Deque<Term> R12 = new ArrayDeque<>(merger.T2);
                 
                 Deque<AUT> unmerged = new ArrayDeque<>();
                 Deque<Integer> mergedVars = new ArrayDeque<>();
-                mergedVars.add(merger.var);
+                mergedVars.addLast(merger.var);
                 for (AUT candidate : S_expanded) {
-                    Triple<Set<Term>, Set<Term>, Integer> merged = merge(R11, candidate.T1, R12, candidate.T2, freshVar);
+                    Triple<Deque<Term>, Deque<Term>, Integer> merged = merge(R11, candidate.T1, R12, candidate.T2, freshVar);
                     if (merged.a.isEmpty() || merged.b.isEmpty()) {
-                        unmerged.add(candidate);
+                        unmerged.addLast(candidate);
                     } else { // APPLY MERGE
-                        mergedVars.add(candidate.var);
+                        mergedVars.addLast(candidate.var);
                         R11 = merged.a;
                         R12 = merged.b;
                         freshVar = merged.c;
@@ -136,22 +137,22 @@ public final class Algorithm {
                 }
             }
             Config mergedSolution = expandedSolution.copy_update_S(S_merged);
-            assert DataUtils.unique(mergedSolution.S);
+            assert DataUtil.unique(mergedSolution.S);
             mergedSolutions.addLast(mergedSolution);
         }
-        log.info("Solutions (MERGED):\n                   ::  {}", DataUtils.joinString(mergedSolutions, "\n                   ::  ", "--"));
+        log.info("Solutions (MERGED):\n                   ::  {}", DataUtil.joinString(mergedSolutions, "\n                   ::  ", "--"));
         return mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
     }
     
-    private Set<Config> decompose(AUT aut, Config cfg) {
-        Set<Config> children = new HashSet<>();
+    private Deque<Config> decompose(AUT aut, Config cfg) {
+        Deque<Config> children = new ArrayDeque<>();
         for (String h : R.commonProximates(aut.heads())) {
-            Pair<List<Set<Term>>, Float> map1 = map(h, aut.T1, cfg.alpha1);
-            List<Set<Term>> Q1 = map1.a;
+            Pair<List<Deque<Term>>, Float> map1 = map(h, aut.T1, cfg.alpha1);
+            List<Deque<Term>> Q1 = map1.a;
             float alpha1 = map1.b;
             
-            Pair<List<Set<Term>>, Float> map2 = map(h, aut.T2, cfg.alpha2);
-            List<Set<Term>> Q2 = map2.a;
+            Pair<List<Deque<Term>>, Float> map2 = map(h, aut.T2, cfg.alpha2);
+            List<Deque<Term>> Q2 = map2.a;
             float alpha2 = map2.b;
             
             // CHECK DEC
@@ -176,16 +177,16 @@ public final class Algorithm {
             child.alpha1 = alpha1;
             child.alpha2 = alpha2;
             
-            children.add(child);
+            children.addLast(child);
         }
         return children;
     }
     
-    private Pair<List<Set<Term>>, Float> map(String h, Set<Term> T, float beta) {
+    private Pair<List<Deque<Term>>, Float> map(String h, Deque<Term> T, float beta) {
         int h_arity = R.arity(h);
-        List<Set<Term>> Q = new ArrayList<>(h_arity);
+        List<Deque<Term>> Q = new ArrayList<>(h_arity);
         for (int i = 0; i < h_arity; i++) {
-            Q.add(new HashSet<>());
+            Q.add(new ArrayDeque<>());
         }
         for (Term t : T) {
             assert !t.isVar() && t.arguments != null;
@@ -194,7 +195,7 @@ public final class Algorithm {
             for (int i = 0; i < h_arity; i++) {
                 for (int t_mapped_idx : h_to_t.get(i)) {
                     // Q[i] => set of args which h|i maps to
-                    Q.get(i).add(t.arguments.get(t_mapped_idx));
+                    Q.get(i).addLast(t.arguments.get(t_mapped_idx));
                 }
             }
             beta = t_norm.apply(beta, proximityRelation.proximity);
@@ -205,51 +206,46 @@ public final class Algorithm {
         return new Pair<>(Q, beta);
     }
     
-    private boolean consistent(Set<Term> terms) {
+    private boolean consistent(Deque<Term> terms) {
         return !specialConjunction(terms, Term.UNUSED_VAR).a.isEmpty();
     }
     
     private AUT expand(AUT aut, int freshVar) {
-        Pair<Set<Term>, Integer> pair1 = specialConjunction(aut.T1, freshVar);
-        Set<Term> C1 = pair1.a;
+        Pair<Deque<Term>, Integer> pair1 = specialConjunction(aut.T1, freshVar);
+        Deque<Term> C1 = pair1.a;
         freshVar = pair1.b;
         
-        Pair<Set<Term>, Integer> pair2 = specialConjunction(aut.T2, freshVar);
-        Set<Term> C2 = pair2.a;
+        Pair<Deque<Term>, Integer> pair2 = specialConjunction(aut.T2, freshVar);
+        Deque<Term> C2 = pair2.a;
         
         assert !C1.isEmpty() && !C2.isEmpty();
         return new AUT(aut.var, C1, C2);
     }
     
-    private Triple<Set<Term>, Set<Term>, Integer> merge(Set<Term> T11, Set<Term> T12, Set<Term> T21, Set<Term> T22, int freshVar) {
-        Pair<Set<Term>, Integer> pair1 = specialConjunction(DataUtils.conjunction(T11, T12), freshVar);
-        Set<Term> Q1 = pair1.a;
+    private Triple<Deque<Term>, Deque<Term>, Integer> merge(Deque<Term> T11, Deque<Term> T12, Deque<Term> T21, Deque<Term> T22, int freshVar) {
+        Pair<Deque<Term>, Integer> pair1 = specialConjunction(DataUtil.conjunction(T11, T12), freshVar);
+        Deque<Term> Q1 = pair1.a;
         freshVar = pair1.b;
         
         if (Q1.isEmpty()) { // optimization: merge fails if either side is empty, so we can stop here
             return new Triple<>(Q1, Q1, freshVar);
         }
         
-        Pair<Set<Term>, Integer> pair2 = specialConjunction(DataUtils.conjunction(T21, T22), freshVar);
-        Set<Term> Q2 = pair2.a;
+        Pair<Deque<Term>, Integer> pair2 = specialConjunction(DataUtil.conjunction(T21, T22), freshVar);
+        Deque<Term> Q2 = pair2.a;
         freshVar = pair2.b;
         
         return new Triple<>(Q1, Q2, freshVar);
     }
     
-    private Pair<Set<Term>, Integer> specialConjunction(Set<Term> terms, int freshVar) {
+    private Pair<Deque<Term>, Integer> specialConjunction(Deque<Term> terms, int freshVar) {
         boolean consistencyCheck = freshVar == Term.UNUSED_VAR;
         Deque<State> branches = new ArrayDeque<>();
-        terms = terms.stream().filter(t -> !Term.ANON.equals(t)).collect(Collectors.toSet());
+        terms = terms.stream().filter(t -> !Term.ANON.equals(t)).collect(DataUtil.toDeque());
         branches.push(new State(terms, freshVar));
         log.trace("  {}", branches);
         
-        Set<Term> solutions;
-        if (consistencyCheck) {
-            solutions = new HashSet<>(1);
-        } else {
-            solutions = new HashSet<>();
-        }
+        Deque<Term> solutions = consistencyCheck ? new ArrayDeque<>(1) : new ArrayDeque<>();
         BRANCHING:
         while (!branches.isEmpty()) {
             State state = branches.pop();
@@ -261,8 +257,8 @@ public final class Algorithm {
                     continue;
                 }
                 // REDUCE
-                for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(Collectors.toSet()))) {
-                    List<Set<Term>> Q = map(h, expr.T, 1.0f).a;
+                for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(DataUtil.toDeque()))) {
+                    List<Deque<Term>> Q = map(h, expr.T, 1.0f).a;
                     assert Q != null;
                     State childState = state.copy();
                     
@@ -285,9 +281,9 @@ public final class Algorithm {
             }
             if (consistencyCheck) {
                 log.trace("  => consistent");
-                return new Pair<>(Collections.singleton(Term.ANON), freshVar);
+                return new Pair<>(new UnmodifiableDeque<>(Term.ANON), freshVar);
             }
-            solutions.add(Substitution.applyAll(state.s, state.peekVar()));
+            solutions.addLast(Substitution.applyAll(state.s, state.peekVar()));
         }
         if (consistencyCheck) {
             log.trace("  => NOT consistent");

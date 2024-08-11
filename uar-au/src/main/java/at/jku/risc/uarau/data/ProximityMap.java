@@ -1,12 +1,11 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.DataUtil;
 import at.jku.risc.uarau.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ProximityMap {
     private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
@@ -15,36 +14,36 @@ public class ProximityMap {
     private final Map<String, Integer> arities;
     private final Set<String> vars;
     
-    public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> relations, float lambda) {
+    public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
         // add flipped relations - don't allow declaring identity relations, even if they follow the definition
-        List<ProximityRelation> allRelations = new ArrayList<>(relations.size() * 2);
-        relations.forEach(relation -> {
+        List<ProximityRelation> allProximityRelations = new ArrayList<>(proximityRelations.size() * 2);
+        proximityRelations.forEach(relation -> {
             if (relation.f == relation.g) {
                 log.error("Identity proximity relation: {}", relation);
                 throw new IllegalArgumentException();
             }
-            allRelations.add(relation);
-            allRelations.add(relation.flipped());
+            allProximityRelations.add(relation);
+            allProximityRelations.add(relation.flipped());
         });
         
         // don't allow duplicates, even if they're equivalent
         Map<String, ProximityRelation> existing = new HashMap<>();
-        for (ProximityRelation pr : allRelations) {
-            String key = pr.f + "," + pr.g;
+        for (ProximityRelation relation : allProximityRelations) {
+            String key = relation.f + "," + relation.g;
             if (existing.containsKey(key)) {
-                log.error("Duplicate proximity relation: {} {}", existing.get(key), pr);
+                log.error("Duplicate proximity relation: {} {}", existing.get(key), relation);
                 throw new IllegalArgumentException();
             }
-            existing.put(key, pr);
+            existing.put(key, relation);
         }
         
-        Pair<Map<String, Integer>, Set<String>> pair = findArities(rhs, lhs, allRelations);
+        Pair<Map<String, Integer>, Set<String>> pair = findArities(rhs, lhs, allProximityRelations);
         arities = Collections.unmodifiableMap(pair.a);
         vars = Collections.unmodifiableSet(pair.b);
         log.trace("Arities {}", arities);
         
         // optimization: remove relations with proximity < λ
-        allRelations.removeIf(relation -> {
+        allProximityRelations.removeIf(relation -> {
             if (relation.proximity < lambda) {
                 log.info("Discarding relation {} with proximity < λ [{}]", relation, lambda);
                 return true;
@@ -52,11 +51,11 @@ public class ProximityMap {
             return false;
         });
         
-        for (ProximityRelation relation : allRelations) {
-            DataUtils.pad(relation.argRelation, ArrayList::new, arity(relation.f));
+        for (ProximityRelation relation : allProximityRelations) {
+            DataUtil.pad(relation.argRelation, ArrayList::new, arity(relation.f));
             proximityClass(relation.f).put(relation.g, relation);
         }
-        log.trace("PR's {}", DataUtils.joinString(allRelations));
+        log.trace("PR's {}", DataUtil.joinString(allProximityRelations));
     }
     
     private Pair<Map<String, Integer>, Set<String>> findArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
@@ -113,27 +112,27 @@ public class ProximityMap {
         return vars.contains(h);
     }
     
-    public Map<Set<String>, Set<String>> proximatesMemory = new HashMap<>();
+    public Map<Deque<String>, Deque<String>> proximatesMemory = new HashMap<>();
     
-    public Set<String> commonProximates(Set<String> T) {
+    public Deque<String> commonProximates(Deque<String> T) {
         assert T != null && !T.isEmpty();
-        Set<String> proximates = null;
+        
         if (T.size() < 5 && proximatesMemory.containsKey(T)) {
-            proximates = proximatesMemory.get(T);
-        } else {
-            for (String t : T) {
-                if (proximates == null) {
-                    proximates = proximityClass(t).values().stream().map(rel -> rel.g).collect(Collectors.toSet());
-                    continue;
-                }
-                Set<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(Collectors.toSet());
+            return proximatesMemory.get(T);
+        }
+        
+        Deque<String> proximates = null;
+        for (String t : T) {
+            Deque<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(DataUtil.toDeque());
+            if (proximates == null) {
+                proximates = t_prox;
+            } else {
                 proximates.retainAll(t_prox);
             }
-            if (T.size() < 5) {
-                proximatesMemory.put(T, proximates);
-            }
         }
-        log.trace("  commonProximates{} = {}", T, proximates);
+        if (T.size() < 5) {
+            proximatesMemory.put(T, proximates);
+        }
         return proximates;
     }
     
@@ -174,7 +173,7 @@ public class ProximityMap {
         StringBuilder sb = new StringBuilder();
         for (String k : relations.keySet()) {
             sb.append(String.format("%s💢%s ", prefix, k));
-            relations.get(k).values().forEach(pr -> sb.append(pr).append(" "));
+            relations.get(k).values().forEach(relation -> sb.append(relation).append(" "));
         }
         return sb.substring(0, sb.length() - 1);
     }

@@ -1,6 +1,6 @@
 import at.jku.risc.uarau.Algorithm;
 import at.jku.risc.uarau.data.Solution;
-import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.DataUtil;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -45,11 +45,11 @@ public class SigmaTest extends BaseTest {
         
         Set<Solution> solutions = Algorithm.solve("f(a(), c()) ?= g(a())", relations, 0.5f);
         assert solutions.size() == 1;
-        check(DataUtils.getAny(solutions), "", "", "h(b())", 0.7f, 0.6f);
+        check(DataUtil.getAny(solutions), "", "", "h(b())", 0.7f, 0.6f);
         
         solutions = Algorithm.solve("f(a(), d()) ?= g(a())", relations, 0.5f);
         assert solutions.size() == 1;
-        check(DataUtils.getAny(solutions), null, null, "0", 1.0f, 1.0f);
+        check(DataUtil.getAny(solutions), null, null, "0", 1.0f, 1.0f);
     }
     
     @Test

@@ -1,15 +1,16 @@
 package at.jku.risc.uarau.data;
 
-import java.util.Collections;
-import java.util.Set;
+import at.jku.risc.uarau.util.UnmodifiableDeque;
+
+import java.util.Deque;
 
 public class Expression {
     public final int var;
-    public final Set<Term> T;
+    public final Deque<Term> T;
     
-    public Expression(int var, Set<Term> T) {
+    public Expression(int var, Deque<Term> T) {
         this.var = var;
-        this.T = Collections.unmodifiableSet(T);
+        this.T = new UnmodifiableDeque<>(T);
     }
     
     @Override

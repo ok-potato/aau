@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtils;
+import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -29,9 +29,9 @@ public class Config {
     }
     
     private Config(Config original, Deque<AUT> S) {
-        this.A = DataUtils.newDeque(original.A);
-        this.S = DataUtils.newDeque(S);
-        this.substitutions = DataUtils.newDeque(original.substitutions);
+        this.A = new ArrayDeque<>(original.A);
+        this.S = new ArrayDeque<>(S);
+        this.substitutions = new ArrayDeque<>(original.substitutions);
         this.alpha1 = original.alpha1;
         this.alpha2 = original.alpha2;
         this.freshVar = original.freshVar;
@@ -55,8 +55,8 @@ public class Config {
     
     @Override
     public String toString() {
-        String A_str = DataUtils.joinString(A, " ", "➰");
-        String S_str = DataUtils.joinString(S, " ", "➰");
+        String A_str = DataUtil.joinString(A, " ", "➰");
+        String S_str = DataUtil.joinString(S, " ", "➰");
         String r = Substitution.applyAll(substitutions, Term.VAR_0).toString();
         return String.format("⚓ ⚫ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
     }
