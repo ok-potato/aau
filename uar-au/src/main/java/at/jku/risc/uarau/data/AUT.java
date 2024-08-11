@@ -26,7 +26,9 @@ public class AUT {
     }
     
     public Deque<String> heads() {
-        return Stream.concat(T1.stream(), T2.stream()).map(t -> t.head).collect(Collectors.toCollection(ArrayDeque::new));
+        return Stream.concat(T1.stream(), T2.stream())
+                .map(t -> t.head)
+                .collect(Collectors.toCollection(ArrayDeque::new));
     }
     
     public static Pair<Deque<Term>, Deque<Term>> applyAll(Deque<AUT> auts, Term q1, Term q2) {
@@ -44,14 +46,10 @@ public class AUT {
     public Pair<Deque<Term>, Deque<Term>> apply(Deque<Term> Q1, Deque<Term> Q2) {
         Pair<Deque<Term>, Deque<Term>> pair = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
         for (Term baseTerm : Q1) {
-            for (Term t : T1) {
-                pair.a.addLast(Substitution.apply(new Substitution(var, t), baseTerm));
-            }
+            T1.forEach(t -> pair.a.addLast(new Substitution(var, t).apply(baseTerm)));
         }
         for (Term baseTerm : Q2) {
-            for (Term t : T2) {
-                pair.b.addLast(Substitution.apply(new Substitution(var, t), baseTerm));
-            }
+            T2.forEach(t -> pair.b.addLast(new Substitution(var, t).apply(baseTerm)));
         }
         return pair;
     }

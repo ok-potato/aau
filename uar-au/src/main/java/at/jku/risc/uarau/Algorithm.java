@@ -3,7 +3,6 @@ package at.jku.risc.uarau;
 import at.jku.risc.uarau.data.*;
 import at.jku.risc.uarau.util.DataUtil;
 import at.jku.risc.uarau.util.Pair;
-import at.jku.risc.uarau.util.Triple;
 import at.jku.risc.uarau.util.UnmodifiableDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,9 +63,7 @@ public final class Algorithm {
                 // DECOMPOSE
                 Deque<Config> children = decompose(aut, config);
                 if (!children.isEmpty()) {
-                    for (Config child : children) {
-                        branches.addLast(child);
-                    }
+                    children.forEach(branches::addLast);
                     log.debug("DEC => {}", DataUtil.joinString(children, " ", ""));
                     continue BRANCHING;
                 }
@@ -90,8 +87,7 @@ public final class Algorithm {
         for (Config linearSolution : linearSolutions) {
             Deque<AUT> S_expanded = linearSolution.S.stream()
                     .map(aut -> expand(aut, linearSolution.peekVar()))
-                    .collect(Collectors.toCollection(ArrayDeque::new));
-            
+                    .collect(DataUtil.toDeque());
             expandedSolutions.addLast(linearSolution.copy_update_S(S_expanded));
         }
         
@@ -117,14 +113,14 @@ public final class Algorithm {
                 Deque<Integer> mergedVars = new ArrayDeque<>();
                 mergedVars.addLast(merger.var);
                 for (AUT candidate : S_expanded) {
-                    Triple<Deque<Term>, Deque<Term>, Integer> merged = merge(R11, candidate.T1, R12, candidate.T2, freshVar);
-                    if (merged.a.isEmpty() || merged.b.isEmpty()) {
+                    AUT merged = merge(R11, candidate.T1, R12, candidate.T2, freshVar);
+                    if (merged.T1.isEmpty() || merged.T2.isEmpty()) {
                         unmerged.addLast(candidate);
                     } else { // APPLY MERGE
                         mergedVars.addLast(candidate.var);
-                        R11 = merged.a;
-                        R12 = merged.b;
-                        freshVar = merged.c;
+                        R11 = merged.T1;
+                        R12 = merged.T2;
+                        freshVar = merged.var;
                     }
                 }
                 S_expanded = unmerged;
@@ -222,20 +218,20 @@ public final class Algorithm {
         return new AUT(aut.var, C1, C2);
     }
     
-    private Triple<Deque<Term>, Deque<Term>, Integer> merge(Deque<Term> T11, Deque<Term> T12, Deque<Term> T21, Deque<Term> T22, int freshVar) {
+    private AUT merge(Deque<Term> T11, Deque<Term> T12, Deque<Term> T21, Deque<Term> T22, int freshVar) {
         Pair<Deque<Term>, Integer> pair1 = specialConjunction(DataUtil.conjunction(T11, T12), freshVar);
         Deque<Term> Q1 = pair1.a;
         freshVar = pair1.b;
         
         if (Q1.isEmpty()) { // optimization: merge fails if either side is empty, so we can stop here
-            return new Triple<>(Q1, Q1, freshVar);
+            return new AUT(freshVar, Q1, Q1);
         }
         
         Pair<Deque<Term>, Integer> pair2 = specialConjunction(DataUtil.conjunction(T21, T22), freshVar);
         Deque<Term> Q2 = pair2.a;
         freshVar = pair2.b;
         
-        return new Triple<>(Q1, Q2, freshVar);
+        return new AUT(freshVar, Q1, Q2);
     }
     
     private Pair<Deque<Term>, Integer> specialConjunction(Deque<Term> terms, int freshVar) {

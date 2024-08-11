@@ -2,7 +2,6 @@ package at.jku.risc.uarau.data;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Set;
 
 public class State {
     // mutable
