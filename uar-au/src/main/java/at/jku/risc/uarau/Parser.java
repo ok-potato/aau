@@ -2,7 +2,7 @@ package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
 import at.jku.risc.uarau.data.Term;
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util._Data;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +92,7 @@ public class Parser {
             log.trace("Parsed PR: {}", pr);
             proximityRelations.add(pr);
         }
-        log.debug("Parsed PR's: {}", DataUtil.joinString(proximityRelations));
+        log.debug("Parsed PR's: {}", _Data.str(proximityRelations));
         return proximityRelations;
     }
     

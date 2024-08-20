@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util._Data;
 import at.jku.risc.uarau.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +52,10 @@ public class ProximityMap {
         });
         
         for (ProximityRelation relation : allProximityRelations) {
-            DataUtil.pad(relation.argRelation, ArrayList::new, arity(relation.f));
+            _Data.pad(relation.argRelation, ArrayList::new, arity(relation.f));
             proximityClass(relation.f).put(relation.g, relation);
         }
-        log.trace("PR's {}", DataUtil.joinString(allProximityRelations));
+        log.trace("PR's {}", _Data.str(allProximityRelations));
     }
     
     private Pair<Map<String, Integer>, Set<String>> findArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
@@ -123,7 +123,7 @@ public class ProximityMap {
         
         Deque<String> proximates = null;
         for (String t : T) {
-            Deque<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(DataUtil.toDeque());
+            Deque<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(_Data.toDeque());
             if (proximates == null) {
                 proximates = t_prox;
             } else {
@@ -172,8 +172,8 @@ public class ProximityMap {
         }
         StringBuilder sb = new StringBuilder();
         for (String k : relations.keySet()) {
-            sb.append(String.format("%s💢%s ", prefix, k));
-            relations.get(k).values().forEach(relation -> sb.append(relation).append(" "));
+            sb.append(String.format("%s💢 %s ", prefix, k));
+            sb.append(_Data.str(relations.get(k).values(), " ", ".."));
         }
         return sb.substring(0, sb.length() - 1);
     }

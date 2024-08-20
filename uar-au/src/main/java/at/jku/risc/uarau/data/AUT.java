@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util._Data;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.UnmodifiableDeque;
 
@@ -56,7 +56,7 @@ public class AUT {
     
     @Override
     public String toString() {
-        return String.format("➰%s: %s ?= %s", var, DataUtil.joinString(T1, ", ", "{}", "{ ", " }"), DataUtil.joinString(T2, ", ", "{}", "{ ", " }"));
+        return String.format("➰%s: %s ?= %s", var, _Data.str(T1, ", ", "{}", "{ ", " }"), _Data.str(T2, ", ", "{}", "{ ", " }"));
     }
     
     @Override

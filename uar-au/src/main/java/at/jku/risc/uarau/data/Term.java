@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util._Data;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.*;
@@ -92,7 +92,7 @@ public class Term {
         if (mappedVar) {
             return head;
         }
-        return head + DataUtil.joinString(arguments, ",", "()", "(", ")");
+        return head + _Data.str(arguments, ",", "()", "(", ")");
     }
     
     private Integer hash = null;

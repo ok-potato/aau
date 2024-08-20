@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util._Data;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -55,8 +55,8 @@ public class Config {
     
     @Override
     public String toString() {
-        String A_str = DataUtil.joinString(A, " ", "➰");
-        String S_str = DataUtil.joinString(S, " ", "➰");
+        String A_str = _Data.str(A, " ", "➰");
+        String S_str = _Data.str(S, " ", "➰");
         String r = Substitution.applyAll(substitutions, Term.VAR_0).toString();
         return String.format("⚓ ⚫ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
     }
@@ -75,6 +75,6 @@ public class Config {
             return false;
         }
         Config that = (Config) object;
-        return that.A.size() == this.A.size() && that.A.containsAll(this.A);
+        return that.A.size() == A.size() && that.A.containsAll(A) && that.S.size() == S.size() && that.S.containsAll(S);
     }
 }

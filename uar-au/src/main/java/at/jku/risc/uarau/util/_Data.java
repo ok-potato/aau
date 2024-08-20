@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class DataUtil {
+public class _Data {
     // collection operations
     
     public static <T> void pad(List<T> list, Supplier<T> supplier, int newSize) {
@@ -48,34 +48,20 @@ public class DataUtil {
     
     // stringify
     
-    public static <T> String joinString(Collection<T> collection) {
-        return joinString(collection, ", ", "..");
+    public static <T> String str(Collection<T> collection) {
+        return str(collection, ", ", "..");
     }
     
-    public static <T> String joinString(Collection<T> collection, String separator, String empty) {
-        return joinString(collection, separator, empty, "", "");
+    public static <T> String str(Collection<T> collection, String separator, String empty) {
+        return str(collection, separator, empty, "", "");
     }
     
-    public static <T> String joinString(Collection<T> collection, String separator, String empty, String open, String close) {
+    public static <T> String str(Collection<T> collection, String separator, String empty, String open, String close) {
         if (collection.isEmpty()) {
             return empty;
         }
         StringJoiner joiner = new StringJoiner(separator);
         collection.forEach(t -> joiner.add(t.toString()));
         return open + joiner + close;
-    }
-    
-    public static <T> String mapString(List<List<T>> map) {
-        StringBuilder sb = new StringBuilder("{");
-        for (Collection<T> c : map) {
-            sb.append("[");
-            String valueSeparator = "";
-            for (T t : c) {
-                sb.append(valueSeparator).append(t);
-                valueSeparator = ",";
-            }
-            sb.append("]");
-        }
-        return sb.append("}").toString();
     }
 }

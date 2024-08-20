@@ -1,7 +1,7 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.*;
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util._Data;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.UnmodifiableDeque;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public final class Algorithm {
     private Set<Solution> run() {
         // TODO analyze for correspondence/mapping properties
         Config initCfg = new Config(lhs, rhs);
-        log.info("SOLVING  ::  λ={}\n                   ::  {}{}", lambda, initCfg.A.peek(), R.toString("\n                   ::  "));
+        log.info("SOLVING  🧇  {} ?= {}  🧇  λ={}{}", lhs, rhs, lambda, R.toString("\n                   ::  "));
         
         Deque<Config> branches = new ArrayDeque<>();
         branches.push(initCfg);
@@ -50,7 +50,7 @@ public final class Algorithm {
         // APPLY RULES
         BRANCHING:
         while (!branches.isEmpty()) {
-            assert DataUtil.unique(branches);
+            assert _Data.unique(branches);
             Config config = branches.removeFirst();
             while (!config.A.isEmpty()) {
                 AUT aut = config.A.removeFirst();
@@ -64,7 +64,7 @@ public final class Algorithm {
                 Deque<Config> children = decompose(aut, config);
                 if (!children.isEmpty()) {
                     children.forEach(branches::addLast);
-                    log.debug("DEC => {}", DataUtil.joinString(children, " ", ""));
+                    log.debug("DEC => {}", _Data.str(children, " ", ""));
                     continue BRANCHING;
                 }
                 // SOLVE
@@ -77,24 +77,32 @@ public final class Algorithm {
         log.debug("Common proximate memory ({}): {}", R.proximatesMemory.size(), R.proximatesMemory);
         
         // POST PROCESS
-        assert DataUtil.unique(linearSolutions);
-        log.info("Solutions (LINEAR):\n                   ::  {}", DataUtil.joinString(linearSolutions, "\n                   ::  ", "--"));
+        assert _Data.unique(linearSolutions);
+        log.info("Solutions (LINEAR):\n                   ::  {}", _Data.str(linearSolutions, "\n                   ::  ", "--"));
         if (linear && !witness) {
-            return linearSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
+            Set<Solution> solutions = linearSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
+            log.info("██");
+            return solutions;
         }
         // EXPAND
         Deque<Config> expandedSolutions = new ArrayDeque<>(linearSolutions.size());
         for (Config linearSolution : linearSolutions) {
             Deque<AUT> S_expanded = linearSolution.S.stream()
                     .map(aut -> expand(aut, linearSolution.peekVar()))
-                    .collect(DataUtil.toDeque());
+                    .collect(_Data.toDeque());
             expandedSolutions.addLast(linearSolution.copy_update_S(S_expanded));
         }
         
-        assert DataUtil.unique(expandedSolutions);
-        log.info("Solutions (EXPANDED):\n                   ::  {}", DataUtil.joinString(expandedSolutions, "\n                   ::  ", "--"));
+        assert _Data.unique(expandedSolutions);
+        if (expandedSolutions.size() == linearSolutions.size() && expandedSolutions.containsAll(linearSolutions)) {
+            log.info("Solutions (EXPANDED): 〃");
+        } else {
+            log.info("Solutions (EXPANDED):\n                   ::  {}", _Data.str(expandedSolutions, "\n                   ::  ", "--"));
+        }
         if (linear) {
-            return expandedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
+            Set<Solution> solutions = expandedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
+            log.info("██");
+            return solutions;
         }
         
         // MERGE
@@ -133,11 +141,21 @@ public final class Algorithm {
                 }
             }
             Config mergedSolution = expandedSolution.copy_update_S(S_merged);
-            assert DataUtil.unique(mergedSolution.S);
+            assert _Data.unique(mergedSolution.S);
             mergedSolutions.addLast(mergedSolution);
         }
-        log.info("Solutions (MERGED):\n                   ::  {}", DataUtil.joinString(mergedSolutions, "\n                   ::  ", "--"));
-        return mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
+        if (mergedSolutions.size() == expandedSolutions.size() && mergedSolutions.containsAll(expandedSolutions)) {
+            if (expandedSolutions.size() == linearSolutions.size() && expandedSolutions.containsAll(linearSolutions)) {
+                log.info("Solutions (MERGED):   〃");
+            } else {
+                log.info("Solutions (MERGED): 〃");
+            }
+        } else {
+            log.info("Solutions (MERGED):\n                   ::  {}", _Data.str(mergedSolutions, "\n                   ::  ", "--"));
+        }
+        Set<Solution> solutions = mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
+        log.info("██");
+        return solutions;
     }
     
     private Deque<Config> decompose(AUT aut, Config cfg) {
@@ -219,7 +237,7 @@ public final class Algorithm {
     }
     
     private AUT merge(Deque<Term> T11, Deque<Term> T12, Deque<Term> T21, Deque<Term> T22, int freshVar) {
-        Pair<Deque<Term>, Integer> pair1 = specialConjunction(DataUtil.conjunction(T11, T12), freshVar);
+        Pair<Deque<Term>, Integer> pair1 = specialConjunction(_Data.conjunction(T11, T12), freshVar);
         Deque<Term> Q1 = pair1.a;
         freshVar = pair1.b;
         
@@ -227,7 +245,7 @@ public final class Algorithm {
             return new AUT(freshVar, Q1, Q1);
         }
         
-        Pair<Deque<Term>, Integer> pair2 = specialConjunction(DataUtil.conjunction(T21, T22), freshVar);
+        Pair<Deque<Term>, Integer> pair2 = specialConjunction(_Data.conjunction(T21, T22), freshVar);
         Deque<Term> Q2 = pair2.a;
         freshVar = pair2.b;
         
@@ -237,9 +255,12 @@ public final class Algorithm {
     private Pair<Deque<Term>, Integer> specialConjunction(Deque<Term> terms, int freshVar) {
         boolean consistencyCheck = freshVar == Term.UNUSED_VAR;
         Deque<State> branches = new ArrayDeque<>();
-        terms = terms.stream().filter(t -> !Term.ANON.equals(t)).collect(DataUtil.toDeque());
+        terms = terms.stream().filter(t -> !Term.ANON.equals(t)).collect(_Data.toDeque());
         branches.push(new State(terms, freshVar));
-        log.trace("  {}", branches);
+        
+        if (consistencyCheck) {
+            log.trace("  cons: {}", _Data.str(branches.peek().expressions.peek().T));
+        }
         
         Deque<Term> solutions = consistencyCheck ? new ArrayDeque<>(1) : new ArrayDeque<>();
         BRANCHING:
@@ -253,7 +274,7 @@ public final class Algorithm {
                     continue;
                 }
                 // REDUCE
-                for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(DataUtil.toDeque()))) {
+                for (String h : R.commonProximates(expr.T.stream().map(t -> t.head).collect(_Data.toDeque()))) {
                     List<Deque<Term>> Q = map(h, expr.T, 1.0f).a;
                     assert Q != null;
                     State childState = state.copy();
@@ -269,30 +290,30 @@ public final class Algorithm {
                     Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
                     childState.s.addLast(new Substitution(expr.var, h_term));
                     branches.push(childState);
+                    
                     if (log.isTraceEnabled()) {
-                        log.trace("  RED => {}", childState);
+                        log.trace("  RED: {} {}=> {}", expr, h, childState.expressions);
                     }
                 }
                 continue BRANCHING;
             }
             if (consistencyCheck) {
-                log.trace("  => consistent");
+                log.trace("=> consistent");
                 return new Pair<>(new UnmodifiableDeque<>(Term.ANON), freshVar);
             }
             solutions.addLast(Substitution.applyAll(state.s, state.peekVar()));
         }
+        
         if (consistencyCheck) {
-            log.trace("  => NOT consistent");
+            log.trace("=> NOT consistent");
         } else {
-            if (solutions.size() < 20) {
-                log.debug("terms: {} -> conjunctions: ({}) {}", terms, solutions.size(), solutions);
+            if (solutions.size() < 16) {
+                log.debug("=> conj: {} => {}", terms, solutions);
             } else {
-                log.debug("terms: {} -> conjunctions: ({})", terms, solutions.size());
-            }
-            if (log.isTraceEnabled()) {
-                log.trace("  => {}", solutions);
+                log.debug("=> conj: {} => ({})", terms, solutions.size());
             }
         }
+        
         return new Pair<>(solutions, freshVar);
     }
     

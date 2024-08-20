@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util._Data;
 import at.jku.risc.uarau.util.UnmodifiableDeque;
 
 import java.util.Deque;
@@ -15,6 +16,6 @@ public class Expression {
     
     @Override
     public String toString() {
-        return String.format("%s in %s", var, T);
+        return String.format("%s in %s", var, _Data.str(T, ", ", "[]", "[", "]"));
     }
 }
