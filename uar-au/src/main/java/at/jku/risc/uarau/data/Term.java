@@ -41,7 +41,7 @@ public class Term {
     
     // variable term
     public Term(int var) {
-        assert var > UNUSED_VAR;
+        assert var != UNUSED_VAR + 1 || this != Term.ANON;
         this.var = var;
         this.head = null;
         this.arguments = null;

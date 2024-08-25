@@ -1,7 +1,7 @@
 package at.jku.risc.uarau.data;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.Queue;
 
 public class Substitution {
     public final int var;
@@ -13,12 +13,12 @@ public class Substitution {
         this.substitute = substitute;
     }
     
-    public static Term applyAll(Deque<Substitution> substitutions, int baseVariable) {
+    public static Term applyAll(Queue<Substitution> substitutions, int baseVariable) {
         if (substitutions.isEmpty()) {
             return new Term(baseVariable);
         }
         substitutions = new ArrayDeque<>(substitutions);
-        Term term = substitutions.removeFirst().substitute;
+        Term term = substitutions.remove().substitute;
         for (Substitution substitution : substitutions) {
             term = substitution.apply(term);
         }

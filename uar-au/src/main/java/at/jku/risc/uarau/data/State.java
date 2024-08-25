@@ -1,20 +1,20 @@
 package at.jku.risc.uarau.data;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.Queue;
 
 public class State {
     // mutable
-    public final Deque<Expression> expressions;
-    public final Deque<Substitution> s;
+    public final Queue<Expression> expressions;
+    public final Queue<Substitution> s;
     
     private int freshVar;
     
-    public State(Deque<Term> T, int freshVar) {
+    public State(Queue<Term> T, int freshVar) {
         this.expressions = new ArrayDeque<>();
         this.s = new ArrayDeque<>();
         this.freshVar = freshVar;
-        expressions.push(new Expression(freshVar(), T));
+        expressions.add(new Expression(freshVar(), T));
     }
     
     private State(State original) {
@@ -28,7 +28,7 @@ public class State {
     }
     
     public int freshVar() {
-        return freshVar++;
+        return freshVar == Term.UNUSED_VAR ? freshVar : freshVar++;
     }
     
     public int peekVar() {

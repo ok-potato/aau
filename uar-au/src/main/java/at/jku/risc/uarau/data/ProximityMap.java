@@ -1,11 +1,12 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util._Data;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util._Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ProximityMap {
     private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
@@ -42,6 +43,7 @@ public class ProximityMap {
         vars = Collections.unmodifiableSet(pair.b);
         log.trace("Arities {}", arities);
         
+        // TODO: these might be needed for EXPAND?
         // optimization: remove relations with proximity < λ
         allProximityRelations.removeIf(relation -> {
             if (relation.proximity < lambda) {
@@ -59,10 +61,10 @@ public class ProximityMap {
     }
     
     private Pair<Map<String, Integer>, Set<String>> findArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
-        // note: if f/g doesn't show up in a term, we assume its arity equals the maximum arity found in R
-        //       if this assumption is wrong, we're missing some non-relevant positions, and could possibly
-        //       misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM)
-        //       otherwise, arities of functions would have to be manually specified if they don't appear in a term
+        //      NOTE: If f/g doesn't show up in a term, we assume its arity equals the maximum arity found in R.
+        //      If this assumption is wrong, we're missing some non-relevant positions, and could possibly
+        //      misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM).
+        //      Otherwise, arities of functions would have to be manually specified if they don't appear in a term.
         Map<String, Integer> termArities = new HashMap<>();
         Set<String> termVars = new HashSet<>();
         findTermArities(rhs, termArities, termVars);
@@ -112,26 +114,27 @@ public class ProximityMap {
         return vars.contains(h);
     }
     
-    public Map<Deque<String>, Deque<String>> proximatesMemory = new HashMap<>();
+    public Map<Queue<String>, Queue<String>> proximatesMemory = new HashMap<>();
     
-    public Deque<String> commonProximates(Deque<String> T) {
+    public Queue<String> commonProximates(Queue<Term> T) {
+        Queue<String> heads = T.stream().map(t -> t.head).collect(_Data.toQueue());
         assert T != null && !T.isEmpty();
         
         if (T.size() < 5 && proximatesMemory.containsKey(T)) {
             return proximatesMemory.get(T);
         }
         
-        Deque<String> proximates = null;
-        for (String t : T) {
-            Deque<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(_Data.toDeque());
+        Queue<String> proximates = null;
+        for (String t : heads) {
+            Queue<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(_Data.toQueue());
             if (proximates == null) {
                 proximates = t_prox;
             } else {
                 proximates.retainAll(t_prox);
             }
         }
-        if (T.size() < 5) {
-            proximatesMemory.put(T, proximates);
+        if (heads.size() < 5) {
+            proximatesMemory.put(heads, proximates);
         }
         return proximates;
     }
@@ -168,7 +171,7 @@ public class ProximityMap {
     
     public String toString(String prefix) {
         if (relations.isEmpty()) {
-            return "💢";
+            return prefix + "💢";
         }
         StringBuilder sb = new StringBuilder();
         for (String k : relations.keySet()) {

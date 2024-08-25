@@ -3,12 +3,12 @@ package at.jku.risc.uarau.data;
 import at.jku.risc.uarau.util._Data;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.Queue;
 
 public class Config {
     // mutable
-    public final Deque<AUT> A, S;
-    public final Deque<Substitution> substitutions;
+    public final Queue<AUT> A, S;
+    public final Queue<Substitution> substitutions;
     
     public float alpha1, alpha2;
     
@@ -21,14 +21,14 @@ public class Config {
         alpha1 = 1.0f;
         alpha2 = 1.0f;
         freshVar = 0;
-        A.push(new AUT(freshVar(), T1, T2));
+        A.add(new AUT(freshVar(), T1, T2));
     }
     
     private Config(Config original) {
         this(original, original.S);
     }
     
-    private Config(Config original, Deque<AUT> S) {
+    private Config(Config original, Queue<AUT> S) {
         this.A = new ArrayDeque<>(original.A);
         this.S = new ArrayDeque<>(S);
         this.substitutions = new ArrayDeque<>(original.substitutions);
@@ -41,7 +41,7 @@ public class Config {
         return new Config(this);
     }
     
-    public Config copy_update_S(Deque<AUT> S) {
+    public Config copy_update_S(Queue<AUT> S) {
         return new Config(this, S);
     }
     
@@ -58,7 +58,7 @@ public class Config {
         String A_str = _Data.str(A, " ", "➰");
         String S_str = _Data.str(S, " ", "➰");
         String r = Substitution.applyAll(substitutions, Term.VAR_0).toString();
-        return String.format("⚓ ⚫ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
+        return String.format("⚓ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
     }
     
     @Override

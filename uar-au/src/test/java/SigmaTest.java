@@ -1,4 +1,5 @@
 import at.jku.risc.uarau.Algorithm;
+import at.jku.risc.uarau.ProblemConfig;
 import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util._Data;
 import org.junit.jupiter.api.Test;
@@ -23,20 +24,22 @@ public class SigmaTest extends BaseTest {
         solve(problem, relations, 0.5f);
     }
     
-    // @Test
-    public void benchmark() { // |f| = 2  |g| = 3  |h| = 4
-        String problem1 = "f(h(f(c(), d()), g(c(), d(), h(a(), b(), c(), f(a(), b()))), c(), d ), b()) ?= g(f(a(), b()), f(h(g(c(), d(), e()), g(a(), c(), f(a(), b())), c(), d()), c()), f(g(a(), b(), d()), d()))";
-        String relations1 = "h f {1 1, 2 1, 3 2, 4 2)}[0.7] ; h g {1 1, 3 3, 2 3, 4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2, 2 3, 2 1)}";
-        String problem2 = "g(h(c(), g(c(), h(a(), b(), c(), f(a(), b())), d()), a(), f(a(), b())), b(), d()) ?= g(f(a(), b()), f(h(g(c(), d(), e()), g(a(), c(), f(a(), b())), c(), d()), c()), f(g(a(), b(), d()), d()))";
-        String relations2 = "h f {1 1, 2 1, 3 2, 4 2)}[0.7] ; h g {1 1, 3 3, 2 3, 4 2)}[0.8] ; c d {}[0.6] ; a b {}[0.8] ; b c {}[0.9] ; f g [0.9] {1 2, 2 3, 2 1)}";
-        int n = 100;
-        long now = System.currentTimeMillis();
-        for (int i = 0; i < n; i++) {
-            solve(problem1, relations1, 0.5f);
-            solve(problem2, relations2, 0.5f);
-        }
-        now = System.currentTimeMillis() - now;
-        System.out.println(now);
+    @Test
+    public void big() { // |f| = 2  |g| = 3  |h| = 3
+        String l_h1 = "h( a(), b(), f(a(),b()) )";
+        String l_g1 = String.format("g( c(), d(), %s )", l_h1);
+        String l_h2 = String.format("h( f(c(),d()), %s, c() )", l_g1);
+        String lhs = String.format("f( %s, b() )", l_h2);
+        
+        String r_g1 = "g( a(), c(), f(a(),b()) )";
+        String r_h1 = String.format("h( g(c(),e(),a()), %s, d() )", r_g1);
+        String r_f1 = String.format("f( %s, c() )", r_h1);
+        String rhs = String.format("g( g(a(),b(),d()), %s, d() )", r_f1);
+        
+        String problem = String.format("%s ?= %s", lhs, rhs);
+        String relations = "h f {1 1, 2 1, 3 2)}[0.7] ; c d {}[0.6] ; b c {}[0.9] ; f g [0.9] {1 2, 2 3, 2 1)}";
+        
+        new ProblemConfig(problem).proximityRelations(relations).lambda(0.5f).linear(false).witness(false).solve();
     }
     
     @Test

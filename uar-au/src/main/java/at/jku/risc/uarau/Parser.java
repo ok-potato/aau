@@ -2,6 +2,7 @@ package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
 import at.jku.risc.uarau.data.Term;
+import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util._Data;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
@@ -14,18 +15,17 @@ import java.util.stream.Collectors;
 public class Parser {
     static Logger log = LoggerFactory.getLogger(Parser.class);
     
-    public static List<Term> parseProblem(String string) {
-        List<Term> terms = new ArrayList<>();
+    public static Pair<Term, Term> parseProblem(String string) {
         String[] tokens = string.split("\\?=");
         if (tokens.length != 2) {
             log.error("Need 2 terms per equation, {} supplied", tokens.length);
             throw new IllegalArgumentException();
         }
-        terms.add(parseTerm(tokens[0]));
-        log.debug("Parsed LHS: {}", terms.get(0));
-        terms.add(parseTerm(tokens[1]));
-        log.debug("Parsed RHS: {}", terms.get(1));
-        return terms;
+        Term lhs = parseTerm(tokens[0]);
+        log.debug("Parsed LHS: {}", lhs);
+        Term rhs = parseTerm(tokens[1]);
+        log.debug("Parsed RHS: {}", rhs);
+        return new Pair<>(lhs, rhs);
     }
     
     // terms look like this: 'f(g(a,b),c,d)'
@@ -35,13 +35,13 @@ public class Parser {
         // split...    (?<=\() => if last char was '('    , => on ','    (?=\)) => if next char is ')'
         String[] tokens = string.split("(?<=\\()|,|(?=\\))");
         
-        Deque<TermBuilder> subTerms = new ArrayDeque<>();
-        subTerms.add(new TermBuilder(",")); // dummyTerm
+        Stack<TermBuilder> subTerms = new Stack<>();
+        subTerms.push(new TermBuilder(",")); // dummyTerm
         for (String token : tokens) {
-            assert subTerms.peek() != null;
+            assert !subTerms.isEmpty();
             if (token.equals(")")) {
                 TermBuilder subTerm = subTerms.pop();
-                if (subTerms.peek() == null) {
+                if (subTerms.isEmpty()) {
                     log.error("Too many closing parentheses in term \"{}\"", string);
                     throw new IllegalArgumentException();
                 }

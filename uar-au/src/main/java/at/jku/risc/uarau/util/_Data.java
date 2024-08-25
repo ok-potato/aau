@@ -1,10 +1,13 @@
 package at.jku.risc.uarau.util;
 
+import com.sun.jmx.remote.internal.ArrayQueue;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class _Data {
     // collection operations
@@ -15,11 +18,10 @@ public class _Data {
         }
     }
     
-    public static <T> Deque<T> conjunction(Deque<T> a, Deque<T> b) {
-        Deque<T> s = new ArrayDeque<>(a.size() + b.size());
-        s.addAll(a);
-        s.addAll(b);
-        return s;
+    public static <T> Queue<T> merge(Queue<T> a, Queue<T> b) {
+        assert unique(a);
+        assert unique(b);
+        return Stream.concat(a.stream(), b.stream()).distinct().collect(Collectors.toCollection(ArrayDeque::new));
     }
     
     public static <T> boolean unique(Collection<T> collection) {
@@ -38,7 +40,7 @@ public class _Data {
         return true;
     }
     
-    public static<T> Collector<T, ?, ArrayDeque<T>> toDeque() {
+    public static <T> Collector<T, ?, Queue<T>> toQueue() {
         return Collectors.toCollection(ArrayDeque::new);
     }
     
