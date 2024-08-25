@@ -11,16 +11,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SigmaTest extends BaseTest {
     @Test
-    public void simple() {
+    public void small() {
         String problem = "f(a, b) ?= g(a, c, d)";
-        String relations = "h {(1, 1), (3, 2), (4, 2)}[0.7] f; h g {(1, 1), (3, 3)}[0.8]";
+        String relations = "h {1 1, 3 2}[0.7] f ; h g {1 1, 3 3}[0.8] ; f g {1 1, 2 1}[0.1]";
         solve(problem, relations, 0.5f);
     }
     
     @Test
     public void medium() {
         String problem = "f(h(a, b(), c(), d()), b()) ?= g(f(a, b()), b(), c())";
-        String relations = "h {(1, 1), (3, 2), (4, 2)}[0.7] f; h g {(1, 1), (3, 3)}[0.8]; c d {}[0.6]";
+        String relations = "h {1 1, 3 2, 4 2}[0.7] f; h g {1 1, 3 3}[0.8]; c d {}[0.6]";
         solve(problem, relations, 0.5f);
     }
     

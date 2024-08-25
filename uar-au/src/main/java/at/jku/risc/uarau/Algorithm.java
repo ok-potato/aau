@@ -28,9 +28,9 @@ public final class Algorithm {
     private final boolean linear, witness;
     
     private Algorithm(Pair<Term, Term> problem, Collection<ProximityRelation> relations, TNorm t_norm, float lambda, boolean linear, boolean witness) {
-        this.rhs = problem.a;
-        this.lhs = problem.b;
-        this.R = new ProximityMap(rhs, lhs, relations, lambda);
+        this.lhs = problem.a;
+        this.rhs = problem.b;
+        this.R = new ProximityMap(lhs, rhs, relations, lambda);
         this.t_norm = t_norm;
         this.lambda = lambda;
         this.linear = linear;
@@ -38,9 +38,17 @@ public final class Algorithm {
     }
     
     private Set<Solution> run() {
-        // TODO analyze for correspondence/mapping properties
         Config initCfg = new Config(lhs, rhs);
         log.info("SOLVING  🧇  {} ?= {}  🧇  λ={}{}", lhs, rhs, lambda, R.toString("\n                   ::  "));
+        
+        if (R.restriction == R.theoreticalRestriction) {
+            log.info("The problem is of type {}.", R.restriction);
+        } else {
+            log.info("The problem is theoretically of type {} - but excluding relations below the λ-cut, it is of type {}.", R.theoreticalRestriction, R.restriction);
+        }
+        if (R.restriction.correspondence) {
+            log.info("Therefore, there are no irrelevant positions, and we get the minimal complete set of generalizations.");
+        }
         
         Queue<Config> branches = new ArrayDeque<>();
         branches.add(initCfg);
@@ -169,8 +177,10 @@ public final class Algorithm {
                 continue;
             }
             assert Q1 != null && Q2 != null;
-            if (Q1.stream().anyMatch(q -> !consistent(q)) || Q2.stream().anyMatch(q -> !consistent(q))) {
-                continue;
+            if (!R.restriction.mapping) {
+                if (Q1.stream().anyMatch(q -> !consistent(q)) || Q2.stream().anyMatch(q -> !consistent(q))) {
+                    continue;
+                }
             }
             
             // APPLY DEC

@@ -6,14 +6,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ProximityMap {
+    public enum Restriction {
+        UNRESTRICTED(false, false), CORRESPONDENCE(true, false), MAPPING(false, true), CORRESPONDENCE_MAPPING(true, true);
+        
+        public final boolean correspondence, mapping;
+        
+        Restriction(boolean correspondence, boolean mapping) {
+            this.correspondence = correspondence;
+            this.mapping = mapping;
+        }
+    }
+    
     private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
     
     private final Map<String, Map<String, ProximityRelation>> relations = new HashMap<>();
     private final Map<String, Integer> arities;
     private final Set<String> vars;
+    public final Restriction restriction, theoreticalRestriction;
     
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
         // add flipped relations - don't allow declaring identity relations, even if they follow the definition
@@ -43,7 +54,8 @@ public class ProximityMap {
         vars = Collections.unmodifiableSet(pair.b);
         log.trace("Arities {}", arities);
         
-        // TODO: these might be needed for EXPAND?
+        theoreticalRestriction = findRestriction(allProximityRelations);
+        
         // optimization: remove relations with proximity < λ
         allProximityRelations.removeIf(relation -> {
             if (relation.proximity < lambda) {
@@ -53,11 +65,24 @@ public class ProximityMap {
             return false;
         });
         
+        restriction = findRestriction(allProximityRelations);
+        
         for (ProximityRelation relation : allProximityRelations) {
             _Data.pad(relation.argRelation, ArrayList::new, arity(relation.f));
             proximityClass(relation.f).put(relation.g, relation);
         }
-        log.trace("PR's {}", _Data.str(allProximityRelations));
+    }
+    
+    private Restriction findRestriction(Collection<ProximityRelation> proximityRelations) {
+        boolean correspondence = proximityRelations.stream()
+                .allMatch(relation -> relation.argRelation.stream().noneMatch(List::isEmpty));
+        boolean mapping = proximityRelations.stream()
+                .allMatch(relation -> relation.argRelation.stream().noneMatch(argRelation -> argRelation.size() > 1));
+        if (correspondence) {
+            return mapping ? Restriction.CORRESPONDENCE_MAPPING : Restriction.CORRESPONDENCE;
+        } else {
+            return mapping ? Restriction.MAPPING : Restriction.UNRESTRICTED;
+        }
     }
     
     private Pair<Map<String, Integer>, Set<String>> findArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
