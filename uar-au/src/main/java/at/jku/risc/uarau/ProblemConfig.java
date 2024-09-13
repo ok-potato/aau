@@ -11,14 +11,14 @@ public class ProblemConfig {
     private final Pair<Term, Term> problem;
     private Collection<ProximityRelation> proximityRelations = new HashSet<>();
     private float lambda = 1.0f;
-    private TNorm t_norm = Math::min;
+    private TNorm tNorm = Math::min;
     private boolean linear = true, witness = true;
     
     public void solve() {
-        Algorithm.solve(this.problem, this.proximityRelations, this.lambda, this.t_norm, this.linear, this.witness);
+        Algorithm.solve(this.problem, this.proximityRelations, this.lambda, this.tNorm, this.linear, this.witness);
     }
     
-    // CONSTRUCTORS
+    // *** constructors ***
     
     public ProblemConfig(Pair<Term, Term> problem) {
         this.problem = problem;
@@ -28,7 +28,7 @@ public class ProblemConfig {
         this(Parser.parseProblem(problem));
     }
     
-    // CHAINING METHODS
+    // *** chaining methods ***
     
     public ProblemConfig proximityRelations(Collection<ProximityRelation> relations) {
         this.proximityRelations = relations;
@@ -45,8 +45,8 @@ public class ProblemConfig {
         return this;
     }
     
-    public ProblemConfig t_norm(TNorm t_norm) {
-        this.t_norm = t_norm;
+    public ProblemConfig tNorm(TNorm tNorm) {
+        this.tNorm = tNorm;
         return this;
     }
     

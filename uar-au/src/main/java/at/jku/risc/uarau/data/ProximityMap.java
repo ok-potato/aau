@@ -1,11 +1,14 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util.ImmutableSet;
 import at.jku.risc.uarau.util.Pair;
-import at.jku.risc.uarau.util._Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ProximityMap {
     public enum Restriction {
@@ -38,20 +41,20 @@ public class ProximityMap {
             allProximityRelations.add(relation.flipped());
         });
         
-        // don't allow duplicates, even if they're equivalent
-        Map<String, ProximityRelation> existing = new HashMap<>();
+        // don't allow multiple relations (even if they're equivalent)
+        Set<String> existing = new HashSet<>();
         for (ProximityRelation relation : allProximityRelations) {
             String key = relation.f + "," + relation.g;
-            if (existing.containsKey(key)) {
-                log.error("Duplicate proximity relation: {} {}", existing.get(key), relation);
+            if (existing.contains(key)) {
+                log.error("Multiple proximity relations between {} {}", relation.f, relation.g);
                 throw new IllegalArgumentException();
             }
-            existing.put(key, relation);
+            existing.add(key);
         }
         
         Pair<Map<String, Integer>, Set<String>> pair = findArities(rhs, lhs, allProximityRelations);
-        arities = Collections.unmodifiableMap(pair.a);
-        vars = Collections.unmodifiableSet(pair.b);
+        arities = Collections.unmodifiableMap(pair.first);
+        vars = Collections.unmodifiableSet(pair.second);
         log.trace("Arities {}", arities);
         
         theoreticalRestriction = findRestriction(allProximityRelations);
@@ -68,7 +71,7 @@ public class ProximityMap {
         restriction = findRestriction(allProximityRelations);
         
         for (ProximityRelation relation : allProximityRelations) {
-            _Data.pad(relation.argRelation, ArrayList::new, arity(relation.f));
+            DataUtil.pad(relation.argRelation, ArrayList::new, arity(relation.f));
             proximityClass(relation.f).put(relation.g, relation);
         }
     }
@@ -139,29 +142,33 @@ public class ProximityMap {
         return vars.contains(h);
     }
     
-    public Map<Queue<String>, Queue<String>> proximatesMemory = new HashMap<>();
+    private final Map<ImmutableSet<String>, ImmutableSet<String>> proximatesMemory = new HashMap<>();
+    private static final int MAX_SIZE_FOR_PROXIMATES_MEMORY = 5;
     
-    public Queue<String> commonProximates(Queue<Term> T) {
-        Queue<String> heads = T.stream().map(t -> t.head).collect(_Data.toQueue());
-        assert T != null && !T.isEmpty();
+    public ImmutableSet<String> commonProximates(ImmutableSet<Term> T) {
+        assert !T.isEmpty();
+        ImmutableSet<String> heads = T.map(t -> t.head);
         
-        if (T.size() < 5 && proximatesMemory.containsKey(T)) {
-            return proximatesMemory.get(T);
+        if (heads.size() < MAX_SIZE_FOR_PROXIMATES_MEMORY && proximatesMemory.containsKey(heads)) {
+            return proximatesMemory.get(heads);
         }
         
-        Queue<String> proximates = null;
-        for (String t : heads) {
-            Queue<String> t_prox = proximityClass(t).values().stream().map(rel -> rel.g).collect(_Data.toQueue());
-            if (proximates == null) {
-                proximates = t_prox;
+        Set<String> commonProximates = null;
+        
+        for (String t_head : heads) {
+            Stream<String> t_prox = proximityClass(t_head).values().stream().map(rel -> rel.g);
+            if (commonProximates == null) {
+                commonProximates = t_prox.collect(Collectors.toSet());
             } else {
-                proximates.retainAll(t_prox);
+                commonProximates.retainAll(t_prox.collect(Collectors.toList()));
             }
         }
-        if (heads.size() < 5) {
-            proximatesMemory.put(heads, proximates);
+        ImmutableSet<String> result = new ImmutableSet<>(commonProximates, true);
+        
+        if (heads.size() < MAX_SIZE_FOR_PROXIMATES_MEMORY) {
+            proximatesMemory.put(heads, result);
         }
-        return proximates;
+        return result;
     }
     
     private Map<String, ProximityRelation> proximityClass(String f) {
@@ -201,7 +208,7 @@ public class ProximityMap {
         StringBuilder sb = new StringBuilder();
         for (String k : relations.keySet()) {
             sb.append(String.format("%s💢 %s ", prefix, k));
-            sb.append(_Data.str(relations.get(k).values(), " ", ".."));
+            sb.append(DataUtil.str(relations.get(k).values(), " ", ".."));
         }
         return sb.substring(0, sb.length() - 1);
     }

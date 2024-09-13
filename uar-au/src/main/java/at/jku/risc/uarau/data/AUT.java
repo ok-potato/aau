@@ -1,8 +1,8 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.ImplicitSet;
+import at.jku.risc.uarau.util.ImmutableSet;
 import at.jku.risc.uarau.util.Pair;
-import at.jku.risc.uarau.util._Data;
+import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -11,18 +11,18 @@ import java.util.stream.Stream;
 
 public class AUT {
     public final int var;
-    public final ImplicitSet<Term> T1, T2;
+    public final ImmutableSet<Term> T1, T2;
     
     private Integer hash = null;
     
     public AUT(int var, Queue<Term> T1, Queue<Term> T2) {
         this.var = var;
-        this.T1 = new ImplicitSet<>(T1);
-        this.T2 = new ImplicitSet<>(T2);
+        this.T1 = new ImmutableSet<>(T1);
+        this.T2 = new ImmutableSet<>(T2);
     }
     
     public AUT(int var, Term T1, Term T2) {
-        this(var, new ImplicitSet<>(T1), new ImplicitSet<>(T2));
+        this(var, new ImmutableSet<>(T1), new ImmutableSet<>(T2));
     }
     
     public Queue<String> heads() {
@@ -33,12 +33,12 @@ public class AUT {
     
     public static Pair<Queue<Term>, Queue<Term>> applyAll(Queue<AUT> auts, Term q1, Term q2) {
         Pair<Queue<Term>, Queue<Term>> applied = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
-        applied.a.add(q1);
-        applied.b.add(q2);
+        applied.first.add(q1);
+        applied.second.add(q2);
         for (AUT aut : auts) {
-            Pair<Queue<Term>, Queue<Term>> pair = aut.apply(applied.a, applied.b);
-            applied.a = pair.a;
-            applied.b = pair.b;
+            Pair<Queue<Term>, Queue<Term>> pair = aut.apply(applied.first, applied.second);
+            applied.first = pair.first;
+            applied.second = pair.second;
         }
         return applied;
     }
@@ -46,17 +46,17 @@ public class AUT {
     public Pair<Queue<Term>, Queue<Term>> apply(Queue<Term> Q1, Queue<Term> Q2) {
         Pair<Queue<Term>, Queue<Term>> pair = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
         for (Term baseTerm : Q1) {
-            T1.forEach(t -> pair.a.add(new Substitution(var, t).apply(baseTerm)));
+            T1.forEach(t -> pair.first.add(new Substitution(var, t).apply(baseTerm)));
         }
         for (Term baseTerm : Q2) {
-            T2.forEach(t -> pair.b.add(new Substitution(var, t).apply(baseTerm)));
+            T2.forEach(t -> pair.second.add(new Substitution(var, t).apply(baseTerm)));
         }
         return pair;
     }
     
     @Override
     public String toString() {
-        return String.format("➰%s: %s ?= %s", var, _Data.str(T1, ", ", "{}", "{ ", " }"), _Data.str(T2, ", ", "{}", "{ ", " }"));
+        return String.format("➰%s: %s ?= %s", var, DataUtil.str(T1, ", ", "{}", "{ ", " }"), DataUtil.str(T2, ", ", "{}", "{ ", " }"));
     }
     
     @Override

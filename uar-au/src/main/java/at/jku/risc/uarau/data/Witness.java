@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util._Data;
+import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.Collections;
 import java.util.Map;
@@ -15,6 +15,6 @@ public class Witness {
     
     @Override
     public String toString() {
-        return _Data.str(substitutions.entrySet());
+        return DataUtil.str(substitutions.entrySet());
     }
 }

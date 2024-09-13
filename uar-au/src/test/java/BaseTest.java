@@ -1,5 +1,5 @@
 import at.jku.risc.uarau.data.Solution;
-import at.jku.risc.uarau.util._Math;
+import at.jku.risc.uarau.util.MathUtil;
 
 public abstract class BaseTest {
     protected void check(Solution solution, String sigma1, String sigma2, String r, float alpha1, float alpha2) {
@@ -16,11 +16,11 @@ public abstract class BaseTest {
             assert solution.sigma2.toString().equals(sigma2);
         }
         
-        if (alpha1 > 0 || _Math.close(alpha1, 0)) { // i.e. alpha1 >= 0
-            assert _Math.close(alpha1, solution.alpha1);
+        if (alpha1 > 0 || MathUtil.close(alpha1, 0)) { // i.e. alpha1 >= 0
+            assert MathUtil.close(alpha1, solution.alpha1);
         }
-        if (alpha2 > 0 || _Math.close(alpha2, 0)) { // i.e. alpha2 >= 0
-            assert _Math.close(alpha2, solution.alpha2);
+        if (alpha2 > 0 || MathUtil.close(alpha2, 0)) { // i.e. alpha2 >= 0
+            assert MathUtil.close(alpha2, solution.alpha2);
         }
     }
 }

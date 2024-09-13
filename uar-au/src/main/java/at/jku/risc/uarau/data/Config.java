@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util._Data;
+import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -55,8 +55,8 @@ public class Config {
     
     @Override
     public String toString() {
-        String A_str = _Data.str(A, " ", "➰");
-        String S_str = _Data.str(S, " ", "➰");
+        String A_str = DataUtil.str(A, " ", "➰");
+        String S_str = DataUtil.str(S, " ", "➰");
         String r = Substitution.applyAll(substitutions, Term.VAR_0).toString();
         return String.format("⚓ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
     }

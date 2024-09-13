@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util._Data;
+import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class ProximityRelation {
         int flipSize = argRelation.stream().flatMap(Collection::stream).max(Comparator.naturalOrder()).orElse(-1) + 1;
         // pad
         List<List<Integer>> flippedArgRelation = new ArrayList<>(flipSize);
-        _Data.pad(flippedArgRelation, ArrayList::new, flipSize);
+        DataUtil.pad(flippedArgRelation, ArrayList::new, flipSize);
         // invert mapping
         for (int fwIdx = 0; fwIdx < argRelation.size(); fwIdx++) {
             for (int flippedIdx : argRelation.get(fwIdx)) {
@@ -64,7 +64,7 @@ public class ProximityRelation {
     private static <T> String mapString(List<List<T>> map) {
         StringBuilder sb = new StringBuilder("{");
         for (Collection<T> c : map) {
-            sb.append(_Data.str(c, ",", "[]", "[", "]"));
+            sb.append(DataUtil.str(c, ",", "[]", "[", "]"));
         }
         return sb.append("}").toString();
     }
