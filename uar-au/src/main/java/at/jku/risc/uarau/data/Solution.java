@@ -27,6 +27,8 @@ public class Solution {
     
     @Override
     public String toString() {
-        return String.format("🔅 %s 🧿%s 🧿%s ⚫ %s, %s", r, sigma1, sigma2, alpha1, alpha2);
+        String sigma1_str = sigma1 == null ? "" : " 🧿LHS " + sigma1;
+        String sigma2_str = sigma2 == null ? "" : " 🧿RHS " + sigma2;
+        return String.format("🔅 %s%s%s ⚫ %s, %s", r, sigma1_str, sigma2_str, alpha1, alpha2);
     }
 }

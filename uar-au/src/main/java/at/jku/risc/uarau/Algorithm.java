@@ -1,8 +1,8 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.*;
+import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.DataUtil;
-import at.jku.risc.uarau.util.ImmutableSet;
 import at.jku.risc.uarau.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,7 @@ public class Algorithm {
     }
     
     private final Logger log = LoggerFactory.getLogger(Algorithm.class);
+    private static final String LOG_NEWLINE = "\n                 :: ";
     
     private final Term lhs, rhs;
     private final ProximityMap R;
@@ -38,15 +39,15 @@ public class Algorithm {
     }
     
     private Set<Solution> run() {
-        log.info("SOLVING  🧇  {} ?= {}  🧇  λ={}{}", lhs, rhs, lambda, R.toString("\n                   ::  "));
+        log.info("SOLVING 🧇 {} ?= {} 🧇 λ = {}{}", lhs, rhs, lambda, R.toString(LOG_NEWLINE));
         
         if (R.restriction == R.theoreticalRestriction) {
-            log.info("The problem is of type {}.", R.restriction);
+            log.info("The problem is of type {}", R.restriction);
         } else {
-            log.info("The problem is theoretically of type {} - but excluding relations below the λ-cut, it is of type {}.", R.theoreticalRestriction, R.restriction);
+            log.info("The problem is theoretically of type {} - but excluding relations below the λ-cut, it is of type {}", R.theoreticalRestriction, R.restriction);
         }
         if (R.restriction.correspondence) {
-            log.info("Therefore, there are no irrelevant positions, and we get the minimal complete set of generalizations.");
+            log.info("Therefore, there are no irrelevant positions, and we get the minimal complete set of generalizations");
         }
         
         Queue<Config> linearSolutions = new ArrayDeque<>();
@@ -72,7 +73,9 @@ public class Algorithm {
                 Queue<Config> children = decompose(aut, config);
                 if (!children.isEmpty()) {
                     branches.addAll(children);
-                    log.debug("DEC => {}", DataUtil.str(children, " ", ""));
+                    if (log.isDebugEnabled()) {
+                        log.debug("DEC => {}", DataUtil.str(children, " ", ""));
+                    }
                     continue BRANCHING;
                 }
                 // SOLVE
@@ -86,9 +89,10 @@ public class Algorithm {
         // *** POST PROCESS ***
         
         assert DataUtil.allUnique(linearSolutions);
-        log.info("Solutions (LINEAR):\n                   ::  {}", DataUtil.str(linearSolutions, "\n                   ::  ", "--"));
+        log.info("linear:{}{}", LOG_NEWLINE, DataUtil.str(linearSolutions, LOG_NEWLINE, ""));
         
         if (linear && !witness) {
+            log.info("SOLUTIONS:");
             Set<Solution> solutions = linearSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
             log.info("██");
             return solutions;
@@ -104,12 +108,13 @@ public class Algorithm {
         
         assert DataUtil.allUnique(expandedSolutions);
         if (expandedSolutions.size() == linearSolutions.size() && expandedSolutions.containsAll(linearSolutions)) {
-            log.info("Solutions (EXPANDED): 〃");
+            log.info("expanded:{}-\"-", LOG_NEWLINE);
         } else {
-            log.info("Solutions (EXPANDED):\n                   ::  {}", DataUtil.str(expandedSolutions, "\n                   ::  ", "--"));
+            log.info("expanded:{}{}", LOG_NEWLINE, DataUtil.str(expandedSolutions, LOG_NEWLINE, ""));
         }
         
         if (linear) {
+            log.info("SOLUTIONS:");
             Set<Solution> solutions = expandedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
             log.info("██");
             return solutions;
@@ -124,8 +129,8 @@ public class Algorithm {
                 int freshVar = expandedSolution.peekVar();
                 
                 AUT merger = S_expanded.remove();
-                ImmutableSet<Term> R11 = new ImmutableSet<>(merger.T1);
-                ImmutableSet<Term> R12 = new ImmutableSet<>(merger.T2);
+                ArraySet<Term> R11 = new ArraySet<>(merger.T1);
+                ArraySet<Term> R12 = new ArraySet<>(merger.T2);
                 
                 Queue<AUT> unmerged = new ArrayDeque<>();
                 Queue<Integer> mergedVars = new ArrayDeque<>();
@@ -157,11 +162,11 @@ public class Algorithm {
         }
         
         if (mergedSolutions.size() == expandedSolutions.size() && mergedSolutions.containsAll(expandedSolutions)) {
-            log.info("Solutions (MERGED): 〃");
+            log.info("merged:{}-\"-", LOG_NEWLINE);
         } else {
-            log.info("Solutions (MERGED):\n                   ::  {}", DataUtil.str(mergedSolutions, "\n                   ::  ", "--"));
+            log.info("merged:{}{}", LOG_NEWLINE, DataUtil.str(mergedSolutions, LOG_NEWLINE, ""));
         }
-        
+        log.info("SOLUTIONS:");
         Set<Solution> solutions = mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
         log.info("██");
         return solutions;
@@ -169,13 +174,13 @@ public class Algorithm {
     
     private Queue<Config> decompose(AUT aut, Config cfg) {
         Queue<Config> children = new ArrayDeque<>();
-        for (String h : R.commonProximates(ImmutableSet.merge(aut.T1, aut.T2))) {
-            Pair<List<ImmutableSet<Term>>, Float> T1_mapped = map(h, aut.T1, cfg.alpha1);
-            List<ImmutableSet<Term>> Q1 = T1_mapped.first;
+        for (String h : R.commonProximates(ArraySet.merge(aut.T1, aut.T2))) {
+            Pair<List<ArraySet<Term>>, Float> T1_mapped = map(h, aut.T1, cfg.alpha1);
+            List<ArraySet<Term>> Q1 = T1_mapped.first;
             float T1_alpha = T1_mapped.second;
             
-            Pair<List<ImmutableSet<Term>>, Float> T2_mapped = map(h, aut.T2, cfg.alpha2);
-            List<ImmutableSet<Term>> Q2 = T2_mapped.first;
+            Pair<List<ArraySet<Term>>, Float> T2_mapped = map(h, aut.T2, cfg.alpha2);
+            List<ArraySet<Term>> Q2 = T2_mapped.first;
             float T2_alpha = T2_mapped.second;
             
             // CHECK DEC
@@ -207,7 +212,7 @@ public class Algorithm {
         return children;
     }
     
-    private Pair<List<ImmutableSet<Term>>, Float> map(String h, Queue<Term> T, float beta) {
+    private Pair<List<ArraySet<Term>>, Float> map(String h, Queue<Term> T, float beta) {
         int h_arity = R.arity(h);
         List<Set<Term>> Q_mutable = new ArrayList<>(h_arity);
         for (int i = 0; i < h_arity; i++) {
@@ -228,7 +233,7 @@ public class Algorithm {
                 return new Pair<>(null, beta); // should not be dereferenced
             }
         }
-        List<ImmutableSet<Term>> Q = Q_mutable.stream().map(ImmutableSet::new).collect(Collectors.toList());
+        List<ArraySet<Term>> Q = Q_mutable.stream().map(ArraySet::new).collect(Collectors.toList());
         return new Pair<>(Q, beta);
     }
     
@@ -244,8 +249,8 @@ public class Algorithm {
         return new AUT(aut.var, C1, C2);
     }
     
-    private AUT merge(ImmutableSet<Term> T11, ImmutableSet<Term> T12, ImmutableSet<Term> T21, ImmutableSet<Term> T22, int freshVar) {
-        Pair<Queue<Term>, Integer> pair1 = specialConjunction(ImmutableSet.merge(T11, T12), freshVar);
+    private AUT merge(ArraySet<Term> T11, ArraySet<Term> T12, ArraySet<Term> T21, ArraySet<Term> T22, int freshVar) {
+        Pair<Queue<Term>, Integer> pair1 = specialConjunction(ArraySet.merge(T11, T12), freshVar);
         Queue<Term> Q1 = pair1.first;
         freshVar = pair1.second;
         
@@ -253,7 +258,7 @@ public class Algorithm {
             return new AUT(freshVar, Q1, Q1);
         }
         
-        Pair<Queue<Term>, Integer> pair2 = specialConjunction(ImmutableSet.merge(T21, T22), freshVar);
+        Pair<Queue<Term>, Integer> pair2 = specialConjunction(ArraySet.merge(T21, T22), freshVar);
         Queue<Term> Q2 = pair2.first;
         freshVar = pair2.second;
         
@@ -280,12 +285,12 @@ public class Algorithm {
     
     // *** special conjunction ***
     
-    private boolean consistent(ImmutableSet<Term> terms) {
+    private boolean consistent(ArraySet<Term> terms) {
         return runConjunction(terms, Term.UNUSED_VAR) != null;
     }
     
     // get rid of annoying null warnings
-    private Pair<Queue<Term>, Integer> specialConjunction(ImmutableSet<Term> terms, int freshVar) {
+    private Pair<Queue<Term>, Integer> specialConjunction(ArraySet<Term> terms, int freshVar) {
         Pair<Queue<Term>, Integer> result = runConjunction(terms, freshVar);
         assert result != null;
         return result;
@@ -293,16 +298,12 @@ public class Algorithm {
     
     private final Pair<Queue<Term>, Integer> DUMMY_PAIR = new Pair<>(null, null);
     
-    private Pair<Queue<Term>, Integer> runConjunction(ImmutableSet<Term> terms, int freshVar) {
+    private Pair<Queue<Term>, Integer> runConjunction(ArraySet<Term> terms, int freshVar) {
         boolean consistencyCheck = freshVar == Term.UNUSED_VAR;
         Queue<State> branches = new ArrayDeque<>();
         assert !terms.contains(Term.ANON);
         terms = terms.filter(t -> !Term.ANON.equals(t));
         branches.add(new State(terms, freshVar));
-        
-        if (consistencyCheck) {
-            log.trace("  cons: {}", DataUtil.str(branches.peek().expressions.peek().T));
-        }
         
         Queue<Term> solutions = consistencyCheck ? null : new ArrayDeque<>();
         BRANCHING:
@@ -310,7 +311,7 @@ public class Algorithm {
             State state = branches.remove();
             while (!state.expressions.isEmpty()) {
                 Expression expression = state.expressions.remove();
-                ImmutableSet<Term> expr_T = expression.T.filter(t -> !Term.ANON.equals(t));
+                ArraySet<Term> expr_T = expression.T.filter(t -> !Term.ANON.equals(t));
                 // REMOVE
                 if (consistencyCheck && expr_T.size() <= 1 || expr_T.isEmpty()) {
                     state.s.add(new Substitution(expression.var, Term.ANON));
@@ -318,7 +319,7 @@ public class Algorithm {
                 }
                 // REDUCE
                 for (String h : R.commonProximates(expr_T)) {
-                    List<ImmutableSet<Term>> Q = map(h, expr_T, 1.0f).first;
+                    List<ArraySet<Term>> Q = map(h, expr_T, 1.0f).first;
                     assert Q != null;
                     State childState = state.copy();
                     
@@ -332,30 +333,19 @@ public class Algorithm {
                     Term h_term = R.isMappedVar(h) ? new Term(h) : new Term(h, h_args);
                     childState.s.add(new Substitution(expression.var, h_term));
                     branches.add(childState);
-                    
-                    if (log.isTraceEnabled()) {
-                        log.trace("  RED: {} {}=> {}", expression, h, childState.expressions);
-                    }
                 }
                 continue BRANCHING;
             }
-            
             if (consistencyCheck) {
-                log.trace("=> consistent");
                 return DUMMY_PAIR;
             }
             solutions.add(Substitution.applyAll(state.s, state.peekVar()));
         }
-        
         if (consistencyCheck) {
-            log.trace("=> NOT consistent");
             return null;
         }
-        
-        if (solutions.size() < 16) {
-            log.debug("=> conj: {} => {}", terms, solutions);
-        } else {
-            log.debug("=> conj: {} => ({})", terms, solutions.size());
+        if (log.isDebugEnabled()) {
+            log.debug("  conjunction: {} => {}", terms, solutions);
         }
         return new Pair<>(solutions, freshVar);
     }

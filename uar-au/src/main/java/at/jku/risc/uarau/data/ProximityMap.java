@@ -1,7 +1,7 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.DataUtil;
-import at.jku.risc.uarau.util.ImmutableSet;
 import at.jku.risc.uarau.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +34,7 @@ public class ProximityMap {
         List<ProximityRelation> allProximityRelations = new ArrayList<>(proximityRelations.size() * 2);
         proximityRelations.forEach(relation -> {
             if (relation.f == relation.g) {
-                log.error("Identity proximity relation: {}", relation);
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Identity proximity relation: " + relation);
             }
             allProximityRelations.add(relation);
             allProximityRelations.add(relation.flipped());
@@ -46,8 +45,8 @@ public class ProximityMap {
         for (ProximityRelation relation : allProximityRelations) {
             String key = relation.f + "," + relation.g;
             if (existing.contains(key)) {
-                log.error("Multiple proximity relations between {} {}", relation.f, relation.g);
-                throw new IllegalArgumentException();
+                String msg = String.format("Multiple proximity relations between '%s' and '%s'", relation.f, relation.g);
+                throw new IllegalArgumentException(msg);
             }
             existing.add(key);
         }
@@ -55,7 +54,6 @@ public class ProximityMap {
         Pair<Map<String, Integer>, Set<String>> pair = findArities(rhs, lhs, allProximityRelations);
         arities = Collections.unmodifiableMap(pair.first);
         vars = Collections.unmodifiableSet(pair.second);
-        log.trace("Arities {}", arities);
         
         theoreticalRestriction = findRestriction(allProximityRelations);
         
@@ -100,13 +98,13 @@ public class ProximityMap {
         Map<String, Integer> allArities = new HashMap<>(termArities);
         for (ProximityRelation relation : proximityRelations) {
             if (termVars.contains(relation.f)) {
-                log.error("'{}' cannot be close to '{}', since it is a variable", relation.f, relation.g);
-                throw new IllegalArgumentException();
+                String msg = String.format("Variable '%s' cannot be close to '%s'", relation.f, relation.g);
+                throw new IllegalArgumentException(msg);
             }
             Integer termArity = termArities.get(relation.f);
             if (termArity != null && termArity < relation.argRelation.size()) {
-                log.error("'{}' appears in the problem with arity {}, which argument relation {} exceeds", relation.f, termArity, relation);
-                throw new IllegalArgumentException();
+                String msg = String.format("'%s' appears in the problem with arity %s, which is exceeded by argument relation %s", relation.f, termArity, relation);
+                throw new IllegalArgumentException(msg);
             }
             int newArity = Math.max(relation.argRelation.size(), allArities.getOrDefault(relation.f, 0));
             allArities.put(relation.f, newArity);
@@ -118,12 +116,10 @@ public class ProximityMap {
         assert !t.isVar(); // can only have mapped vars
         if (arityMap.containsKey(t.head)) {
             if (arityMap.get(t.head) != t.arguments.size()) {
-                log.error("Found multiple arities of '{}' in the posed problem", t.head);
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Found multiple arities for '" + t.head + "' in the posed problem");
             }
             if (varSet.contains(t.head) != t.mappedVar) {
-                log.error("'{}' appears as both a variable and a function/constant symbol", t.head);
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(t.head + " appears as both a variable and a function/const symbol");
             }
         } else {
             arityMap.put(t.head, t.arguments.size());
@@ -142,14 +138,14 @@ public class ProximityMap {
         return vars.contains(h);
     }
     
-    private final Map<ImmutableSet<String>, ImmutableSet<String>> proximatesMemory = new HashMap<>();
-    private static final int MAX_SIZE_FOR_PROXIMATES_MEMORY = 5;
+    private final Map<ArraySet<String>, ArraySet<String>> proximatesMemory = new HashMap<>();
+    private static final int MAX_SIZE_FOR_PROXIMATES_MEMORY = 2;
     
-    public ImmutableSet<String> commonProximates(ImmutableSet<Term> T) {
+    public ArraySet<String> commonProximates(ArraySet<Term> T) {
         assert !T.isEmpty();
-        ImmutableSet<String> heads = T.map(t -> t.head);
+        ArraySet<String> heads = T.map(t -> t.head);
         
-        if (heads.size() < MAX_SIZE_FOR_PROXIMATES_MEMORY && proximatesMemory.containsKey(heads)) {
+        if (heads.size() <= MAX_SIZE_FOR_PROXIMATES_MEMORY && proximatesMemory.containsKey(heads)) {
             return proximatesMemory.get(heads);
         }
         
@@ -163,9 +159,9 @@ public class ProximityMap {
                 commonProximates.retainAll(t_prox.collect(Collectors.toList()));
             }
         }
-        ImmutableSet<String> result = new ImmutableSet<>(commonProximates, true);
+        ArraySet<String> result = new ArraySet<>(commonProximates, true);
         
-        if (heads.size() < MAX_SIZE_FOR_PROXIMATES_MEMORY) {
+        if (heads.size() <= MAX_SIZE_FOR_PROXIMATES_MEMORY) {
             proximatesMemory.put(heads, result);
         }
         return result;
@@ -202,14 +198,10 @@ public class ProximityMap {
     }
     
     public String toString(String prefix) {
-        if (relations.isEmpty()) {
-            return prefix + "💢";
-        }
         StringBuilder sb = new StringBuilder();
         for (String k : relations.keySet()) {
-            sb.append(String.format("%s💢 %s ", prefix, k));
-            sb.append(DataUtil.str(relations.get(k).values(), " ", ".."));
+            sb.append(prefix).append(DataUtil.str(relations.get(k).values(), " ", ".."));
         }
-        return sb.substring(0, sb.length() - 1);
+        return sb.toString();
     }
 }

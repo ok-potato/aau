@@ -81,20 +81,6 @@ public class Term {
         return var > UNUSED_VAR;
     }
     
-    @Override
-    public String toString() {
-        if (var == ANON.var) {
-            return "_";
-        }
-        if (isVar()) {
-            return String.format("%s", var);
-        }
-        if (mappedVar) {
-            return head;
-        }
-        return head + DataUtil.str(arguments, ",", "()", "(", ")");
-    }
-    
     private Integer hash = null;
     
     @Override
@@ -125,5 +111,23 @@ public class Term {
             return false;
         }
         return head.equals(otherTerm.head) && arguments.equals(otherTerm.arguments);
+    }
+    
+    @Override
+    public String toString() {
+        return toString(true);
+    }
+    
+    public String toString(boolean ansi) {
+        if (var == ANON.var) {
+            return "_";
+        }
+        if (isVar()) {
+            return ansi ? "\u001B[33m" + var + "\u001B[0m" : String.valueOf(var);
+        }
+        if (mappedVar) {
+            return head;
+        }
+        return head + DataUtil.str(arguments, ",", "()", "(", ")");
     }
 }

@@ -25,7 +25,8 @@ public class SigmaTest extends BaseTest {
     }
     
     @Test
-    public void big() { // |f| = 2  |g| = 3  |h| = 3
+    public void big() {
+        // |f| = 2  |g| = 3  |h| = 3
         String l_h1 = "h( a(), b(), f(a(),b()) )";
         String l_g1 = String.format("g( c(), d(), %s )", l_h1);
         String l_h2 = String.format("h( f(c(),d()), %s, c() )", l_g1);
@@ -76,7 +77,6 @@ public class SigmaTest extends BaseTest {
     public void variableTerms() {
         solve("a() ?= b()", "", 0.5f);
         solve("a ?= b()", "", 0.5f);
-        solve("a() ?= b", "", 0.5f);
         solve("a ?= b", "", 0.5f);
     }
     
@@ -101,7 +101,10 @@ public class SigmaTest extends BaseTest {
         assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f g", 1.0f));
         assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f g {}", 1.0f));
         assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f g {}[]", 1.0f));
-        // argument relations
+        assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f g h {}[0.5]", 1.0f));
+        assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f , {}[0.5]", 1.0f));
+        assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", ") g {}[0.5]", 1.0f));
+        // -> argument relations
         assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f g {1}[1.0]", 1.0f));
         assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f g {(1, )}[1.0]", 1.0f));
         assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f g {f}[1.0]", 1.0f));

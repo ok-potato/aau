@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.util.ImmutableSet;
+import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.DataUtil;
 
@@ -11,18 +11,18 @@ import java.util.stream.Stream;
 
 public class AUT {
     public final int var;
-    public final ImmutableSet<Term> T1, T2;
+    public final ArraySet<Term> T1, T2;
     
     private Integer hash = null;
     
     public AUT(int var, Queue<Term> T1, Queue<Term> T2) {
         this.var = var;
-        this.T1 = new ImmutableSet<>(T1);
-        this.T2 = new ImmutableSet<>(T2);
+        this.T1 = new ArraySet<>(T1);
+        this.T2 = new ArraySet<>(T2);
     }
     
     public AUT(int var, Term T1, Term T2) {
-        this(var, new ImmutableSet<>(T1), new ImmutableSet<>(T2));
+        this(var, new ArraySet<>(T1), new ArraySet<>(T2));
     }
     
     public Queue<String> heads() {
@@ -56,7 +56,9 @@ public class AUT {
     
     @Override
     public String toString() {
-        return String.format("➰%s: %s ?= %s", var, DataUtil.str(T1, ", ", "{}", "{ ", " }"), DataUtil.str(T2, ", ", "{}", "{ ", " }"));
+        String T1_str = DataUtil.str(T1, "  ", "..");
+        String T2_str = DataUtil.str(T2, "  ", "..");
+        return "\u001B[34m" + var + ":\u001B[0m " + T1_str + " \u001B[31m?=\u001B[0m " + T2_str;
     }
     
     @Override

@@ -58,14 +58,17 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return String.format("(%s►%s %s %s)", f, g, proximity, mapString(argRelation));
+        return String.format("(\u001B[31m%s ► %s\u001B[0m %s%s)", f, g, argsString(), proximity);
     }
     
-    private static <T> String mapString(List<List<T>> map) {
-        StringBuilder sb = new StringBuilder("{");
-        for (Collection<T> c : map) {
-            sb.append(DataUtil.str(c, ",", "[]", "[", "]"));
+    private String argsString() {
+        if (argRelation.isEmpty()) {
+            return "";
         }
-        return sb.append("}").toString();
+        StringBuilder sb = new StringBuilder();
+        for (List<Integer> args : argRelation) {
+            sb.append(DataUtil.str(args, ",", "[]", "[", "]"));
+        }
+        return sb.append(" ").toString();
     }
 }

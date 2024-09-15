@@ -6,16 +6,16 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ImmutableSet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
+public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     private final ELEMENT[] elements;
     private Integer hash = null;
     
     @SuppressWarnings("unchecked")
-    public ImmutableSet(Collection<ELEMENT> collection, boolean overrideUniqueCheck) {
-        if (collection instanceof ImmutableSet) {
-            ImmutableSet<ELEMENT> immutableSet = (ImmutableSet<ELEMENT>) collection;
-            elements = immutableSet.elements;
-            hash = immutableSet.hash;
+    public ArraySet(Collection<ELEMENT> collection, boolean knownAsUnique) {
+        if (collection instanceof ArraySet) {
+            ArraySet<ELEMENT> arraySet = (ArraySet<ELEMENT>) collection;
+            elements = arraySet.elements;
+            hash = arraySet.hash;
             return;
         }
         
@@ -25,37 +25,37 @@ public class ImmutableSet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
             assert element != null;
             elements[i++] = element;
         }
-        assert overrideUniqueCheck || collection instanceof Set || DataUtil.allUnique(this);
+        assert knownAsUnique || collection instanceof Set || DataUtil.allUnique(this);
     }
     
-    public ImmutableSet(Collection<ELEMENT> collection) {
+    public ArraySet(Collection<ELEMENT> collection) {
         this(collection, false);
     }
     
     @SafeVarargs
-    public ImmutableSet(ELEMENT... element) {
+    public ArraySet(ELEMENT... element) {
         this(Arrays.asList(element));
     }
     
-    public <MAPPED_ELEMENT> ImmutableSet<MAPPED_ELEMENT> map(Function<ELEMENT, MAPPED_ELEMENT> mapFunction) {
-        return new ImmutableSet<>(this.stream().map(mapFunction).distinct().collect(Collectors.toList()));
+    public <MAPPED_ELEMENT> ArraySet<MAPPED_ELEMENT> map(Function<ELEMENT, MAPPED_ELEMENT> mapFunction) {
+        return new ArraySet<>(this.stream().map(mapFunction).distinct().collect(Collectors.toList()));
     }
     
-    public ImmutableSet<ELEMENT> filter(Predicate<ELEMENT> filterPredicate) {
+    public ArraySet<ELEMENT> filter(Predicate<ELEMENT> filterPredicate) {
         List<ELEMENT> list = this.stream().filter(filterPredicate).collect(Collectors.toList());
         if (list.size() == this.size()) {
-            return new ImmutableSet<>(this);
+            return new ArraySet<>(this);
         }
-        return new ImmutableSet<>(list, true);
+        return new ArraySet<>(list, true);
     }
     
-    public static <ELEMENT> ImmutableSet<ELEMENT> merge(ImmutableSet<ELEMENT> a, ImmutableSet<ELEMENT> b) {
+    public static <ELEMENT> ArraySet<ELEMENT> merge(ArraySet<ELEMENT> a, ArraySet<ELEMENT> b) {
         List<ELEMENT> merged = Stream.concat(a.stream(), b.stream())
                 .unordered()
                 .distinct()
                 .collect(Collectors.toCollection(ArrayList::new));
         
-        return new ImmutableSet<>(merged, true);
+        return new ArraySet<>(merged, true);
     }
     
     // *** overrides ***
@@ -192,10 +192,10 @@ public class ImmutableSet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof ImmutableSet)) {
+        if (!(obj instanceof ArraySet)) {
             return false;
         }
-        ImmutableSet<?> other = (ImmutableSet<?>) obj;
+        ArraySet<?> other = (ArraySet<?>) obj;
         if (size() != other.size() || hashCode() != other.hashCode()) {
             return false;
         }

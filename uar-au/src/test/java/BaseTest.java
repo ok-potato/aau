@@ -4,7 +4,7 @@ import at.jku.risc.uarau.util.MathUtil;
 public abstract class BaseTest {
     protected void check(Solution solution, String sigma1, String sigma2, String r, float alpha1, float alpha2) {
         if (r != null) {
-            assert solution.r.toString().equals(r);
+            assert solution.r.toString(false).equals(r);
         }
         
         if (sigma1 != null) {

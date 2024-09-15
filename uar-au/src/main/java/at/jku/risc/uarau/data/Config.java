@@ -55,10 +55,10 @@ public class Config {
     
     @Override
     public String toString() {
-        String A_str = DataUtil.str(A, " ", "➰");
-        String S_str = DataUtil.str(S, " ", "➰");
-        String r = Substitution.applyAll(substitutions, Term.VAR_0).toString();
-        return String.format("⚓ %s ⚫ %s 🔅 %s ⚫ %s, %s", A_str, S_str, r, alpha1, alpha2);
+        String A_str = DataUtil.str(A, " ", "", "", " ⚫ ");
+        String S_str = DataUtil.str(S, " ", "\u001B[34m---\u001B[0m");
+        String r_str = Substitution.applyAll(substitutions, Term.VAR_0).toString();
+        return String.format("🔅 %s %s%s ⚫ %s, %s", r_str, A_str, S_str, alpha1, alpha2);
     }
     
     @Override
