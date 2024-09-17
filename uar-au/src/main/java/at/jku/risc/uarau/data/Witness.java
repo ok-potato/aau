@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.Collections;
@@ -19,7 +20,7 @@ public class Witness {
     public String toString() {
         return DataUtil.str(substitutions.entrySet()
                 .stream()
-                .flatMap(entry -> Stream.of("\u001B[33m" + entry.getKey() + ":\u001B[0m", entry.getValue()))
+                .flatMap(entry -> Stream.of(ANSI.blue(entry.getKey()), entry.getValue()))
                 .collect(Collectors.toList()), " ", "..");
     }
 }

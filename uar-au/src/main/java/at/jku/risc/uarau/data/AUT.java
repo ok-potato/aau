@@ -1,8 +1,9 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util.Pair;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -58,7 +59,7 @@ public class AUT {
     public String toString() {
         String T1_str = DataUtil.str(T1, "  ", "..");
         String T2_str = DataUtil.str(T2, "  ", "..");
-        return "\u001B[34m" + var + ":\u001B[0m " + T1_str + " \u001B[31m?=\u001B[0m " + T2_str;
+        return ANSI.blue(var + " ") + T1_str + ANSI.red(" ?= ") + T2_str;
     }
     
     @Override

@@ -1,6 +1,7 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.*;
+import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.DataUtil;
 import at.jku.risc.uarau.util.Pair;
@@ -39,7 +40,7 @@ public class Algorithm {
     }
     
     private Set<Solution> run() {
-        log.info("SOLVING 🧇 {} ?= {} 🧇 λ = {}{}", lhs, rhs, lambda, R.toString(LOG_NEWLINE));
+        log.info(ANSI.green("SOLVING ") + lhs + ANSI.red(" ?= ") + rhs + ANSI.green(" λ = " + lambda) + R.toString(LOG_NEWLINE));
         
         if (R.restriction == R.theoreticalRestriction) {
             log.info("The problem is of type {}", R.restriction);
@@ -89,12 +90,12 @@ public class Algorithm {
         // *** POST PROCESS ***
         
         assert DataUtil.allUnique(linearSolutions);
-        log.info("linear:{}{}", LOG_NEWLINE, DataUtil.str(linearSolutions, LOG_NEWLINE, ""));
+        log.info(ANSI.green("LINEAR:") + "{}{}", LOG_NEWLINE, DataUtil.str(linearSolutions, LOG_NEWLINE, ""));
         
         if (linear && !witness) {
-            log.info("SOLUTIONS:");
+            log.info(ANSI.green("SOLUTIONS:"));
             Set<Solution> solutions = linearSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
-            log.info("██");
+            log.info("🧇");
             return solutions;
         }
         // EXPAND
@@ -108,15 +109,15 @@ public class Algorithm {
         
         assert DataUtil.allUnique(expandedSolutions);
         if (expandedSolutions.size() == linearSolutions.size() && expandedSolutions.containsAll(linearSolutions)) {
-            log.info("expanded:{}-\"-", LOG_NEWLINE);
+            log.info(ANSI.green("EXPANDED:") + "{}-\"-", LOG_NEWLINE);
         } else {
-            log.info("expanded:{}{}", LOG_NEWLINE, DataUtil.str(expandedSolutions, LOG_NEWLINE, ""));
+            log.info(ANSI.green("EXPANDED:") + "{}{}", LOG_NEWLINE, DataUtil.str(expandedSolutions, LOG_NEWLINE, ""));
         }
         
         if (linear) {
-            log.info("SOLUTIONS:");
+            log.info(ANSI.green("SOLUTIONS:"));
             Set<Solution> solutions = expandedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
-            log.info("██");
+            log.info("🧇");
             return solutions;
         }
         
@@ -162,13 +163,13 @@ public class Algorithm {
         }
         
         if (mergedSolutions.size() == expandedSolutions.size() && mergedSolutions.containsAll(expandedSolutions)) {
-            log.info("merged:{}-\"-", LOG_NEWLINE);
+            log.info(ANSI.green("MERGED:") + "{}-\"-", LOG_NEWLINE);
         } else {
-            log.info("merged:{}{}", LOG_NEWLINE, DataUtil.str(mergedSolutions, LOG_NEWLINE, ""));
+            log.info(ANSI.green("MERGED:") + "{}{}", LOG_NEWLINE, DataUtil.str(mergedSolutions, LOG_NEWLINE, ""));
         }
-        log.info("SOLUTIONS:");
+        log.info(ANSI.green("SOLUTIONS:"));
         Set<Solution> solutions = mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
-        log.info("██");
+        log.info("🧇");
         return solutions;
     }
     

@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.DataUtil;
 import org.junit.platform.commons.util.StringUtils;
 
@@ -123,7 +124,7 @@ public class Term {
             return "_";
         }
         if (isVar()) {
-            return ansi ? "\u001B[33m" + var + "\u001B[0m" : String.valueOf(var);
+            return ansi ? ANSI.yellow(var) : String.valueOf(var);
         }
         if (mappedVar) {
             return head;

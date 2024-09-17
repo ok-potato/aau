@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.ArrayDeque;
@@ -56,9 +57,9 @@ public class Config {
     @Override
     public String toString() {
         String A_str = DataUtil.str(A, " ", "", "", " ⚫ ");
-        String S_str = DataUtil.str(S, " ", "\u001B[34m---\u001B[0m");
+        String S_str = DataUtil.str(S, " ", ANSI.blue(".."));
         String r_str = Substitution.applyAll(substitutions, Term.VAR_0).toString();
-        return String.format("🔅 %s %s%s ⚫ %s, %s", r_str, A_str, S_str, alpha1, alpha2);
+        return String.format("%s ⚫ %s%s " + ANSI.green("%s %s"), r_str, A_str, S_str, alpha1, alpha2);
     }
     
     @Override

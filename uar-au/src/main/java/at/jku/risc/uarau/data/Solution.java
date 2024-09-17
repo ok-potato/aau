@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.ANSI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +28,8 @@ public class Solution {
     
     @Override
     public String toString() {
-        String sigma1_str = sigma1 == null ? "" : " 🧿LHS " + sigma1;
-        String sigma2_str = sigma2 == null ? "" : " 🧿RHS " + sigma2;
-        return String.format("🔅 %s%s%s ⚫ %s, %s", r, sigma1_str, sigma2_str, alpha1, alpha2);
+        String sigma1_str = sigma1 == null ? "" : " 🧿 " + sigma1;
+        String sigma2_str = sigma2 == null ? "" : " 🧿 " + sigma2;
+        return String.format("🔅 %s%s%s " + ANSI.green("%s %s"), r, sigma1_str, sigma2_str, alpha1, alpha2);
     }
 }
