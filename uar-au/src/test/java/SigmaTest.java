@@ -1,5 +1,5 @@
 import at.jku.risc.uarau.Algorithm;
-import at.jku.risc.uarau.ProblemConfig;
+import at.jku.risc.uarau.Problem;
 import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.DataUtil;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ public class SigmaTest extends BaseTest {
         String problem = String.format("%s ?= %s", lhs, rhs);
         String relations = "h f {1 1, 2 1, 3 2)}[0.7] ; c d {}[0.6] ; b c {}[0.9] ; f g [0.9] {1 2, 2 3, 2 1)}";
         
-        new ProblemConfig(problem).proximityRelations(relations).lambda(0.5f).linear(false).witness(false).solve();
+        new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(false).solve();
     }
     
     @Test

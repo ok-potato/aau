@@ -1,11 +1,11 @@
 package at.jku.risc.uarau.util;
 
-public final class Pair<FIRST, SECOND> {
-    public FIRST first;
-    public SECOND second;
+public class Pair<LEFT, RIGHT> {
+    public final LEFT left;
+    public final RIGHT right;
     
-    public Pair(FIRST first, SECOND second) {
-        this.first = first;
-        this.second = second;
+    public Pair(LEFT left, RIGHT right) {
+        this.left = left;
+        this.right = right;
     }
 }

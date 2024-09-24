@@ -30,7 +30,7 @@ public class ProximityMap {
     public final Restriction restriction, theoreticalRestriction;
     
     public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
-        // add flipped relations - don't allow declaring identity relations, even if they follow the definition
+        // add flipped relations - don't allow declaring identity relations (even if they follow the definition)
         List<ProximityRelation> allProximityRelations = new ArrayList<>(proximityRelations.size() * 2);
         proximityRelations.forEach(relation -> {
             if (relation.f == relation.g) {
@@ -40,7 +40,7 @@ public class ProximityMap {
             allProximityRelations.add(relation.flipped());
         });
         
-        // don't allow multiple relations (even if they're equivalent)
+        // don't allow multiple relations between two functions (even if they're equivalent)
         Set<String> existing = new HashSet<>();
         for (ProximityRelation relation : allProximityRelations) {
             String key = relation.f + "," + relation.g;
@@ -52,8 +52,8 @@ public class ProximityMap {
         }
         
         Pair<Map<String, Integer>, Set<String>> pair = findArities(rhs, lhs, allProximityRelations);
-        arities = Collections.unmodifiableMap(pair.first);
-        vars = Collections.unmodifiableSet(pair.second);
+        arities = Collections.unmodifiableMap(pair.left);
+        vars = Collections.unmodifiableSet(pair.right);
         
         theoreticalRestriction = findRestriction(allProximityRelations);
         
@@ -90,7 +90,7 @@ public class ProximityMap {
         //      NOTE: If f/g doesn't show up in a term, we assume its arity equals the maximum arity found in R.
         //      If this assumption is wrong, we're missing some non-relevant positions, and could possibly
         //      misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM).
-        //      Otherwise, arities of functions would have to be manually specified if they don't appear in a term.
+        //      TODO If this is not acceptable, we need to allow manually defining arities
         Map<String, Integer> termArities = new HashMap<>();
         Set<String> termVars = new HashSet<>();
         findTermArities(rhs, termArities, termVars);
@@ -113,7 +113,7 @@ public class ProximityMap {
     }
     
     private void findTermArities(Term t, Map<String, Integer> arityMap, Set<String> varSet) {
-        assert !t.isVar(); // can only have mapped vars
+        assert !t.isVar();
         if (arityMap.containsKey(t.head)) {
             if (arityMap.get(t.head) != t.arguments.size()) {
                 throw new IllegalArgumentException("Found multiple arities for '" + t.head + "' in the posed problem");
@@ -132,7 +132,7 @@ public class ProximityMap {
         }
     }
     
-    // --- public
+    // *** public methods ***
     
     public boolean isMappedVar(String h) {
         return vars.contains(h);

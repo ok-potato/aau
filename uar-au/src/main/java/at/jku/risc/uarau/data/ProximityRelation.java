@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.DataUtil;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return String.format("(\u001B[31m%s ► %s\u001B[0m %s%s)", f, g, argsString(), proximity);
+        return String.format("(" + ANSI.red("%s ► %s") + "%s%s)", f, g, argsString(), proximity);
     }
     
     private String argsString() {

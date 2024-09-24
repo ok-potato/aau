@@ -11,14 +11,33 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Core implementation of the algorithm.
+ * <br>
+ * You can run the Algorithm by defining a {@link Problem}, and calling {@link Problem#solve()} on it.
+ * <br><br>
+ * (or by calling {@link Algorithm#solve(String, String, float)}, or
+ * <br>
+ * {@link Algorithm#solve(Pair, Collection, float, TNorm, boolean, boolean)} directly)
+ */
 public class Algorithm {
-    public static Set<Solution> solve(String problem, String proximityRelations, float lambda) {
-        return solve(Parser.parseProblem(problem), Parser.parseProximityRelations(proximityRelations), lambda, Math::min, false, true);
+    // *** api ***
+    
+    /**
+     * Convenience method, typically use {@link Problem#solve()}
+     */
+    public static Set<Solution> solve(Pair<Term, Term> equation, Collection<ProximityRelation> relations, float lambda, TNorm tNorm, boolean merge, boolean witness) {
+        return new Algorithm(equation, relations, tNorm, lambda, merge, witness).run();
     }
     
-    public static Set<Solution> solve(Pair<Term, Term> problem, Collection<ProximityRelation> relations, float lambda, TNorm tNorm, boolean linear, boolean witness) {
-        return new Algorithm(problem, relations, tNorm, lambda, linear, witness).run();
+    /**
+     * Convenience method, typically use {@link Problem#solve()}
+     */
+    public static Set<Solution> solve(String equation, String proximityRelations, float lambda) {
+        return solve(Parser.parseEquation(equation), Parser.parseProximityRelations(proximityRelations), lambda, Math::min, true, true);
     }
+    
+    // *** /api ***
     
     private final Logger log = LoggerFactory.getLogger(Algorithm.class);
     private static final String LOG_NEWLINE = "\n                 :: ";
@@ -27,20 +46,24 @@ public class Algorithm {
     private final ProximityMap R;
     private final TNorm tNorm;
     private final float lambda;
-    private final boolean linear, witness;
+    private final boolean merge, witnesses;
     
-    private Algorithm(Pair<Term, Term> problem, Collection<ProximityRelation> relations, TNorm tNorm, float lambda, boolean linear, boolean witness) {
-        this.lhs = problem.first;
-        this.rhs = problem.second;
+    private Algorithm(Pair<Term, Term> equation, Collection<ProximityRelation> relations, TNorm tNorm, float lambda, boolean merge, boolean witnesses) {
+        this.lhs = equation.left;
+        this.rhs = equation.right;
         this.R = new ProximityMap(lhs, rhs, relations, lambda);
         this.tNorm = tNorm;
+        if (lambda < 0.0f || lambda > 1.0f) {
+            throw new IllegalArgumentException("Lambda must be in range [0,1]");
+        }
         this.lambda = lambda;
-        this.linear = linear;
-        this.witness = witness;
+        this.merge = merge;
+        this.witnesses = witnesses;
     }
     
     private Set<Solution> run() {
-        log.info(ANSI.green("SOLVING ") + lhs + ANSI.red(" ?= ") + rhs + ANSI.green(" λ = " + lambda) + R.toString(LOG_NEWLINE));
+        log.info(ANSI.green("SOLVING ") + lhs + ANSI.red(" ?= ") + rhs + ANSI.green(" λ = " + lambda)
+                + R.toString(LOG_NEWLINE));
         
         if (R.restriction == R.theoreticalRestriction) {
             log.info("The problem is of type {}", R.restriction);
@@ -92,7 +115,7 @@ public class Algorithm {
         assert DataUtil.allUnique(linearSolutions);
         log.info(ANSI.green("LINEAR:") + "{}{}", LOG_NEWLINE, DataUtil.str(linearSolutions, LOG_NEWLINE, ""));
         
-        if (linear && !witness) {
+        if (!merge && !witnesses) {
             log.info(ANSI.green("SOLUTIONS:"));
             Set<Solution> solutions = linearSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
             log.info("🧇");
@@ -114,7 +137,7 @@ public class Algorithm {
             log.info(ANSI.green("EXPANDED:") + "{}{}", LOG_NEWLINE, DataUtil.str(expandedSolutions, LOG_NEWLINE, ""));
         }
         
-        if (linear) {
+        if (!merge) {
             log.info(ANSI.green("SOLUTIONS:"));
             Set<Solution> solutions = expandedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
             log.info("🧇");
@@ -177,12 +200,12 @@ public class Algorithm {
         Queue<Config> children = new ArrayDeque<>();
         for (String h : R.commonProximates(ArraySet.merge(aut.T1, aut.T2))) {
             Pair<List<ArraySet<Term>>, Float> T1_mapped = map(h, aut.T1, cfg.alpha1);
-            List<ArraySet<Term>> Q1 = T1_mapped.first;
-            float T1_alpha = T1_mapped.second;
+            List<ArraySet<Term>> Q1 = T1_mapped.left;
+            float T1_alpha = T1_mapped.right;
             
             Pair<List<ArraySet<Term>>, Float> T2_mapped = map(h, aut.T2, cfg.alpha2);
-            List<ArraySet<Term>> Q2 = T2_mapped.first;
-            float T2_alpha = T2_mapped.second;
+            List<ArraySet<Term>> Q2 = T2_mapped.left;
+            float T2_alpha = T2_mapped.right;
             
             // CHECK DEC
             if (T1_alpha < lambda || T2_alpha < lambda) {
@@ -240,11 +263,11 @@ public class Algorithm {
     
     private AUT expand(AUT aut, int freshVar) {
         Pair<Queue<Term>, Integer> T1_conjunction = specialConjunction(aut.T1, freshVar);
-        Queue<Term> C1 = T1_conjunction.first;
-        freshVar = T1_conjunction.second;
+        Queue<Term> C1 = T1_conjunction.left;
+        freshVar = T1_conjunction.right;
         
         Pair<Queue<Term>, Integer> pair2 = specialConjunction(aut.T2, freshVar);
-        Queue<Term> C2 = pair2.first;
+        Queue<Term> C2 = pair2.left;
         
         assert !C1.isEmpty() && !C2.isEmpty();
         return new AUT(aut.var, C1, C2);
@@ -252,34 +275,33 @@ public class Algorithm {
     
     private AUT merge(ArraySet<Term> T11, ArraySet<Term> T12, ArraySet<Term> T21, ArraySet<Term> T22, int freshVar) {
         Pair<Queue<Term>, Integer> pair1 = specialConjunction(ArraySet.merge(T11, T12), freshVar);
-        Queue<Term> Q1 = pair1.first;
-        freshVar = pair1.second;
+        Queue<Term> Q1 = pair1.left;
+        freshVar = pair1.right;
         
         if (Q1.isEmpty()) {
             return new AUT(freshVar, Q1, Q1);
         }
         
         Pair<Queue<Term>, Integer> pair2 = specialConjunction(ArraySet.merge(T21, T22), freshVar);
-        Queue<Term> Q2 = pair2.first;
-        freshVar = pair2.second;
+        Queue<Term> Q2 = pair2.left;
+        freshVar = pair2.right;
         
         return new AUT(freshVar, Q1, Q2);
     }
     
     private Solution toSolution(Config config) {
         Term r = Substitution.applyAll(config.substitutions, Term.VAR_0);
-        Pair<Witness, Witness> pair = witness ? calculateWitnesses(config, r) : new Pair<>(null, null);
-        return new Solution(r, pair.first, pair.second, config.alpha1, config.alpha2);
+        Pair<Witness, Witness> pair = witnesses ? calculateWitnesses(config, r) : new Pair<>(null, null);
+        return new Solution(r, pair.left, pair.right, config.alpha1, config.alpha2);
     }
     
     private Pair<Witness, Witness> calculateWitnesses(Config config, Term r) {
-        Map<Integer, Queue<Term>> W1 = new HashMap<>();
-        Map<Integer, Queue<Term>> W2 = new HashMap<>();
+        Map<Integer, Set<Term>> W1 = new HashMap<>();
+        Map<Integer, Set<Term>> W2 = new HashMap<>();
         for (int var : r.V_named()) {
-            Term varTerm = new Term(var);
-            Pair<Queue<Term>, Queue<Term>> applied = AUT.applyAll(config.S, varTerm, varTerm);
-            W1.put(var, applied.first);
-            W2.put(var, applied.second);
+            Pair<Set<Term>, Set<Term>> applied = AUT.applyAll(config.S, new Term(var));
+            W1.put(var, applied.left);
+            W2.put(var, applied.right);
         }
         return new Pair<>(new Witness(W1), new Witness(W2));
     }
@@ -320,7 +342,7 @@ public class Algorithm {
                 }
                 // REDUCE
                 for (String h : R.commonProximates(expr_T)) {
-                    List<ArraySet<Term>> Q = map(h, expr_T, 1.0f).first;
+                    List<ArraySet<Term>> Q = map(h, expr_T, 1.0f).left;
                     assert Q != null;
                     State childState = state.copy();
                     

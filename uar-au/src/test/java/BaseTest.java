@@ -16,10 +16,10 @@ public abstract class BaseTest {
             assert solution.sigma2.toString().equals(sigma2);
         }
         
-        if (alpha1 > 0 || MathUtil.close(alpha1, 0)) { // i.e. alpha1 >= 0
+        if (alpha1 > 0 || MathUtil.close(alpha1, 0)) { // alpha1 >= 0
             assert MathUtil.close(alpha1, solution.alpha1);
         }
-        if (alpha2 > 0 || MathUtil.close(alpha2, 0)) { // i.e. alpha2 >= 0
+        if (alpha2 > 0 || MathUtil.close(alpha2, 0)) { // alpha2 >= 0
             assert MathUtil.close(alpha2, solution.alpha2);
         }
     }

@@ -5,8 +5,7 @@ import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.DataUtil;
 import at.jku.risc.uarau.util.Pair;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,27 +31,25 @@ public class AUT {
                 .collect(Collectors.toCollection(ArrayDeque::new));
     }
     
-    public static Pair<Queue<Term>, Queue<Term>> applyAll(Queue<AUT> auts, Term q1, Term q2) {
-        Pair<Queue<Term>, Queue<Term>> applied = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
-        applied.first.add(q1);
-        applied.second.add(q2);
+    public static Pair<Set<Term>, Set<Term>> applyAll(Queue<AUT> auts, Term baseTerm) {
+        Pair<Set<Term>, Set<Term>> applied = new Pair<>(new HashSet<>(), new HashSet<>());
+        applied.left.add(baseTerm);
+        applied.right.add(baseTerm);
+        
         for (AUT aut : auts) {
-            Pair<Queue<Term>, Queue<Term>> pair = aut.apply(applied.first, applied.second);
-            applied.first = pair.first;
-            applied.second = pair.second;
+            applied = aut.apply(applied.left, applied.right);
         }
         return applied;
     }
     
-    public Pair<Queue<Term>, Queue<Term>> apply(Queue<Term> Q1, Queue<Term> Q2) {
-        Pair<Queue<Term>, Queue<Term>> pair = new Pair<>(new ArrayDeque<>(), new ArrayDeque<>());
-        for (Term baseTerm : Q1) {
-            T1.forEach(t -> pair.first.add(new Substitution(var, t).apply(baseTerm)));
-        }
-        for (Term baseTerm : Q2) {
-            T2.forEach(t -> pair.second.add(new Substitution(var, t).apply(baseTerm)));
-        }
-        return pair;
+    public Pair<Set<Term>, Set<Term>> apply(Set<Term> Q1, Set<Term> Q2) {
+        Set<Term> lhs = new HashSet<>();
+        Set<Term> rhs = new HashSet<>();
+        
+        Q1.forEach(q1 -> T1.forEach(t1 -> lhs.add(new Substitution(var, t1).apply(q1))));
+        Q2.forEach(q2 -> T2.forEach(t2 -> rhs.add(new Substitution(var, t2).apply(q2))));
+        
+        return new Pair<>(Collections.unmodifiableSet(lhs), Collections.unmodifiableSet(rhs));
     }
     
     @Override

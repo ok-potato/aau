@@ -6,51 +6,54 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
-    private final ELEMENT[] elements;
+/**
+ * compact representation for immutable sets
+ */
+public class ArraySet<E> implements Set<E>, Queue<E> {
+    private final E[] elements;
     private Integer hash = null;
     
     @SuppressWarnings("unchecked")
-    public ArraySet(Collection<ELEMENT> collection, boolean knownAsUnique) {
+    public ArraySet(Collection<E> collection, boolean knownAsUnique) {
         if (collection instanceof ArraySet) {
-            ArraySet<ELEMENT> arraySet = (ArraySet<ELEMENT>) collection;
+            ArraySet<E> arraySet = (ArraySet<E>) collection;
             elements = arraySet.elements;
             hash = arraySet.hash;
             return;
         }
         
-        elements = (ELEMENT[]) new Object[collection.size()];
+        elements = (E[]) new Object[collection.size()];
         int i = 0;
-        for (ELEMENT element : collection) {
+        for (E element : collection) {
             assert element != null;
             elements[i++] = element;
         }
         assert knownAsUnique || collection instanceof Set || DataUtil.allUnique(this);
     }
     
-    public ArraySet(Collection<ELEMENT> collection) {
+    public ArraySet(Collection<E> collection) {
         this(collection, false);
     }
     
     @SafeVarargs
-    public ArraySet(ELEMENT... element) {
+    public ArraySet(E... element) {
         this(Arrays.asList(element));
     }
     
-    public <MAPPED_ELEMENT> ArraySet<MAPPED_ELEMENT> map(Function<ELEMENT, MAPPED_ELEMENT> mapFunction) {
+    public <M> ArraySet<M> map(Function<E, M> mapFunction) {
         return new ArraySet<>(this.stream().map(mapFunction).distinct().collect(Collectors.toList()));
     }
     
-    public ArraySet<ELEMENT> filter(Predicate<ELEMENT> filterPredicate) {
-        List<ELEMENT> list = this.stream().filter(filterPredicate).collect(Collectors.toList());
+    public ArraySet<E> filter(Predicate<E> filterPredicate) {
+        List<E> list = this.stream().filter(filterPredicate).collect(Collectors.toList());
         if (list.size() == this.size()) {
             return new ArraySet<>(this);
         }
         return new ArraySet<>(list, true);
     }
     
-    public static <ELEMENT> ArraySet<ELEMENT> merge(ArraySet<ELEMENT> a, ArraySet<ELEMENT> b) {
-        List<ELEMENT> merged = Stream.concat(a.stream(), b.stream())
+    public static <E> ArraySet<E> merge(ArraySet<E> a, ArraySet<E> b) {
+        List<E> merged = Stream.concat(a.stream(), b.stream())
                 .unordered()
                 .distinct()
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -73,7 +76,7 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     @Override
     public boolean contains(Object o) {
         assert o != null;
-        for (ELEMENT element : this) {
+        for (E element : this) {
             if (o.equals(element)) {
                 return true;
             }
@@ -92,7 +95,7 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     }
     
     @Override
-    public ELEMENT element() {
+    public E element() {
         if (size() == 0) {
             throw new IllegalArgumentException();
         }
@@ -100,12 +103,12 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     }
     
     @Override
-    public ELEMENT peek() {
+    public E peek() {
         return size() == 0 ? null : elements[0];
     }
     
     @Override
-    public ELEMENT[] toArray() {
+    public E[] toArray() {
         return Arrays.copyOf(elements, elements.length);
     }
     
@@ -116,14 +119,14 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
             a = (T[]) new Object[size()];
         }
         try {
-            for (ELEMENT element : this) {
+            for (E element : this) {
                 T t = (T) element;
             }
         } catch (ClassCastException e) {
             throw new ArrayStoreException();
         }
         int i = 0;
-        for (ELEMENT element : this) {
+        for (E element : this) {
             a[i++] = (T) element;
         }
         if (a.length > size()) {
@@ -136,25 +139,25 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     
     @Override
     @Deprecated // unsupported
-    public boolean add(ELEMENT element) {
+    public boolean add(E element) {
         throw new UnsupportedOperationException();
     }
     
     @Override
     @Deprecated // unsupported
-    public boolean offer(ELEMENT element) {
+    public boolean offer(E element) {
         throw new UnsupportedOperationException();
     }
     
     @Override
     @Deprecated // unsupported
-    public ELEMENT remove() {
+    public E remove() {
         throw new UnsupportedOperationException();
     }
     
     @Override
     @Deprecated // unsupported
-    public ELEMENT poll() {
+    public E poll() {
         throw new UnsupportedOperationException();
     }
     
@@ -166,7 +169,7 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     
     @Override
     @Deprecated // unsupported
-    public boolean addAll(Collection<? extends ELEMENT> c) {
+    public boolean addAll(Collection<? extends E> c) {
         throw new UnsupportedOperationException();
     }
     
@@ -211,7 +214,7 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     public int hashCode() {
         if (hash == null) {
             hash = 0;
-            for (ELEMENT element : this) {
+            for (E element : this) {
                 hash = hash * 31 + element.hashCode();
             }
         }
@@ -221,11 +224,11 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
     // *** iterator ***
     
     @Override
-    public Iterator<ELEMENT> iterator() {
+    public Iterator<E> iterator() {
         return new ImplicitSetIterator();
     }
     
-    private class ImplicitSetIterator implements Iterator<ELEMENT> {
+    private class ImplicitSetIterator implements Iterator<E> {
         
         int cursor = 0;
         
@@ -235,7 +238,7 @@ public class ArraySet<ELEMENT> implements Set<ELEMENT>, Queue<ELEMENT> {
         }
         
         @Override
-        public ELEMENT next() {
+        public E next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
