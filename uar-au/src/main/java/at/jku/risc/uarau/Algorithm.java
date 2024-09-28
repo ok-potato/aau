@@ -3,7 +3,7 @@ package at.jku.risc.uarau;
 import at.jku.risc.uarau.data.*;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util.Util;
 import at.jku.risc.uarau.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,29 +12,32 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Core implementation of the algorithm.
+ * Core implementation of the Algorithm described in the paper
  * <br>
- * You can run the Algorithm by defining a {@link Problem}, and calling {@link Problem#solve()} on it.
+ * <a href="https://doi.org/10.1007/978-3-031-10769-6_34">A Framework for Approximate Generalization in Quantitative Theories</a>
  * <br><br>
- * (or by calling {@link Algorithm#solve(String, String, float)}, or
+ * You can run the Algorithm by defining a {@linkplain Problem}, and calling {@linkplain Problem#solve()}
  * <br>
- * {@link Algorithm#solve(Pair, Collection, float, TNorm, boolean, boolean)} directly)
+ * or directly calling {@linkplain Algorithm#solve(String, String, float)} ||
+ * {@linkplain Algorithm#solve(Pair, Collection, float, TNorm, boolean, boolean)}
  */
 public class Algorithm {
     // *** api ***
     
     /**
-     * Convenience method, typically use {@link Problem#solve()}
-     */
-    public static Set<Solution> solve(Pair<Term, Term> equation, Collection<ProximityRelation> relations, float lambda, TNorm tNorm, boolean merge, boolean witness) {
-        return new Algorithm(equation, relations, tNorm, lambda, merge, witness).run();
-    }
-    
-    /**
-     * Convenience method, typically use {@link Problem#solve()}
+     * Convenience method for simple string-based inputs
+     * <br>
+     * For more complex queries, it's probably easiest to use {@linkplain Problem#solve()}
      */
     public static Set<Solution> solve(String equation, String proximityRelations, float lambda) {
         return solve(Parser.parseEquation(equation), Parser.parseProximityRelations(proximityRelations), lambda, Math::min, true, true);
+    }
+    
+    /**
+     * See {@linkplain Problem#solve()}
+     */
+    public static Set<Solution> solve(Pair<Term, Term> equation, Collection<ProximityRelation> relations, float lambda, TNorm tNorm, boolean merge, boolean witness) {
+        return new Algorithm(equation, relations, tNorm, lambda, merge, witness).run();
     }
     
     // *** /api ***
@@ -83,7 +86,7 @@ public class Algorithm {
         
         BRANCHING:
         while (!branches.isEmpty()) {
-            assert DataUtil.allUnique(branches);
+            assert Util.allUnique(branches);
             Config config = branches.remove();
             while (!config.A.isEmpty()) {
                 AUT aut = config.A.remove();
@@ -98,7 +101,7 @@ public class Algorithm {
                 if (!children.isEmpty()) {
                     branches.addAll(children);
                     if (log.isDebugEnabled()) {
-                        log.debug("DEC => {}", DataUtil.str(children, " ", ""));
+                        log.debug("DEC => {}", Util.str(children, " ", ""));
                     }
                     continue BRANCHING;
                 }
@@ -112,8 +115,8 @@ public class Algorithm {
         
         // *** POST PROCESS ***
         
-        assert DataUtil.allUnique(linearSolutions);
-        log.info(ANSI.green("LINEAR:") + "{}{}", LOG_NEWLINE, DataUtil.str(linearSolutions, LOG_NEWLINE, ""));
+        assert Util.allUnique(linearSolutions);
+        log.info(ANSI.green("LINEAR:") + "{}{}", LOG_NEWLINE, Util.str(linearSolutions, LOG_NEWLINE, ""));
         
         if (!merge && !witnesses) {
             log.info(ANSI.green("SOLUTIONS:"));
@@ -126,15 +129,15 @@ public class Algorithm {
         for (Config linearSolution : linearSolutions) {
             Queue<AUT> S_expanded = linearSolution.S.stream()
                     .map(aut -> expand(aut, linearSolution.peekVar()))
-                    .collect(DataUtil.toQueue());
+                    .collect(Util.toQueue());
             expandedSolutions.add(linearSolution.copy_update_S(S_expanded));
         }
         
-        assert DataUtil.allUnique(expandedSolutions);
+        assert Util.allUnique(expandedSolutions);
         if (expandedSolutions.size() == linearSolutions.size() && expandedSolutions.containsAll(linearSolutions)) {
             log.info(ANSI.green("EXPANDED:") + "{}-\"-", LOG_NEWLINE);
         } else {
-            log.info(ANSI.green("EXPANDED:") + "{}{}", LOG_NEWLINE, DataUtil.str(expandedSolutions, LOG_NEWLINE, ""));
+            log.info(ANSI.green("EXPANDED:") + "{}{}", LOG_NEWLINE, Util.str(expandedSolutions, LOG_NEWLINE, ""));
         }
         
         if (!merge) {
@@ -181,14 +184,14 @@ public class Algorithm {
                 }
             }
             Config mergedSolution = expandedSolution.copy_update_S(S_merged);
-            assert DataUtil.allUnique(mergedSolution.S);
+            assert Util.allUnique(mergedSolution.S);
             mergedSolutions.add(mergedSolution);
         }
         
         if (mergedSolutions.size() == expandedSolutions.size() && mergedSolutions.containsAll(expandedSolutions)) {
             log.info(ANSI.green("MERGED:") + "{}-\"-", LOG_NEWLINE);
         } else {
-            log.info(ANSI.green("MERGED:") + "{}{}", LOG_NEWLINE, DataUtil.str(mergedSolutions, LOG_NEWLINE, ""));
+            log.info(ANSI.green("MERGED:") + "{}{}", LOG_NEWLINE, Util.str(mergedSolutions, LOG_NEWLINE, ""));
         }
         log.info(ANSI.green("SOLUTIONS:"));
         Set<Solution> solutions = mergedSolutions.stream().map(this::toSolution).collect(Collectors.toSet());
@@ -243,7 +246,7 @@ public class Algorithm {
             Q_mutable.add(new HashSet<>());
         }
         for (Term t : T) {
-            assert !t.isVar() && t.arguments != null;
+            assert !t.isVar();
             ProximityRelation proximityRelation = R.proximityRelation(h, t.head);
             List<List<Integer>> h_to_t = proximityRelation.argRelation;
             for (int i = 0; i < h_arity; i++) {
@@ -309,20 +312,18 @@ public class Algorithm {
     // *** special conjunction ***
     
     private boolean consistent(ArraySet<Term> terms) {
-        return runConjunction(terms, Term.UNUSED_VAR) != null;
+        return runConj(terms, Term.VAR_0, true) == IS_CONSISTENT;
     }
     
-    // get rid of annoying null warnings
     private Pair<Queue<Term>, Integer> specialConjunction(ArraySet<Term> terms, int freshVar) {
-        Pair<Queue<Term>, Integer> result = runConjunction(terms, freshVar);
+        Pair<Queue<Term>, Integer> result = runConj(terms, freshVar, false);
         assert result != null;
         return result;
     }
     
-    private final Pair<Queue<Term>, Integer> DUMMY_PAIR = new Pair<>(null, null);
+    private final Pair<Queue<Term>, Integer> IS_CONSISTENT = new Pair<>(null, null);
     
-    private Pair<Queue<Term>, Integer> runConjunction(ArraySet<Term> terms, int freshVar) {
-        boolean consistencyCheck = freshVar == Term.UNUSED_VAR;
+    private Pair<Queue<Term>, Integer> runConj(ArraySet<Term> terms, int freshVar, boolean consistencyCheck) {
         Queue<State> branches = new ArrayDeque<>();
         assert !terms.contains(Term.ANON);
         terms = terms.filter(t -> !Term.ANON.equals(t));
@@ -360,7 +361,7 @@ public class Algorithm {
                 continue BRANCHING;
             }
             if (consistencyCheck) {
-                return DUMMY_PAIR;
+                return IS_CONSISTENT;
             }
             solutions.add(Substitution.applyAll(state.s, state.peekVar()));
         }

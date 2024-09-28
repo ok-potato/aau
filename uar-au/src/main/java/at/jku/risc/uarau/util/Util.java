@@ -6,11 +6,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class DataUtil {
+public class Util {
     
-    // collection ops
+    // *** Collection ***
     
-    public static <ELEMENT> void pad(Collection<ELEMENT> collection, Supplier<ELEMENT> supplier, int newSize) {
+    public static <E> List<E> newList(int size, Function<Integer, E> initializer) {
+        List<E> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            list.add(initializer.apply(i));
+        }
+        return list;
+    }
+    
+    public static <E> void pad(Collection<E> collection, int newSize, Supplier<E> supplier) {
         for (int i = collection.size(); i < newSize; i++) {
             collection.add(supplier.get());
         }
@@ -20,10 +28,10 @@ public class DataUtil {
         return allUnique(collection, Function.identity());
     }
     
-    public static <ELEMENT, KEY> boolean allUnique(Collection<ELEMENT> collection, Function<ELEMENT, KEY> extractKey) {
-        Set<KEY> keySet = new HashSet<>();
-        for (ELEMENT element : collection) {
-            KEY key = extractKey.apply(element);
+    public static <E, K> boolean allUnique(Collection<E> collection, Function<E, K> extractKey) {
+        Set<K> keySet = new HashSet<>();
+        for (E element : collection) {
+            K key = extractKey.apply(element);
             if (keySet.contains(key)) {
                 return false;
             }
@@ -32,15 +40,15 @@ public class DataUtil {
         return true;
     }
     
-    public static <ELEMENT> Collector<ELEMENT, ?, Queue<ELEMENT>> toQueue() {
+    public static <E> Collector<E, ?, Queue<E>> toQueue() {
         return Collectors.toCollection(ArrayDeque::new);
     }
     
-    public static <ELEMENT> ELEMENT getAny(Set<ELEMENT> set) {
+    public static <E> E getAny(Set<E> set) {
         return set.stream().findFirst().orElseThrow(IllegalArgumentException::new);
     }
     
-    // string ops
+    // *** String ***
     
     public static String str(Collection<?> collection) {
         return str(collection, ", ", "..");

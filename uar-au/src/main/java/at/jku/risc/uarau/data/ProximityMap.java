@@ -1,7 +1,7 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util.Util;
 import at.jku.risc.uarau.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class ProximityMap {
         restriction = findRestriction(allProximityRelations);
         
         for (ProximityRelation relation : allProximityRelations) {
-            DataUtil.pad(relation.argRelation, ArrayList::new, arity(relation.f));
+            Util.pad(relation.argRelation, arity(relation.f), ArrayList::new);
             proximityClass(relation.f).put(relation.g, relation);
         }
     }
@@ -200,7 +200,7 @@ public class ProximityMap {
     public String toString(String prefix) {
         StringBuilder sb = new StringBuilder();
         for (String k : relations.keySet()) {
-            sb.append(prefix).append(DataUtil.str(relations.get(k).values(), " ", ".."));
+            sb.append(prefix).append(Util.str(relations.get(k).values(), " ", ".."));
         }
         return sb.toString();
     }

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * compact representation for immutable sets
+ * compact representation of immutable sets
  */
 public class ArraySet<E> implements Set<E>, Queue<E> {
     private final E[] elements;
@@ -28,7 +28,7 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
             assert element != null;
             elements[i++] = element;
         }
-        assert knownAsUnique || collection instanceof Set || DataUtil.allUnique(this);
+        assert knownAsUnique || collection instanceof Set || Util.allUnique(this);
     }
     
     public ArraySet(Collection<E> collection) {
@@ -135,6 +135,61 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
         return a;
     }
     
+    // *** equals/hashCode ***
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ArraySet)) {
+            return false;
+        }
+        ArraySet<?> other = (ArraySet<?>) obj;
+        if (size() != other.size() || hashCode() != other.hashCode()) {
+            return false;
+        }
+        for (int i = 0; i < size(); i++) {
+            if (!(elements[i].equals(other.elements[i]))) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+        if (hash == null) {
+            hash = 0;
+            for (E element : this) {
+                hash = hash * 31 + element.hashCode();
+            }
+        }
+        return hash;
+    }
+    
+    // *** iterator ***
+    
+    @Override
+    public Iterator<E> iterator() {
+        return new ImplicitSetIterator();
+    }
+    
+    private class ImplicitSetIterator implements Iterator<E> {
+        
+        int cursor = 0;
+        
+        @Override
+        public boolean hasNext() {
+            return cursor < elements.length;
+        }
+        
+        @Override
+        public E next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return elements[cursor++];
+        }
+    }
+    
     // *** modifications (unsupported) ***
     
     @Override
@@ -189,60 +244,5 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
     @Deprecated // unsupported
     public boolean retainAll(Collection c) {
         throw new UnsupportedOperationException();
-    }
-    
-    // *** equals/hashCode ***
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof ArraySet)) {
-            return false;
-        }
-        ArraySet<?> other = (ArraySet<?>) obj;
-        if (size() != other.size() || hashCode() != other.hashCode()) {
-            return false;
-        }
-        for (int i = 0; i < size(); i++) {
-            if (!(elements[i].equals(other.elements[i]))) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    @Override
-    public int hashCode() {
-        if (hash == null) {
-            hash = 0;
-            for (E element : this) {
-                hash = hash * 31 + element.hashCode();
-            }
-        }
-        return hash;
-    }
-    
-    // *** iterator ***
-    
-    @Override
-    public Iterator<E> iterator() {
-        return new ImplicitSetIterator();
-    }
-    
-    private class ImplicitSetIterator implements Iterator<E> {
-        
-        int cursor = 0;
-        
-        @Override
-        public boolean hasNext() {
-            return cursor < elements.length;
-        }
-        
-        @Override
-        public E next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException();
-            }
-            return elements[cursor++];
-        }
     }
 }

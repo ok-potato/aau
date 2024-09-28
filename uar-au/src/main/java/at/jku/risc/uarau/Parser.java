@@ -10,8 +10,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Parser {
-    public static Pair<Term, Term> parseEquation(String string) {
-        String[] tokens = string.split("\\?=");
+    /**
+     * @param equationStr
+     * @return
+     */
+    public static Pair<Term, Term> parseEquation(String equationStr) {
+        String[] tokens = equationStr.split("\\?=");
         if (tokens.length != 2) {
             throw new IllegalArgumentException("Need 2 sides per equation, but got " + tokens.length);
         }
@@ -19,13 +23,13 @@ public class Parser {
     }
     
     // e.g. "f(g(a,b),c,d)"
-    public static Term parseTerm(String string) {
-        string = string.replaceAll("\\s", "");
+    public static Term parseTerm(String termStr) {
+        termStr = termStr.replaceAll("\\s", "");
         // split "f(g(a,b),c,d)" -> ["f(", "g(", "a", "b", ")", "c", "d", ")"]
         // (?<=\() => if last char was '('
         //       , => if this char is ','
         //  (?=\)) => if next char is ')'
-        String[] tokens = string.split("(?<=\\()|,|(?=\\))");
+        String[] tokens = termStr.split("(?<=\\()|,|(?=\\))");
         
         Stack<TermBuilder> subTerms = new Stack<>();
         subTerms.push(new TermBuilder(",")); // dummyTerm
@@ -34,7 +38,7 @@ public class Parser {
             if (token.equals(")")) {
                 TermBuilder subTerm = subTerms.pop();
                 if (subTerms.isEmpty()) {
-                    throw new IllegalArgumentException("Too many closing parentheses in term: " + string);
+                    throw new IllegalArgumentException("Too many closing parentheses in term: " + termStr);
                 }
                 subTerms.peek().arguments.add(subTerm.build());
                 continue;
@@ -42,26 +46,20 @@ public class Parser {
             if (token.endsWith("(")) {
                 String head = token.substring(0, token.length() - 1);
                 if (StringUtils.isBlank(head)) {
-                    throw new IllegalArgumentException("Missing function name in " + string);
+                    throw new IllegalArgumentException("Missing function name in " + termStr);
                 }
                 subTerms.push(new TermBuilder(head));
                 continue;
             }
-            if (Arrays.stream(new String[]{"(", ",", ")"}).anyMatch(token::contains)) {
-                throw new IllegalArgumentException("Bad syntax in term: " + string);
-            }
-            if (StringUtils.isBlank(token)) {
-                throw new IllegalArgumentException("Missing argument in sub-term of: " + string);
-            }
             subTerms.peek().arguments.add(new Term(token));
         }
         if (subTerms.size() > 1) {
-            throw new IllegalArgumentException("Unclosed parentheses in term: " + string);
+            throw new IllegalArgumentException("Unclosed parentheses in term: " + termStr);
         }
         
         TermBuilder dummyTerm = subTerms.pop();
         if (dummyTerm.arguments.size() > 1) {
-            throw new IllegalArgumentException("More than one top level term on one side: " + string);
+            throw new IllegalArgumentException("More than one top level term on one side: " + termStr);
         }
         return dummyTerm.arguments.get(0);
     }
@@ -69,79 +67,75 @@ public class Parser {
     // relations        :=  f g {<arg-relation>} [<proximity>]   multiple relations separated by ';'
     // <arg-relation>   :=  (1,1), (2,3), (3,1), ...        (surrounded with '{}')
     // <proximity>      :=  float between 0.0 and 1.0       (surrounded with '[]')
-    public static Set<ProximityRelation> parseProximityRelations(String string) {
+    public static Set<ProximityRelation> parseProximityRelations(String proximityRelationsStr) {
         Set<ProximityRelation> proximityRelations = new HashSet<>();
-        for (String token : string.split(";")) {
-            if (StringUtils.isBlank(token)) {
-                continue;
+        for (String relation : proximityRelationsStr.split(";")) {
+            if (!StringUtils.isBlank(relation)) {
+                proximityRelations.add(parseProximityRelation(relation));
             }
-            proximityRelations.add(parseProximityRelation(token));
         }
         return proximityRelations;
     }
     
-    public static ProximityRelation parseProximityRelation(String string) {
+    public static ProximityRelation parseProximityRelation(String relationStr) {
         // find proximity + argument relation
         String proximity;
         String argRelation;
         try {
-            proximity = string.substring(string.lastIndexOf('['), string.indexOf(']') + 1);
-            argRelation = string.substring(string.lastIndexOf('{'), string.indexOf('}') + 1);
+            proximity = relationStr.substring(relationStr.lastIndexOf('['), relationStr.indexOf(']') + 1);
+            argRelation = relationStr.substring(relationStr.lastIndexOf('{'), relationStr.indexOf('}') + 1);
         } catch (StringIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Couldn't get proximity or argument relation from: " + string);
+            throw new IllegalArgumentException("Couldn't get proximity or argument relation from: " + relationStr);
         }
         
         // find two function symbols
-        String[] split = string.split(Pattern.quote(proximity) + "|" + Pattern.quote(argRelation));
+        String[] split = relationStr.split(Pattern.quote(proximity) + "|" + Pattern.quote(argRelation));
         List<String> rest = Arrays.stream(split)
                 .flatMap(s -> Arrays.stream(s.split("[,()\\s]+")))
                 .filter(s -> !StringUtils.isBlank(s))
                 .collect(Collectors.toList());
         if (rest.size() != 2) {
-            throw new IllegalArgumentException("Couldn't get two function symbols from: " + string);
+            throw new IllegalArgumentException("Couldn't get two function symbols from: " + relationStr);
         }
         float parsedProximity = parseProximity(proximity);
         if (parsedProximity < 0.0f || parsedProximity > 1.0f) {
-            throw new IllegalArgumentException("Proximity outside of range [0,1]: " + string);
+            throw new IllegalArgumentException("Proximity outside of range [0,1]: " + relationStr);
         }
         return new ProximityRelation(rest.get(0), rest.get(1), parsedProximity, parseArgumentRelation(argRelation));
     }
     
     // [<proximity>]    :=  float between 0.0 and 1.0
-    public static float parseProximity(String string) {
-        return Float.parseFloat(string.substring(1, string.length() - 1));
+    public static float parseProximity(String proximityStr) {
+        return Float.parseFloat(proximityStr.substring(1, proximityStr.length() - 1));
     }
     
     // {<arg-relation>} :=  (1,1), (2,3), (3,1), ...
-    public static List<List<Integer>> parseArgumentRelation(String string) {
-        List<Integer> argRelationPairs;
+    public static List<List<Integer>> parseArgumentRelation(String argRelationStr) {
+        List<Integer> pairs;
         try {
-            argRelationPairs = Arrays.stream(string.substring(1, string.length() - 1).split("[(),\\s]+"))
+            pairs = Arrays.stream(argRelationStr.substring(1, argRelationStr.length() - 1).split("[(),\\s]+"))
                     .filter(s -> !StringUtils.isBlank(s))
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Some argument relation partners couldn't be parsed as int: " + string);
+            throw new IllegalArgumentException("Some argument positions couldn't be parsed as int: " + argRelationStr);
         }
         
-        if (argRelationPairs.size() % 2 != 0) {
-            throw new IllegalArgumentException("Odd number of argument relation partners in: " + string);
+        if (pairs.size() % 2 != 0) {
+            throw new IllegalArgumentException("Odd number of argument positions in: " + argRelationStr);
         }
         
-        int maxFrom = 0;
-        for (int i = 0; i < argRelationPairs.size() / 2; i++) {
-            maxFrom = Math.max(maxFrom, argRelationPairs.get(i * 2));
+        // convert to index-based representation, e.g. [1,2, 1,3, 3,1] -> [[2,3], [], [1]]
+        int maxFromPosition = 0;
+        for (int i = 0; i < pairs.size() / 2; i++) {
+            maxFromPosition = Math.max(maxFromPosition, pairs.get(i * 2));
         }
-        
-        // e.g. [1,2, 1,3, 3,1] -> [[2,3], [], [1]]
-        List<List<Integer>> argRelationsIndexed = new ArrayList<>(maxFrom);
-        for (int i = 0; i < maxFrom; i++) {
+        List<List<Integer>> argRelationsIndexed = new ArrayList<>(maxFromPosition);
+        for (int i = 0; i < maxFromPosition; i++) {
             argRelationsIndexed.add(new ArrayList<>());
         }
-        
-        for (int i = 0; i < argRelationPairs.size() / 2; i++) {
-            // convert from 1-indexing to 0.indexing
-            argRelationsIndexed.get(argRelationPairs.get(i * 2) - 1).add(argRelationPairs.get(i * 2 + 1) - 1);
+        for (int i = 0; i < pairs.size() / 2; i++) {
+            argRelationsIndexed.get(pairs.get(i * 2) - 1).add(pairs.get(i * 2 + 1) - 1);
         }
         return argRelationsIndexed;
     }

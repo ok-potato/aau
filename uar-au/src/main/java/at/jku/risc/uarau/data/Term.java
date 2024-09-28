@@ -1,7 +1,7 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.ANSI;
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util.Util;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.*;
@@ -19,33 +19,43 @@ public class Term {
     
     // function/constant term
     public Term(String head, List<Term> arguments) {
-        assert !StringUtils.isBlank(head);
+        if (StringUtils.isBlank(head) || head.contains("(") || head.contains(")") || head.contains(",")) {
+            throw new IllegalArgumentException("Illegal head: " + head);
+        }
         this.var = UNUSED_VAR;
         this.head = head.intern();
-        if (arguments == null) {
-            this.arguments = Collections.emptyList();
-            mappedVar = true;
-        } else {
-            this.arguments = Collections.unmodifiableList(arguments);
-            mappedVar = false;
-        }
+        this.arguments = Collections.unmodifiableList(arguments);
+        mappedVar = false;
     }
     
     public Term(String head, Term[] arguments) {
         this(head, Arrays.asList(arguments));
     }
     
-    // mapped variable term
+    /**
+     * Term which is a variable in the original problem.
+     * <br>
+     * The algorithm assumes that the problem is ground (i.e. it contains no variables)
+     * <br>
+     * For this reason, we treat variables from the original problem as constants, and we track them with {@linkplain Term#mappedVar}
+     *
+     * @param head non-empty string which doesn't contain '( ) ,'
+     */
     public Term(String head) {
-        this(head, (List<Term>) null);
+        if (StringUtils.isBlank(head) || head.contains("(") || head.contains(")") || head.contains(",")) {
+            throw new IllegalArgumentException("Illegal head: " + head);
+        }
+        this.var = UNUSED_VAR;
+        this.head = head.intern();
+        this.arguments = Collections.emptyList();
+        mappedVar = true;
     }
     
-    // variable term
     public Term(int var) {
-        assert var != UNUSED_VAR + 1 || this != Term.ANON;
+        assert var > UNUSED_VAR;
         this.var = var;
         this.head = null;
-        this.arguments = null;
+        this.arguments = Collections.emptyList();
         mappedVar = false;
     }
     
@@ -62,20 +72,20 @@ public class Term {
         return depth;
     }
     
-    private Set<Integer> V = null;
+    private Set<Integer> V_named = null;
     
     public Set<Integer> V_named() {
-        if (V == null) {
-            V = new HashSet<>();
-            if (arguments != null) {
+        if (V_named == null) {
+            V_named = new HashSet<>();
+            if (!isVar()) {
                 for (Term argument : arguments) {
-                    V.addAll(argument.V_named());
+                    V_named.addAll(argument.V_named());
                 }
             } else if (this != ANON) {
-                V.add(var);
+                V_named.add(var);
             }
         }
-        return V;
+        return V_named;
     }
     
     public boolean isVar() {
@@ -129,6 +139,6 @@ public class Term {
         if (mappedVar) {
             return head;
         }
-        return head + DataUtil.str(arguments, ",", "()", "(", ")");
+        return head + Util.str(arguments, ",", "()", "(", ")");
     }
 }

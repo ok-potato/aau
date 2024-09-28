@@ -1,7 +1,7 @@
 package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util.Util;
 
 import java.util.Queue;
 
@@ -17,6 +17,6 @@ public class Expression {
     
     @Override
     public String toString() {
-        return String.format("%s in %s", var, DataUtil.str(T, ", ", "[]", "[", "]"));
+        return String.format("%s in %s", var, Util.str(T, ", ", "[]", "[", "]"));
     }
 }

@@ -1,6 +1,9 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.util.Util;
+
 import java.util.ArrayDeque;
+import java.util.List;
 import java.util.Queue;
 
 public class Substitution {
@@ -32,10 +35,7 @@ public class Substitution {
         if (term.isVar() || term.mappedVar) {
             return term;
         }
-        Term[] arguments = new Term[term.arguments.size()];
-        for (int i = 0; i < term.arguments.size(); i++) {
-            arguments[i] = apply(term.arguments.get(i));
-        }
+        List<Term> arguments = Util.newList(term.arguments.size(), i -> apply(term.arguments.get(i)));
         return new Term(term.head, arguments);
     }
     

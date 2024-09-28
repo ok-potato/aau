@@ -2,7 +2,7 @@ package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.DataUtil;
+import at.jku.risc.uarau.util.Util;
 import at.jku.risc.uarau.util.Pair;
 
 import java.util.*;
@@ -54,8 +54,8 @@ public class AUT {
     
     @Override
     public String toString() {
-        String T1_str = DataUtil.str(T1, "  ", "..");
-        String T2_str = DataUtil.str(T2, "  ", "..");
+        String T1_str = Util.str(T1, "  ", "..");
+        String T2_str = Util.str(T2, "  ", "..");
         return ANSI.blue(var + " ") + T1_str + ANSI.red(" ?= ") + T2_str;
     }
     
