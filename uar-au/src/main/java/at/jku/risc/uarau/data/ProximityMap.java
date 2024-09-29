@@ -1,7 +1,7 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.GroundTerm;
-import at.jku.risc.uarau.MappedVariableTerm;
+import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.data.term.MappedVariableTerm;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Util;
@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+// TODO documentation
 public class ProximityMap {
     public enum Restriction {
         UNRESTRICTED(false, false), CORRESPONDENCE(true, false), MAPPING(false, true), CORRESPONDENCE_MAPPING(true, true);
@@ -36,7 +37,7 @@ public class ProximityMap {
         List<ProximityRelation> allProximityRelations = new ArrayList<>(proximityRelations.size() * 2);
         proximityRelations.forEach(relation -> {
             if (relation.f == relation.g) {
-                throw new IllegalArgumentException("Identity proximity relation: " + relation);
+                throw Util.argException("Identity proximity relation: %s", relation);
             }
             allProximityRelations.add(relation);
             allProximityRelations.add(relation.flipped());
@@ -47,8 +48,7 @@ public class ProximityMap {
         for (ProximityRelation relation : allProximityRelations) {
             String key = relation.f + "," + relation.g;
             if (existing.contains(key)) {
-                String msg = String.format("Multiple proximity relations between '%s' and '%s'", relation.f, relation.g);
-                throw new IllegalArgumentException(msg);
+                throw Util.argException("Multiple proximity relations between '%s' and '%s'", relation.f, relation.g);
             }
             existing.add(key);
         }
@@ -71,16 +71,14 @@ public class ProximityMap {
         restriction = findRestriction(allProximityRelations);
         
         for (ProximityRelation relation : allProximityRelations) {
-            Util.pad(relation.argRelation, arity(relation.f), ArrayList::new);
+            Util.pad(relation.argRelation, arity(relation.f), Collections::emptySet);
             proximityClass(relation.f).put(relation.g, relation);
         }
     }
     
-    private Restriction findRestriction(Collection<ProximityRelation> proximityRelations) {
-        boolean correspondence = proximityRelations.stream()
-                .allMatch(relation -> relation.argRelation.stream().noneMatch(List::isEmpty));
-        boolean mapping = proximityRelations.stream()
-                .allMatch(relation -> relation.argRelation.stream().noneMatch(argRelation -> argRelation.size() > 1));
+    private Restriction findRestriction(Collection<ProximityRelation> relations) {
+        boolean correspondence = Util.all(relations, relation -> Util.none(relation.argRelation, Set::isEmpty));
+        boolean mapping = Util.all(relations, relation -> Util.none(relation.argRelation, argRel -> argRel.size() > 1));
         if (correspondence) {
             return mapping ? Restriction.CORRESPONDENCE_MAPPING : Restriction.CORRESPONDENCE;
         } else {
@@ -93,23 +91,22 @@ public class ProximityMap {
         //      If this assumption is wrong, we're missing some non-relevant positions, and could possibly
         //      misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM).
         //      TODO If this is not acceptable, we need to allow manually defining arities
+        
         Map<String, Integer> termArities = new HashMap<>();
         Set<String> termVars = new HashSet<>();
         findTermArities(rhs, termArities, termVars);
         findTermArities(lhs, termArities, termVars);
+        
         Map<String, Integer> allArities = new HashMap<>(termArities);
         for (ProximityRelation relation : proximityRelations) {
             if (termVars.contains(relation.f)) {
-                String msg = String.format("Variable '%s' cannot be close to '%s'", relation.f, relation.g);
-                throw new IllegalArgumentException(msg);
+                throw Util.argException("Variable '%s' can't be close to '%s'", relation.f, relation.g);
             }
             Integer termArity = termArities.get(relation.f);
             if (termArity != null && termArity < relation.argRelation.size()) {
-                String msg = String.format("'%s' appears in the problem with arity %s, which is exceeded by argument relation %s", relation.f, termArity, relation);
-                throw new IllegalArgumentException(msg);
+                throw Util.argException("'%s' has a higher arity in its argument relation %s than in the equation", relation.f, relation);
             }
-            int newArity = Math.max(relation.argRelation.size(), allArities.getOrDefault(relation.f, 0));
-            allArities.put(relation.f, newArity);
+            allArities.put(relation.f, Math.max(relation.argRelation.size(), allArities.getOrDefault(relation.f, 0)));
         }
         return new Pair<>(allArities, termVars);
     }
@@ -117,10 +114,10 @@ public class ProximityMap {
     private void findTermArities(GroundTerm t, Map<String, Integer> arityMap, Set<String> varSet) {
         if (arityMap.containsKey(t.head)) {
             if (arityMap.get(t.head) != t.arguments.size()) {
-                throw new IllegalArgumentException("Found multiple arities for '" + t.head + "' in the posed problem");
+                throw Util.argException("Found multiple arities for '%s' in the posed problem", t.head);
             }
             if (varSet.contains(t.head) != t instanceof MappedVariableTerm) {
-                throw new IllegalArgumentException(t.head + " appears as both a variable and a function/const symbol");
+                throw Util.argException("%s appears as both a variable and a function/const symbol", t.head);
             }
         } else {
             arityMap.put(t.head, t.arguments.size());
@@ -170,15 +167,10 @@ public class ProximityMap {
     
     private Map<String, ProximityRelation> proximityClass(String f) {
         return relations.computeIfAbsent(f, head -> {
-            // initialize with id-relation
-            assert arities.containsKey(head);
-            int arity = arities.get(head);
-            List<List<Integer>> mapping = new ArrayList<>(arity);
-            for (int i = 0; i < arity; i++) {
-                mapping.add(Collections.singletonList(i));
-            }
+            // id relation
+            List<Set<Integer>> mapping = Util.newList(arities.get(head), ArraySet::singleton);
             Map<String, ProximityRelation> proximityClass = new HashMap<>();
-            proximityClass.put(f, new ProximityRelation(f, f, 1.0f, mapping));
+            proximityClass.put(head, new ProximityRelation(head, head, 1.0f, mapping));
             return proximityClass;
         });
     }

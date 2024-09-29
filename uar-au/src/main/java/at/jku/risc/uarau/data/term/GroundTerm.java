@@ -1,38 +1,33 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data.term;
 
 import at.jku.risc.uarau.util.Util;
 import org.junit.platform.commons.util.StringUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
-public class FunctionTerm implements Term {
-    public final String head;
-    public final List<Term> arguments;
+public class GroundTerm implements Term {
     
-    // function/constant term
-    public FunctionTerm(String head, List<Term> arguments) {
+    public final String head;
+    public final List<GroundTerm> arguments;
+    
+    public GroundTerm(String head, List<GroundTerm> arguments) {
         if (StringUtils.isBlank(head) || head.contains("(") || head.contains(")") || head.contains(",")) {
-            throw new IllegalArgumentException("Illegal head: " + head);
+            throw Util.argException("Illegal head '%s'", head);
         }
         this.head = head.intern();
-        this.arguments = Collections.unmodifiableList(arguments);
+        this.arguments = arguments;
     }
     
-    public FunctionTerm(String head, Term[] arguments) {
+    public GroundTerm(String head, GroundTerm[] arguments) {
         this(head, Arrays.asList(arguments));
     }
     
-    private Set<Integer> v_named = null;
-    
     @Override
     public Set<Integer> v_named() {
-        if (v_named == null) {
-            v_named = new HashSet<>();
-            for (Term argument : arguments) {
-                v_named.addAll(argument.v_named());
-            }
-        }
-        return v_named;
+        return Collections.emptySet();
     }
     
     private Integer hash = null;
@@ -50,10 +45,13 @@ public class FunctionTerm implements Term {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof FunctionTerm)) {
+        if (!(other instanceof GroundTerm)) {
             return false;
         }
-        FunctionTerm otherFunctionTerm = (FunctionTerm) other;
+        if (this == MappedVariableTerm.ANON || other == MappedVariableTerm.ANON) {
+            return false;
+        }
+        GroundTerm otherFunctionTerm = (GroundTerm) other;
         if (hashCode() != otherFunctionTerm.hashCode()) {
             return false;
         }

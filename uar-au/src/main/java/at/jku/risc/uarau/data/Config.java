@@ -1,13 +1,13 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.GroundTerm;
-import at.jku.risc.uarau.Substitution;
-import at.jku.risc.uarau.VariableTerm;
+import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.data.term.VariableTerm;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.Util;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.function.Function;
 
 /**
  * mutable
@@ -47,8 +47,8 @@ public class Config {
         return new Config(this);
     }
     
-    public Config copy_update_S(Queue<AUT> S) {
-        return new Config(this, S);
+    public Config mapSolutions(Function<Config, Queue<AUT>> mappingFunction) {
+        return new Config(this, mappingFunction.apply(this));
     }
     
     public int freshVar() {
@@ -81,6 +81,6 @@ public class Config {
             return false;
         }
         Config that = (Config) object;
-        return that.A.size() == A.size() && that.A.containsAll(A) && that.S.size() == S.size() && that.S.containsAll(S);
+        return that.A.size() == A.size() && that.S.size() == S.size() && that.A.containsAll(A) && that.S.containsAll(S);
     }
 }

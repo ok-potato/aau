@@ -1,4 +1,4 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data.term;
 
 import java.util.Collections;
 
@@ -6,7 +6,6 @@ public class MappedVariableTerm extends GroundTerm {
     public static final MappedVariableTerm ANON = new MappedVariableTerm("_");
     
     public MappedVariableTerm(String head) {
-        // TODO enforce no anon in input
         super(head, Collections.emptyList());
     }
     

@@ -1,16 +1,16 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.GroundTerm;
-import at.jku.risc.uarau.Substitution;
-import at.jku.risc.uarau.Term;
+import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.data.term.Term;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Util;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
 
 public class AUT {
     public final int var;
@@ -18,20 +18,14 @@ public class AUT {
     
     private Integer hash = null;
     
-    public AUT(int var, Queue<GroundTerm> T1, Queue<GroundTerm> T2) {
+    public AUT(int var, ArraySet<GroundTerm> T1, ArraySet<GroundTerm> T2) {
         this.var = var;
-        this.T1 = new ArraySet<>(T1);
-        this.T2 = new ArraySet<>(T2);
+        this.T1 = T1;
+        this.T2 = T2;
     }
     
     public AUT(int var, GroundTerm T1, GroundTerm T2) {
-        this(var, new ArraySet<>(T1), new ArraySet<>(T2));
-    }
-    
-    public Queue<String> heads() {
-        return Stream.concat(T1.stream(), T2.stream())
-                .map(t -> t.head)
-                .collect(Collectors.toCollection(ArrayDeque::new));
+        this(var, ArraySet.singleton(T1), ArraySet.singleton(T2));
     }
     
     public static Pair<Set<Term>, Set<Term>> applyAll(Queue<AUT> auts, Term baseTerm) {

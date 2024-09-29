@@ -1,9 +1,12 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.data.term.Term;
+import at.jku.risc.uarau.data.term.FunctionTerm;
+import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.data.term.VariableTerm;
 import at.jku.risc.uarau.util.Util;
 
 import java.util.ArrayDeque;
-import java.util.List;
 import java.util.Queue;
 
 public class Substitution {
@@ -41,12 +44,10 @@ public class Substitution {
             return (GroundTerm) term;
         }
         if (!(term instanceof FunctionTerm)) {
-            throw new UnsupportedOperationException(
-                    "Tried force-casting sub-term: " + term + " of type " + term.getClass().getSimpleName());
+            throw new UnsupportedOperationException("Couldn't cast sub-term: " + term + " of type " + term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        List<GroundTerm> arguments = Util.newList(functionTerm.arguments.size(), i -> forceGroundTerm(functionTerm.arguments.get(i)));
-        return new GroundTerm(functionTerm.head, arguments);
+        return new GroundTerm(functionTerm.head, Util.mapList(functionTerm.arguments, Substitution::forceGroundTerm));
     }
     
     public Term apply(Term term) {
@@ -60,8 +61,7 @@ public class Substitution {
             throw new IllegalStateException("Unknown Term type used in substitution: " + term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        List<Term> arguments = Util.newList(functionTerm.arguments.size(), i -> apply(functionTerm.arguments.get(i)));
-        return new FunctionTerm(functionTerm.head, arguments);
+        return new FunctionTerm(functionTerm.head, Util.mapList(functionTerm.arguments, this::apply));
     }
     
     @Override

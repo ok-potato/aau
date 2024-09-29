@@ -1,29 +1,34 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.data.term;
 
 import at.jku.risc.uarau.util.Util;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public class GroundTerm implements Term {
-    
+public class FunctionTerm implements Term {
     public final String head;
-    public final List<GroundTerm> arguments;
+    public final List<Term> arguments;
     
-    public GroundTerm(String head, List<GroundTerm> arguments) {
+    // function/constant term
+    public FunctionTerm(String head, List<Term> arguments) {
         this.head = head.intern();
-        this.arguments = arguments;
+        this.arguments = Collections.unmodifiableList(arguments);
     }
     
-    public GroundTerm(String head, GroundTerm[] arguments) {
+    public FunctionTerm(String head, Term[] arguments) {
         this(head, Arrays.asList(arguments));
     }
     
+    private Set<Integer> v_named = null;
+    
     @Override
     public Set<Integer> v_named() {
-        return Collections.emptySet();
+        if (v_named == null) {
+            v_named = new HashSet<>();
+            for (Term argument : arguments) {
+                v_named.addAll(argument.v_named());
+            }
+        }
+        return v_named;
     }
     
     private Integer hash = null;
@@ -41,10 +46,10 @@ public class GroundTerm implements Term {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof GroundTerm)) {
+        if (!(other instanceof FunctionTerm)) {
             return false;
         }
-        GroundTerm otherFunctionTerm = (GroundTerm) other;
+        FunctionTerm otherFunctionTerm = (FunctionTerm) other;
         if (hashCode() != otherFunctionTerm.hashCode()) {
             return false;
         }

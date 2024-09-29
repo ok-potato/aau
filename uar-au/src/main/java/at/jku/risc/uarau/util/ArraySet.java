@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 /**
  * compact representation of immutable sets
  */
-public class ArraySet<E> implements Set<E>, Queue<E> {
+public class ArraySet<E> implements Set<E> {
     private final E[] elements;
     private Integer hash = null;
     
@@ -30,8 +30,15 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
         this(collection, false);
     }
     
+    public static <E> ArraySet<E> singleton(E element) {
+        return new ArraySet<>(element);
+    }
+    
+    /**
+     * access with {@linkplain ArraySet#singleton(Object)}
+     */
     @SuppressWarnings("unchecked")
-    public ArraySet(E element) {
+    private ArraySet(E element) {
         elements = (E[]) new Object[]{element};
     }
     
@@ -48,11 +55,7 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
     }
     
     public static <E> ArraySet<E> merged(ArraySet<E> a, ArraySet<E> b) {
-        List<E> merged = Stream.concat(a.stream(), b.stream())
-                .unordered()
-                .distinct()
-                .collect(Collectors.toList());
-        
+        List<E> merged = Stream.concat(a.stream(), b.stream()).unordered().distinct().collect(Collectors.toList());
         return new ArraySet<>(merged, true);
     }
     
@@ -90,19 +93,6 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
     }
     
     @Override
-    public E element() {
-        if (size() == 0) {
-            throw new IllegalArgumentException();
-        }
-        return elements[0];
-    }
-    
-    @Override
-    public E peek() {
-        return size() == 0 ? null : elements[0];
-    }
-    
-    @Override
     public E[] toArray() {
         return Arrays.copyOf(elements, elements.length);
     }
@@ -115,7 +105,7 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
         }
         try {
             for (E element : this) {
-                T t = (T) element;
+                T ignored = (T) element;
             }
         } catch (ClassCastException e) {
             throw new ArrayStoreException();
@@ -190,24 +180,6 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
     @Override
     @Deprecated // unsupported
     public boolean add(E element) {
-        throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    @Deprecated // unsupported
-    public boolean offer(E element) {
-        throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    @Deprecated // unsupported
-    public E remove() {
-        throw new UnsupportedOperationException();
-    }
-    
-    @Override
-    @Deprecated // unsupported
-    public E poll() {
         throw new UnsupportedOperationException();
     }
     

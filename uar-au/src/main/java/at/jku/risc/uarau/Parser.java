@@ -1,22 +1,23 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
+import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.data.term.MappedVariableTerm;
+import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.Util;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+// TODO documentation
 public class Parser {
-    /**
-     * @param equationStr
-     * @return
-     */
     public static Pair<GroundTerm, GroundTerm> parseEquation(String equationStr) {
         String[] tokens = equationStr.split("\\?=");
         if (tokens.length != 2) {
-            throw new IllegalArgumentException("Need 2 sides per equation, but got " + tokens.length);
+            throw Util.argException("Need 2 sides per equation, but got %s", tokens.length);
         }
         return new Pair<>(parseTerm(tokens[0]), parseTerm(tokens[1]));
     }
@@ -37,7 +38,7 @@ public class Parser {
             if (token.equals(")")) {
                 GroundTermBuilder subTerm = subTerms.pop();
                 if (subTerms.isEmpty()) {
-                    throw new IllegalArgumentException("Too many closing parentheses in term: " + termStr);
+                    throw Util.argException("Too many closing parentheses in term: %s", termStr);
                 }
                 subTerms.peek().arguments.add(subTerm.build());
                 continue;
@@ -45,7 +46,7 @@ public class Parser {
             if (token.endsWith("(")) {
                 String head = token.substring(0, token.length() - 1);
                 if (StringUtils.isBlank(head)) {
-                    throw new IllegalArgumentException("Missing function name in " + termStr);
+                    throw Util.argException("Missing function name in term: %s", termStr);
                 }
                 subTerms.push(new GroundTermBuilder(head));
                 continue;
@@ -53,12 +54,12 @@ public class Parser {
             subTerms.peek().arguments.add(new MappedVariableTerm(token));
         }
         if (subTerms.size() > 1) {
-            throw new IllegalArgumentException("Unclosed parentheses in term: " + termStr);
+            throw Util.argException("Unclosed parentheses in term: %s", termStr);
         }
         
         GroundTermBuilder dummyTerm = subTerms.pop();
         if (dummyTerm.arguments.size() > 1) {
-            throw new IllegalArgumentException("More than one top level term on one side: " + termStr);
+            throw Util.argException("More than one top level term on one side: %s", termStr);
         }
         return dummyTerm.arguments.get(0);
     }
@@ -84,7 +85,7 @@ public class Parser {
             proximity = relationStr.substring(relationStr.lastIndexOf('['), relationStr.indexOf(']') + 1);
             argRelation = relationStr.substring(relationStr.lastIndexOf('{'), relationStr.indexOf('}') + 1);
         } catch (StringIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Couldn't get proximity or argument relation from: " + relationStr);
+            throw Util.argException("Couldn't get proximity or argument relation from: %s", relationStr);
         }
         
         // find two function symbols
@@ -94,11 +95,11 @@ public class Parser {
                 .filter(s -> !StringUtils.isBlank(s))
                 .collect(Collectors.toList());
         if (rest.size() != 2) {
-            throw new IllegalArgumentException("Couldn't get two function symbols from: " + relationStr);
+            throw Util.argException("Couldn't get two function symbols from: %s", relationStr);
         }
         float parsedProximity = parseProximity(proximity);
         if (parsedProximity < 0.0f || parsedProximity > 1.0f) {
-            throw new IllegalArgumentException("Proximity outside of range [0,1]: " + relationStr);
+            throw Util.argException("Proximity outside of range [0,1]: %s", parsedProximity);
         }
         return new ProximityRelation(rest.get(0), rest.get(1), parsedProximity, parseArgumentRelation(argRelation));
     }
@@ -109,7 +110,7 @@ public class Parser {
     }
     
     // {<arg-relation>} :=  (1,1), (2,3), (3,1), ...
-    public static List<List<Integer>> parseArgumentRelation(String argRelationStr) {
+    public static List<Set<Integer>> parseArgumentRelation(String argRelationStr) {
         List<Integer> pairs;
         try {
             pairs = Arrays.stream(argRelationStr.substring(1, argRelationStr.length() - 1).split("[(),\\s]+"))
@@ -117,11 +118,11 @@ public class Parser {
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Some argument positions couldn't be parsed as int: " + argRelationStr);
+            throw Util.argException("Some argument positions couldn't be parsed as int: %s", argRelationStr);
         }
         
         if (pairs.size() % 2 != 0) {
-            throw new IllegalArgumentException("Odd number of argument positions in: " + argRelationStr);
+            throw Util.argException("Odd number of argument positions in: %s", argRelationStr);
         }
         
         // convert to index-based representation, e.g. [1,2, 1,3, 3,1] -> [[2,3], [], [1]]
@@ -136,7 +137,7 @@ public class Parser {
         for (int i = 0; i < pairs.size() / 2; i++) {
             argRelationsIndexed.get(pairs.get(i * 2) - 1).add(pairs.get(i * 2 + 1) - 1);
         }
-        return argRelationsIndexed;
+        return Util.mapList(argRelationsIndexed, ArraySet::new);
     }
     
     private static class GroundTermBuilder {

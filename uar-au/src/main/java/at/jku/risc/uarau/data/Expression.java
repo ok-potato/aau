@@ -1,18 +1,16 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.GroundTerm;
+import at.jku.risc.uarau.data.term.GroundTerm;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Util;
-
-import java.util.Queue;
 
 public class Expression {
     public final int var;
     public final ArraySet<GroundTerm> T;
     
-    public Expression(int var, Queue<GroundTerm> T) {
+    public Expression(int var, ArraySet<GroundTerm> T) {
         this.var = var;
-        this.T = new ArraySet<>(T);
+        this.T = T;
     }
     
     @Override

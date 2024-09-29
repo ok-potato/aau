@@ -2,7 +2,9 @@ package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
 import at.jku.risc.uarau.data.Solution;
+import at.jku.risc.uarau.data.term.GroundTerm;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.Util;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -119,7 +121,7 @@ public class Problem {
      */
     public Problem lambda(float lambda) {
         if (lambda < 0.0f || lambda > 1.0f) {
-            throw new IllegalArgumentException("Lambda must be in range [0,1]");
+            throw Util.argException("Lambda must be in range [0,1]");
         }
         this.lambda = lambda;
         return this;

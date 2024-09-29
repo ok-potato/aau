@@ -1,7 +1,7 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.GroundTerm;
-import at.jku.risc.uarau.Substitution;
+import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.util.ArraySet;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -15,7 +15,7 @@ public class State {
     
     private int freshVar;
     
-    public State(Queue<GroundTerm> T, int freshVar) {
+    public State(ArraySet<GroundTerm> T, int freshVar) {
         this.expressions = new ArrayDeque<>();
         this.s = new ArrayDeque<>();
         this.freshVar = freshVar;

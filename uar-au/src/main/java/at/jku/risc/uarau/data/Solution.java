@@ -1,6 +1,6 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.Term;
+import at.jku.risc.uarau.data.term.Term;
 import at.jku.risc.uarau.util.ANSI;
 
 public class Solution {
