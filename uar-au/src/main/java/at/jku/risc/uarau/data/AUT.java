@@ -1,9 +1,12 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.GroundTerm;
+import at.jku.risc.uarau.Substitution;
+import at.jku.risc.uarau.Term;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Util;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.Util;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,17 +14,17 @@ import java.util.stream.Stream;
 
 public class AUT {
     public final int var;
-    public final ArraySet<Term> T1, T2;
+    public final ArraySet<GroundTerm> T1, T2;
     
     private Integer hash = null;
     
-    public AUT(int var, Queue<Term> T1, Queue<Term> T2) {
+    public AUT(int var, Queue<GroundTerm> T1, Queue<GroundTerm> T2) {
         this.var = var;
         this.T1 = new ArraySet<>(T1);
         this.T2 = new ArraySet<>(T2);
     }
     
-    public AUT(int var, Term T1, Term T2) {
+    public AUT(int var, GroundTerm T1, GroundTerm T2) {
         this(var, new ArraySet<>(T1), new ArraySet<>(T2));
     }
     

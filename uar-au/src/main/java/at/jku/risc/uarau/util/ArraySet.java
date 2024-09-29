@@ -19,25 +19,20 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
             ArraySet<E> arraySet = (ArraySet<E>) collection;
             elements = arraySet.elements;
             hash = arraySet.hash;
-            return;
+        } else if (knownAsUnique || collection instanceof Set) {
+            elements = (E[]) collection.toArray();
+        } else {
+            elements = (E[]) collection.stream().distinct().toArray();
         }
-        
-        elements = (E[]) new Object[collection.size()];
-        int i = 0;
-        for (E element : collection) {
-            assert element != null;
-            elements[i++] = element;
-        }
-        assert knownAsUnique || collection instanceof Set || Util.allUnique(this);
     }
     
     public ArraySet(Collection<E> collection) {
         this(collection, false);
     }
     
-    @SafeVarargs
-    public ArraySet(E... element) {
-        this(Arrays.asList(element));
+    @SuppressWarnings("unchecked")
+    public ArraySet(E element) {
+        elements = (E[]) new Object[]{element};
     }
     
     public <M> ArraySet<M> map(Function<E, M> mapFunction) {
@@ -52,11 +47,11 @@ public class ArraySet<E> implements Set<E>, Queue<E> {
         return new ArraySet<>(list, true);
     }
     
-    public static <E> ArraySet<E> merge(ArraySet<E> a, ArraySet<E> b) {
+    public static <E> ArraySet<E> merged(ArraySet<E> a, ArraySet<E> b) {
         List<E> merged = Stream.concat(a.stream(), b.stream())
                 .unordered()
                 .distinct()
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
         
         return new ArraySet<>(merged, true);
     }

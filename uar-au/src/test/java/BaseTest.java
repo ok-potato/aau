@@ -3,7 +3,7 @@ import at.jku.risc.uarau.data.Solution;
 public abstract class BaseTest {
     protected static void check(Solution solution, String sigma1, String sigma2, String r, float alpha1, float alpha2) {
         if (r != null) {
-            assert solution.r.toString(false).equals(r);
+            assert solution.r.toString().equals(r);
         }
         
         if (sigma1 != null) {

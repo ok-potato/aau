@@ -1,16 +1,21 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.GroundTerm;
+import at.jku.risc.uarau.Substitution;
+
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+/**
+ * mutable
+ */
 public class State {
-    // mutable
     public final Queue<Expression> expressions;
     public final Queue<Substitution> s;
     
     private int freshVar;
     
-    public State(Queue<Term> T, int freshVar) {
+    public State(Queue<GroundTerm> T, int freshVar) {
         this.expressions = new ArrayDeque<>();
         this.s = new ArrayDeque<>();
         this.freshVar = freshVar;
@@ -28,7 +33,7 @@ public class State {
     }
     
     public int freshVar() {
-        return freshVar == Term.UNUSED_VAR ? freshVar : freshVar++;
+        return freshVar++;
     }
     
     public int peekVar() {

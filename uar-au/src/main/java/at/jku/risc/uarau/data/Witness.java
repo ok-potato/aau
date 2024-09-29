@@ -1,5 +1,6 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.Term;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.Util;
 

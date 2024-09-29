@@ -1,13 +1,18 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.GroundTerm;
+import at.jku.risc.uarau.Substitution;
+import at.jku.risc.uarau.VariableTerm;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.Util;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+/**
+ * mutable
+ */
 public class Config {
-    // mutable
     public final Queue<AUT> A, S;
     public final Queue<Substitution> substitutions;
     
@@ -15,7 +20,7 @@ public class Config {
     
     private int freshVar;
     
-    public Config(Term T1, Term T2) {
+    public Config(GroundTerm T1, GroundTerm T2) {
         A = new ArrayDeque<>();
         S = new ArrayDeque<>();
         substitutions = new ArrayDeque<>();
@@ -58,7 +63,7 @@ public class Config {
     public String toString() {
         String A_str = Util.str(A, " ", "", "", " ⚫ ");
         String S_str = Util.str(S, " ", ANSI.blue(".."));
-        String r_str = Substitution.applyAll(substitutions, Term.VAR_0).toString();
+        String r_str = Substitution.applyAll(substitutions, VariableTerm.VAR_0).toString();
         return String.format("%s ⚫ %s%s " + ANSI.green("%s %s"), r_str, A_str, S_str, alpha1, alpha2);
     }
     

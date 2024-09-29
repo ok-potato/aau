@@ -1,8 +1,10 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.GroundTerm;
+import at.jku.risc.uarau.MappedVariableTerm;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Util;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,7 @@ public class ProximityMap {
     private final Set<String> vars;
     public final Restriction restriction, theoreticalRestriction;
     
-    public ProximityMap(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
+    public ProximityMap(GroundTerm rhs, GroundTerm lhs, Collection<ProximityRelation> proximityRelations, float lambda) {
         // add flipped relations - don't allow declaring identity relations (even if they follow the definition)
         List<ProximityRelation> allProximityRelations = new ArrayList<>(proximityRelations.size() * 2);
         proximityRelations.forEach(relation -> {
@@ -86,7 +88,7 @@ public class ProximityMap {
         }
     }
     
-    private Pair<Map<String, Integer>, Set<String>> findArities(Term rhs, Term lhs, Collection<ProximityRelation> proximityRelations) {
+    private Pair<Map<String, Integer>, Set<String>> findArities(GroundTerm rhs, GroundTerm lhs, Collection<ProximityRelation> proximityRelations) {
         //      NOTE: If f/g doesn't show up in a term, we assume its arity equals the maximum arity found in R.
         //      If this assumption is wrong, we're missing some non-relevant positions, and could possibly
         //      misidentify the problem type (CAR where it is in fact UAR / CAM where it is in fact AM).
@@ -112,22 +114,21 @@ public class ProximityMap {
         return new Pair<>(allArities, termVars);
     }
     
-    private void findTermArities(Term t, Map<String, Integer> arityMap, Set<String> varSet) {
-        assert !t.isVar();
+    private void findTermArities(GroundTerm t, Map<String, Integer> arityMap, Set<String> varSet) {
         if (arityMap.containsKey(t.head)) {
             if (arityMap.get(t.head) != t.arguments.size()) {
                 throw new IllegalArgumentException("Found multiple arities for '" + t.head + "' in the posed problem");
             }
-            if (varSet.contains(t.head) != t.mappedVar) {
+            if (varSet.contains(t.head) != t instanceof MappedVariableTerm) {
                 throw new IllegalArgumentException(t.head + " appears as both a variable and a function/const symbol");
             }
         } else {
             arityMap.put(t.head, t.arguments.size());
-            if (t.mappedVar) {
+            if (t instanceof MappedVariableTerm) {
                 varSet.add(t.head);
             }
         }
-        for (Term arg : t.arguments) {
+        for (GroundTerm arg : t.arguments) {
             findTermArities(arg, arityMap, varSet);
         }
     }
@@ -141,7 +142,7 @@ public class ProximityMap {
     private final Map<ArraySet<String>, ArraySet<String>> proximatesMemory = new HashMap<>();
     private static final int MAX_SIZE_FOR_PROXIMATES_MEMORY = 2;
     
-    public ArraySet<String> commonProximates(ArraySet<Term> T) {
+    public ArraySet<String> commonProximates(ArraySet<GroundTerm> T) {
         assert !T.isEmpty();
         ArraySet<String> heads = T.map(t -> t.head);
         
@@ -197,10 +198,12 @@ public class ProximityMap {
         return toString("");
     }
     
-    public String toString(String prefix) {
+    public String toString(String separator) {
         StringBuilder sb = new StringBuilder();
+        String sep = "";
         for (String k : relations.keySet()) {
-            sb.append(prefix).append(Util.str(relations.get(k).values(), " ", ".."));
+            sb.append(sep).append(Util.str(relations.get(k).values(), " ", ".."));
+            sep = separator;
         }
         return sb.toString();
     }

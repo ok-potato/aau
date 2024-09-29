@@ -2,7 +2,6 @@ package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
 import at.jku.risc.uarau.data.Solution;
-import at.jku.risc.uarau.data.Term;
 import at.jku.risc.uarau.util.Pair;
 
 import java.util.Collection;
@@ -10,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Problem {
-    private final Pair<Term, Term> equation;
+    private final Pair<GroundTerm, GroundTerm> equation;
     private Collection<ProximityRelation> proximityRelations = new HashSet<>();
     private float lambda = 1.0f;
     private TNorm tNorm = Math::min;
@@ -40,7 +39,7 @@ public class Problem {
      * Finally, call {@linkplain Problem#solve()} to run the {@linkplain Algorithm} against the Problem.
      */
     
-    public Problem(Pair<Term, Term> equation) {
+    public Problem(Pair<GroundTerm, GroundTerm> equation) {
         this.equation = equation;
     }
     

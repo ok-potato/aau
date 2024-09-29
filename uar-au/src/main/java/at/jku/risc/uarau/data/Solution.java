@@ -1,12 +1,9 @@
 package at.jku.risc.uarau.data;
 
+import at.jku.risc.uarau.Term;
 import at.jku.risc.uarau.util.ANSI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Solution {
-    static Logger log = LoggerFactory.getLogger(Solution.class);
-    
     public final Term r;
     public final Witness sigma1, sigma2;
     public final float alpha1, alpha2;
@@ -23,7 +20,6 @@ public class Solution {
         }
         this.alpha1 = alpha1;
         this.alpha2 = alpha2;
-        log.info("{}", this);
     }
     
     @Override

@@ -1,7 +1,6 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
-import at.jku.risc.uarau.data.Term;
 import at.jku.risc.uarau.util.Pair;
 import org.junit.platform.commons.util.StringUtils;
 
@@ -14,7 +13,7 @@ public class Parser {
      * @param equationStr
      * @return
      */
-    public static Pair<Term, Term> parseEquation(String equationStr) {
+    public static Pair<GroundTerm, GroundTerm> parseEquation(String equationStr) {
         String[] tokens = equationStr.split("\\?=");
         if (tokens.length != 2) {
             throw new IllegalArgumentException("Need 2 sides per equation, but got " + tokens.length);
@@ -23,7 +22,7 @@ public class Parser {
     }
     
     // e.g. "f(g(a,b),c,d)"
-    public static Term parseTerm(String termStr) {
+    public static GroundTerm parseTerm(String termStr) {
         termStr = termStr.replaceAll("\\s", "");
         // split "f(g(a,b),c,d)" -> ["f(", "g(", "a", "b", ")", "c", "d", ")"]
         // (?<=\() => if last char was '('
@@ -31,12 +30,12 @@ public class Parser {
         //  (?=\)) => if next char is ')'
         String[] tokens = termStr.split("(?<=\\()|,|(?=\\))");
         
-        Stack<TermBuilder> subTerms = new Stack<>();
-        subTerms.push(new TermBuilder(",")); // dummyTerm
+        Stack<GroundTermBuilder> subTerms = new Stack<>();
+        subTerms.push(new GroundTermBuilder(",")); // dummyTerm
         for (String token : tokens) {
             assert !subTerms.isEmpty();
             if (token.equals(")")) {
-                TermBuilder subTerm = subTerms.pop();
+                GroundTermBuilder subTerm = subTerms.pop();
                 if (subTerms.isEmpty()) {
                     throw new IllegalArgumentException("Too many closing parentheses in term: " + termStr);
                 }
@@ -48,16 +47,16 @@ public class Parser {
                 if (StringUtils.isBlank(head)) {
                     throw new IllegalArgumentException("Missing function name in " + termStr);
                 }
-                subTerms.push(new TermBuilder(head));
+                subTerms.push(new GroundTermBuilder(head));
                 continue;
             }
-            subTerms.peek().arguments.add(new Term(token));
+            subTerms.peek().arguments.add(new MappedVariableTerm(token));
         }
         if (subTerms.size() > 1) {
             throw new IllegalArgumentException("Unclosed parentheses in term: " + termStr);
         }
         
-        TermBuilder dummyTerm = subTerms.pop();
+        GroundTermBuilder dummyTerm = subTerms.pop();
         if (dummyTerm.arguments.size() > 1) {
             throw new IllegalArgumentException("More than one top level term on one side: " + termStr);
         }
@@ -140,17 +139,17 @@ public class Parser {
         return argRelationsIndexed;
     }
     
-    private static class TermBuilder {
+    private static class GroundTermBuilder {
         public String head;
-        public List<Term> arguments = new ArrayList<>();
+        public List<GroundTerm> arguments = new ArrayList<>();
         
-        public TermBuilder(String head) {
+        public GroundTermBuilder(String head) {
             this.head = head;
         }
         
-        public Term build() {
+        public GroundTerm build() {
             assert arguments != null;
-            Term t = new Term(head, arguments);
+            GroundTerm t = new GroundTerm(head, arguments);
             arguments = null;
             return t;
         }
