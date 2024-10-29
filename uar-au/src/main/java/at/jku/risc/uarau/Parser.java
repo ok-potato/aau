@@ -17,7 +17,7 @@ public class Parser {
     public static Pair<GroundTerm, GroundTerm> parseEquation(String equationStr) {
         String[] tokens = equationStr.split("\\?=");
         if (tokens.length != 2) {
-            throw Util.argException("Need 2 sides per equation, but got %s", tokens.length);
+            throw Util.except("Need 2 sides per equation, but got %s", tokens.length);
         }
         return new Pair<>(parseTerm(tokens[0]), parseTerm(tokens[1]));
     }
@@ -38,7 +38,7 @@ public class Parser {
             if (token.equals(")")) {
                 GroundTermBuilder subTerm = subTerms.pop();
                 if (subTerms.isEmpty()) {
-                    throw Util.argException("Too many closing parentheses in term: %s", termStr);
+                    throw Util.except("Too many closing parentheses in term: %s", termStr);
                 }
                 subTerms.peek().arguments.add(subTerm.build());
                 continue;
@@ -46,7 +46,7 @@ public class Parser {
             if (token.endsWith("(")) {
                 String head = token.substring(0, token.length() - 1);
                 if (StringUtils.isBlank(head)) {
-                    throw Util.argException("Missing function name in term: %s", termStr);
+                    throw Util.except("Missing function name in term: %s", termStr);
                 }
                 subTerms.push(new GroundTermBuilder(head));
                 continue;
@@ -54,12 +54,12 @@ public class Parser {
             subTerms.peek().arguments.add(new MappedVariableTerm(token));
         }
         if (subTerms.size() > 1) {
-            throw Util.argException("Unclosed parentheses in term: %s", termStr);
+            throw Util.except("Unclosed parentheses in term: %s", termStr);
         }
         
         GroundTermBuilder dummyTerm = subTerms.pop();
         if (dummyTerm.arguments.size() > 1) {
-            throw Util.argException("More than one top level term on one side: %s", termStr);
+            throw Util.except("More than one top level term on one side: %s", termStr);
         }
         return dummyTerm.arguments.get(0);
     }
@@ -85,7 +85,7 @@ public class Parser {
             proximity = relationStr.substring(relationStr.lastIndexOf('['), relationStr.indexOf(']') + 1);
             argRelation = relationStr.substring(relationStr.lastIndexOf('{'), relationStr.indexOf('}') + 1);
         } catch (StringIndexOutOfBoundsException e) {
-            throw Util.argException("Couldn't get proximity or argument relation from: %s", relationStr);
+            throw Util.except("Couldn't get proximity or argument relation from: %s", relationStr);
         }
         
         // find two function symbols
@@ -95,11 +95,11 @@ public class Parser {
                 .filter(s -> !StringUtils.isBlank(s))
                 .collect(Collectors.toList());
         if (rest.size() != 2) {
-            throw Util.argException("Couldn't get two function symbols from: %s", relationStr);
+            throw Util.except("Couldn't get two function symbols from: %s", relationStr);
         }
         float parsedProximity = parseProximity(proximity);
         if (parsedProximity < 0.0f || parsedProximity > 1.0f) {
-            throw Util.argException("Proximity outside of range [0,1]: %s", parsedProximity);
+            throw Util.except("Proximity outside of range [0,1]: %s", parsedProximity);
         }
         return new ProximityRelation(rest.get(0), rest.get(1), parsedProximity, parseArgumentRelation(argRelation));
     }
@@ -118,11 +118,11 @@ public class Parser {
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {
-            throw Util.argException("Some argument positions couldn't be parsed as int: %s", argRelationStr);
+            throw Util.except("Some argument positions couldn't be parsed as int: %s", argRelationStr);
         }
         
         if (pairs.size() % 2 != 0) {
-            throw Util.argException("Odd number of argument positions in: %s", argRelationStr);
+            throw Util.except("Odd number of argument positions in: %s", argRelationStr);
         }
         
         // convert to index-based representation, e.g. [1,2, 1,3, 3,1] -> [[2,3], [], [1]]

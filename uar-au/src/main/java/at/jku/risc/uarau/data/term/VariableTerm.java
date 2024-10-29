@@ -5,9 +5,9 @@ import at.jku.risc.uarau.util.ArraySet;
 import java.util.Set;
 
 /**
- * VariableTerms can't be used in the problem input, since the problem terms are assumed to be ground
+ * VariableTerms can't be used in the problem input, since the problem terms are assumed to be ground.
  * <br>
- * Instead, use {@linkplain MappedVariableTerm} to map your variables to the appropriate const representation
+ * Instead, use {@linkplain MappedVariableTerm} to map your variables to their respective constant representation.
  */
 public class VariableTerm implements Term {
     public static final int VAR_0 = 0;

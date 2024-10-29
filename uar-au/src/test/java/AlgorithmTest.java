@@ -2,8 +2,13 @@ import at.jku.risc.uarau.Algorithm;
 import at.jku.risc.uarau.Problem;
 import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.Util;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.slf4j.Log4jLogger;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 
 import static at.jku.risc.uarau.Algorithm.solve;
@@ -25,7 +30,35 @@ public class AlgorithmTest extends BaseTest {
     
     @Test
     public void big() {
-        // |f| = 2  |g| = 3  |h| = 3
+        String problem = bigProblem();
+        String relations = "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
+        
+        new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(false).solve();
+    }
+    
+    // @Test
+    public void benchmark() {
+        String problem = bigProblem();
+        String relations = "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
+        
+        try { // disable logging
+            Log4jLogger algorithmLoggerImpl = (Log4jLogger) LoggerFactory.getLogger(Algorithm.class);
+            Field loggerField = algorithmLoggerImpl.getClass().getDeclaredField("logger");
+            loggerField.setAccessible(true);
+            ((Logger) loggerField.get(algorithmLoggerImpl)).setLevel(Level.ERROR);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+        
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < 50; i++) {
+            new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(false).solve();
+            new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(true).solve();
+        }
+        System.out.println(System.currentTimeMillis() - startTime);
+    }
+    
+    private String bigProblem() { // |f| = 2  |g| = 3  |h| = 3
         String l_h1 = "h( a(), b(), f(a(),b()) )";
         String l_g1 = String.format("g( c(), d(), %s )", l_h1);
         String l_h2 = String.format("h( f(c(),d()), %s, c() )", l_g1);
@@ -36,11 +69,10 @@ public class AlgorithmTest extends BaseTest {
         String r_f1 = String.format("f( %s, c() )", r_h1);
         String rhs = String.format("g( g(a(),b(),d()), %s, d() )", r_f1);
         
-        String problem = String.format("%s ?= %s", lhs, rhs);
-        String relations = "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
-        
-        new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(false).solve();
+        return String.format("%s ?= %s", lhs, rhs);
     }
+    
+    // *** examples from the paper ***
     
     @Test
     public void example5() {

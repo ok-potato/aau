@@ -58,7 +58,7 @@ public class Algorithm {
         this.R = new ProximityMap(lhs, rhs, relations, lambda);
         this.tNorm = tNorm;
         if (lambda < 0.0f || lambda > 1.0f) {
-            throw Util.argException("Lambda must be in range [0,1]");
+            throw Util.except("Lambda must be in range [0,1]");
         }
         this.lambda = lambda;
         this.merge = merge;
@@ -160,7 +160,7 @@ public class Algorithm {
                 child.A.add(new AUT(yi, Q1.get(i), Q2.get(i)));
                 return new VariableTerm(yi);
             });
-            Term hTerm = R.isMappedVar(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, hArgs);
+            Term hTerm = R.isMappedVariable(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, hArgs);
             child.substitutions.add(new Substitution(aut.var, hTerm));
             children.add(child);
         }
@@ -218,7 +218,7 @@ public class Algorithm {
             Queue<Integer> collectedVars = new ArrayDeque<>();
             // need to manually keep track of 'fresh var'
             int freshVar = expandedCfg.peekVar();
-            // try merge on each remaining
+            // try merge on each remaining AUT
             for (AUT candidate : remaining) {
                 Pair<ArraySet<GroundTerm>, Integer> mergedLHS = specialConjunction(ArraySet.merged(collector.T1, candidate.T1), freshVar);
                 Pair<ArraySet<GroundTerm>, Integer> mergedRHS = mergedLHS.left.isEmpty() ? mergedLHS :
@@ -315,7 +315,7 @@ public class Algorithm {
                     });
                     
                     freshVar = Math.max(freshVar, childState.peekVar());
-                    Term h_term = R.isMappedVar(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, h_args);
+                    Term h_term = R.isMappedVariable(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, h_args);
                     childState.s.add(new Substitution(expression.var, h_term));
                     branches.add(childState);
                 }

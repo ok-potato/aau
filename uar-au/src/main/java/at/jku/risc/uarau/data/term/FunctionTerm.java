@@ -2,20 +2,18 @@ package at.jku.risc.uarau.data.term;
 
 import at.jku.risc.uarau.util.Util;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class FunctionTerm implements Term {
     public final String head;
     public final List<Term> arguments;
     
-    // function/constant term
     public FunctionTerm(String head, List<Term> arguments) {
         this.head = head.intern();
         this.arguments = Collections.unmodifiableList(arguments);
-    }
-    
-    public FunctionTerm(String head, Term[] arguments) {
-        this(head, Arrays.asList(arguments));
     }
     
     private Set<Integer> v_named = null;

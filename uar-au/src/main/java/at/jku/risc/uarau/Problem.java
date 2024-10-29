@@ -121,7 +121,7 @@ public class Problem {
      */
     public Problem lambda(float lambda) {
         if (lambda < 0.0f || lambda > 1.0f) {
-            throw Util.argException("Lambda must be in range [0,1]");
+            throw Util.except("Lambda must be in range [0,1]");
         }
         this.lambda = lambda;
         return this;

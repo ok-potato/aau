@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * compact representation of immutable sets
+ * Compact representation of immutable sets, optimized for small- to medium-sized sets.
+ * <br>
+ * Doesn't allow null elements.
  */
 public class ArraySet<E> implements Set<E> {
     private final E[] elements;
@@ -43,7 +45,8 @@ public class ArraySet<E> implements Set<E> {
     }
     
     public <M> ArraySet<M> map(Function<E, M> mapFunction) {
-        return new ArraySet<>(this.stream().map(mapFunction).distinct().collect(Collectors.toList()));
+        List<M> mapped = this.stream().map(mapFunction).distinct().collect(Collectors.toList());
+        return new ArraySet<>(mapped, true);
     }
     
     public ArraySet<E> filter(Predicate<E> filterPredicate) {
@@ -121,6 +124,15 @@ public class ArraySet<E> implements Set<E> {
     }
     
     // *** equals/hashCode ***
+    
+    /**
+     * <b>note:</b>
+     * <br>
+     * equals + hashCode consider insert order, since we only use them in {@code ProximityMap.proximatesMemory},
+     * where we will usually only see a few insert orders per set of elements.
+     * <br>
+     * This made the (more correct) O(n^2) {@linkplain ArraySet#containsAll(Collection)} check noticeably slower on my test input.
+     */
     
     @Override
     public boolean equals(Object obj) {

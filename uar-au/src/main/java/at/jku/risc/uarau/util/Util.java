@@ -3,7 +3,6 @@ package at.jku.risc.uarau.util;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class Util {
@@ -47,10 +46,6 @@ public class Util {
         return true;
     }
     
-    public static <E> Collector<E, ?, Queue<E>> toQueue() {
-        return Collectors.toCollection(ArrayDeque::new);
-    }
-    
     public static <E> E getAny(Set<E> set) {
         return set.stream().findFirst().orElseThrow(IllegalArgumentException::new);
     }
@@ -69,7 +64,7 @@ public class Util {
     
     // *** String ***
     
-    public static IllegalArgumentException argException(String message, Object... args) {
+    public static IllegalArgumentException except(String message, Object... args) {
         return new IllegalArgumentException(String.format(message, args));
     }
     

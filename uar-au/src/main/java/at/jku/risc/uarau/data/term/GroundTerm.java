@@ -3,7 +3,6 @@ package at.jku.risc.uarau.data.term;
 import at.jku.risc.uarau.util.Util;
 import org.junit.platform.commons.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -15,14 +14,10 @@ public class GroundTerm implements Term {
     
     public GroundTerm(String head, List<GroundTerm> arguments) {
         if (StringUtils.isBlank(head) || head.contains("(") || head.contains(")") || head.contains(",")) {
-            throw Util.argException("Illegal head '%s'", head);
+            throw Util.except("Illegal head '%s'", head);
         }
         this.head = head.intern();
-        this.arguments = arguments;
-    }
-    
-    public GroundTerm(String head, GroundTerm[] arguments) {
-        this(head, Arrays.asList(arguments));
+        this.arguments = Collections.unmodifiableList(arguments);
     }
     
     @Override
