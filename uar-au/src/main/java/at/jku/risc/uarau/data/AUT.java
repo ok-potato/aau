@@ -12,20 +12,24 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 
+/**
+ * This data structure represents the Anti-Unification Triples described in the paper.
+ * <br>
+ * {@linkplain AUT#T1} and {@linkplain AUT#T2} are the sets of the {@linkplain AUT#variable}'s possible substitutions
+ * on the left- and right-hand side, respectively.
+ * <br>
+ * The triples that appear in a final {@linkplain Config#S} are used to generate that solution's {@linkplain Witness} substitutions.
+ */
 public class AUT {
-    public final int var;
+    public final int variable;
     public final ArraySet<GroundTerm> T1, T2;
     
     private Integer hash = null;
     
-    public AUT(int var, ArraySet<GroundTerm> T1, ArraySet<GroundTerm> T2) {
-        this.var = var;
+    public AUT(int variable, ArraySet<GroundTerm> T1, ArraySet<GroundTerm> T2) {
+        this.variable = variable;
         this.T1 = T1;
         this.T2 = T2;
-    }
-    
-    public AUT(int var, GroundTerm T1, GroundTerm T2) {
-        this(var, ArraySet.singleton(T1), ArraySet.singleton(T2));
     }
     
     public static Pair<Set<Term>, Set<Term>> applyAll(Queue<AUT> auts, Term baseTerm) {
@@ -43,23 +47,21 @@ public class AUT {
         Set<Term> lhs = new HashSet<>();
         Set<Term> rhs = new HashSet<>();
         
-        Q1.forEach(q1 -> T1.forEach(t1 -> lhs.add(new Substitution(var, t1).apply(q1))));
-        Q2.forEach(q2 -> T2.forEach(t2 -> rhs.add(new Substitution(var, t2).apply(q2))));
+        Q1.forEach(q1 -> T1.forEach(t1 -> lhs.add(new Substitution(variable, t1).apply(q1))));
+        Q2.forEach(q2 -> T2.forEach(t2 -> rhs.add(new Substitution(variable, t2).apply(q2))));
         
         return new Pair<>(Collections.unmodifiableSet(lhs), Collections.unmodifiableSet(rhs));
     }
     
     @Override
     public String toString() {
-        String T1_str = Util.str(T1, "  ", "..");
-        String T2_str = Util.str(T2, "  ", "..");
-        return ANSI.blue(var + " ") + T1_str + ANSI.red(" ?= ") + T2_str;
+        return String.format("%s [%s]==[%s]", ANSI.blue(variable), Util.str(T1), Util.str(T2));
     }
     
     @Override
     public int hashCode() {
         if (hash == null) {
-            hash = var + T1.hashCode() * 31 + T2.hashCode() * 31 * 31;
+            hash = variable + T1.hashCode() * 31 + T2.hashCode() * 31 * 31;
         }
         return hash;
     }
@@ -76,6 +78,6 @@ public class AUT {
         if (hashCode() != aut.hashCode()) {
             return false;
         }
-        return var == aut.var && T1.equals(aut.T1) && T2.equals(aut.T2);
+        return variable == aut.variable && T1.equals(aut.T1) && T2.equals(aut.T2);
     }
 }

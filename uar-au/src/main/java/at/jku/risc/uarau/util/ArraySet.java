@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Compact representation of immutable sets, optimized for small- to medium-sized sets.
+ * Compact representation of immutable, ordered (see {@linkplain ArraySet#equals(Object)}) sets, optimized for small- to medium-sized sets.
  * <br>
  * Doesn't allow null elements.
  */
@@ -113,9 +113,9 @@ public class ArraySet<E> implements Set<E> {
         } catch (ClassCastException e) {
             throw new ArrayStoreException();
         }
-        int i = 0;
+        int idx = 0;
         for (E element : this) {
-            a[i++] = (T) element;
+            a[idx++] = (T) element;
         }
         if (a.length > size()) {
             a[size()] = null;
@@ -126,12 +126,11 @@ public class ArraySet<E> implements Set<E> {
     // *** equals/hashCode ***
     
     /**
-     * <b>note:</b>
-     * <br>
-     * equals + hashCode consider insert order, since we only use them in {@code ProximityMap.proximatesMemory},
-     * where we will usually only see a few insert orders per set of elements.
-     * <br>
-     * This made the (more correct) O(n^2) {@linkplain ArraySet#containsAll(Collection)} check noticeably slower on my test input.
+     * In regard to their usage, ArraySets don't in principle need to be ordered, and the decision is mostly based on
+     * performance in {@linkplain at.jku.risc.uarau.data.ProximityMap#commonProximates(ArraySet)}.
+     * <br><br>
+     * Memory 'hits' usually greatly outnumber the 'misses' that arise from permutations of the same set of function symbols.
+     * This usually makes it worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).
      */
     
     @Override
@@ -143,8 +142,8 @@ public class ArraySet<E> implements Set<E> {
         if (size() != other.size() || hashCode() != other.hashCode()) {
             return false;
         }
-        for (int i = 0; i < size(); i++) {
-            if (!(elements[i].equals(other.elements[i]))) {
+        for (int idx = 0; idx < size(); idx++) {
+            if (!(elements[idx].equals(other.elements[idx]))) {
                 return false;
             }
         }

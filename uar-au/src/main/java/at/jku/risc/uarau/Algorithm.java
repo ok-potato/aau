@@ -2,10 +2,7 @@ package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.*;
 import at.jku.risc.uarau.data.term.*;
-import at.jku.risc.uarau.util.ANSI;
-import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Pair;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,42 +38,48 @@ public class Algorithm {
         return new Algorithm(equation, relations, tNorm, lambda, merge, witness).run();
     }
     
-    // *** /api ***
+    // ^^^ api ^^^
+    
+    // *** implementation ***
     
     private final Logger log = LoggerFactory.getLogger(Algorithm.class);
-    private static final String LOG_NEWLINE = "\n                 :: ";
     
     private final GroundTerm lhs, rhs;
     private final ProximityMap R;
     private final TNorm tNorm;
     private final float lambda;
-    private final boolean merge, generateWitnesses;
+    private final boolean merge, includeWitnesses;
     
-    private Algorithm(Pair<GroundTerm, GroundTerm> equation, Collection<ProximityRelation> relations, TNorm tNorm, float lambda, boolean merge, boolean generateWitnesses) {
+    private Algorithm(Pair<GroundTerm, GroundTerm> equation, Collection<ProximityRelation> relations, TNorm tNorm, float lambda, boolean merge, boolean includeWitnesses) {
         this.lhs = equation.left;
         this.rhs = equation.right;
         this.R = new ProximityMap(lhs, rhs, relations, lambda);
         this.tNorm = tNorm;
         if (lambda < 0.0f || lambda > 1.0f) {
-            throw Util.except("Lambda must be in range [0,1]");
+            throw Except.argument("Lambda must be in range [0,1]");
         }
         this.lambda = lambda;
         this.merge = merge;
-        this.generateWitnesses = generateWitnesses;
+        this.includeWitnesses = includeWitnesses;
     }
     
     private Set<Solution> run() {
-        log.info(ANSI.green("SOLVING :: ") + lhs + ANSI.red(" ?= ") + rhs + ANSI.green(":: λ = " + lambda));
-        log.info(R.toString(LOG_NEWLINE));
+        log.info(ANSI.yellow("SOLVING: ") + lhs + ANSI.yellow(" == ") + rhs + ANSI.yellow(" λ=", lambda));
         
-        if (R.restriction == R.theoreticalRestriction) {
-            log.info("The problem is of type {}", R.restriction);
+        if (log.isDebugEnabled()) {
+            log.debug(Util.log(ANSI.yellow("R:"), R.fullView()));
         } else {
-            log.info("The problem is theoretically of type {} - but excluding relations below the λ-cut, it is of type {}", R.theoreticalRestriction, R.restriction);
+            log.info(ANSI.yellow("R: ") + Util.str(R.compactView()));
         }
-        log.info(R.restriction.correspondence ?
-                "Therefore, there are no irrelevant positions, and we get the minimal complete set of generalizations" :
-                "Therefore, there might be irrelevant positions, and we are not guaranteed to get the minimal complete set of generalizations");
+        
+        if (R.restrictionType == R.theoreticalRestrictionType) {
+            log.info("The problem is of type {}.", ANSI.blue(R.restrictionType));
+        } else {
+            log.info("The problem is theoretically of type " + ANSI.blue(R.theoreticalRestrictionType)
+                    + ". But excluding relations below the λ-cut, it is of type {}.", ANSI.blue(R.restrictionType));
+        }
+        log.info(R.restrictionType.correspondence ? "Therefore, we get the minimal complete set of generalizations." :
+                "Therefore, we are not guaranteed to get the minimal complete set of generalizations.");
         
         // *** APPLY RULES ***
         Queue<Config> linearConfigs = new ArrayDeque<>();
@@ -85,13 +88,13 @@ public class Algorithm {
         
         BRANCHING:
         while (!branches.isEmpty()) {
-            assert Util.allUnique(branches);
+            assert Util.isSet(branches);
             Config config = branches.remove();
             while (!config.A.isEmpty()) {
                 AUT aut = config.A.remove();
                 // TRIVIAL
                 if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-                    config.substitutions.add(new Substitution(aut.var, MappedVariableTerm.ANON));
+                    config.substitutions.add(new Substitution(aut.variable, MappedVariableTerm.ANON));
                     log.debug("TRI => {}", config);
                     continue;
                 }
@@ -111,30 +114,30 @@ public class Algorithm {
             linearConfigs.add(config);
         }
         
-        assert Util.allUnique(linearConfigs);
-        if (!merge && !generateWitnesses) {
+        assert Util.isSet(linearConfigs);
+        if (!merge && !includeWitnesses) {
             return generateSolutions(linearConfigs);
         }
         
         // *** POST PROCESS ***
-        log.info(ANSI.green("LINEAR:") + "{}{}", LOG_NEWLINE, Util.str(linearConfigs, LOG_NEWLINE, ""));
+        log.info(Util.log(ANSI.yellow("LINEAR:"), linearConfigs));
         // EXPAND
         Queue<Config> expandedConfigs = Util.mapQueue(linearConfigs, config -> config.mapSolutions(this::expand));
-        assert Util.allUnique(expandedConfigs);
+        assert Util.isSet(expandedConfigs);
         if (!merge) {
             return generateSolutions(expandedConfigs);
         }
-        log.info(ANSI.green("EXPANDED:") + "{}{}", LOG_NEWLINE, Util.str(expandedConfigs, LOG_NEWLINE, ""));
+        log.info(Util.log(ANSI.yellow("EXPANDED:"), expandedConfigs));
         // MERGE
         Queue<Config> mergedSolutions = Util.mapQueue(expandedConfigs, config -> config.mapSolutions(this::merge));
-        assert Util.allUnique(mergedSolutions);
+        assert Util.isSet(mergedSolutions);
         return generateSolutions(mergedSolutions);
     }
     
     private Queue<Config> decompose(AUT aut, Config cfg) {
         Queue<Config> children = new ArrayDeque<>();
         for (String h : R.commonProximates(ArraySet.merged(aut.T1, aut.T2))) {
-            // map args
+            // map arguments
             Pair<List<ArraySet<GroundTerm>>, Float> T1Mapped = mapArgs(h, aut.T1, cfg.alpha1);
             List<ArraySet<GroundTerm>> Q1 = T1Mapped.left;
             float alpha1 = T1Mapped.right;
@@ -148,20 +151,22 @@ public class Algorithm {
                 continue;
             }
             assert Q1 != null && Q2 != null;
-            if (!R.restriction.mapping && (Util.any(Q1, this::notConsistent) || Util.any(Q2, this::notConsistent))) {
-                continue;
+            if (!R.restrictionType.mapping) {
+                if (Util.any(Q1, this::inconsistent) || Util.any(Q2, this::inconsistent)) {
+                    continue;
+                }
             }
             // apply DEC
             Config child = cfg.copy();
             child.alpha1 = alpha1;
             child.alpha2 = alpha2;
-            List<Term> hArgs = Util.newList(R.arity(h), i -> {
+            List<Term> hArgs = Util.list(R.arity(h), idx -> {
                 int yi = child.freshVar();
-                child.A.add(new AUT(yi, Q1.get(i), Q2.get(i)));
+                child.A.add(new AUT(yi, Q1.get(idx), Q2.get(idx)));
                 return new VariableTerm(yi);
             });
-            Term hTerm = R.isMappedVariable(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, hArgs);
-            child.substitutions.add(new Substitution(aut.var, hTerm));
+            Term hTerm = R.isMappedVariable(h) ? new MappedVariableTerm(h) : new FunctionTerm<>(h, hArgs);
+            child.substitutions.add(new Substitution(aut.variable, hTerm));
             children.add(child);
         }
         return children;
@@ -171,24 +176,24 @@ public class Algorithm {
      * for each <b>t</b> in <b>T</b>, add the arguments which <b>h|i</b> maps to, to <b>Q[i]</b>
      * <br><br>
      * <code>
-     * e.g. given .... T = {f(a,b), g(c)}
+     * e.g. given ... T = {f(a,b), g(c)}
      * <br>
-     * .... with ..... h -> f {(1,1),(2,1)} ,  h -> g {(2,1)}
+     * .... with .... h -> f {(1,1),(2,1)} ,  h -> g {(2,1)}
      * <br>
-     * .... then ..... Q = [{a}, {b,c}]
+     * .... then .... Q = [{a}, {b,c}]
      * </code>
      */
     private Pair<List<ArraySet<GroundTerm>>, Float> mapArgs(String h, ArraySet<GroundTerm> T, float beta) {
         int hArity = R.arity(h);
-        List<Set<GroundTerm>> Q = Util.newList(hArity, i -> new HashSet<>());
+        List<Set<GroundTerm>> Q = Util.list(hArity, idx -> new HashSet<>());
         for (GroundTerm t : T) {
-            ProximityRelation h_t_Relation = R.proximityRelation(h, t.head);
-            beta = tNorm.apply(beta, h_t_Relation.proximity);
+            ProximityRelation htRelation = R.proximityRelation(h, t.head);
+            beta = tNorm.apply(beta, htRelation.proximity);
             if (beta < lambda) {
                 return new Pair<>(null, beta);
             }
             for (int hIdx = 0; hIdx < hArity; hIdx++) {
-                for (int termIdx : h_t_Relation.argRelation.get(hIdx)) {
+                for (int termIdx : htRelation.argRelation.get(hIdx)) {
                     Q.get(hIdx).add(t.arguments.get(termIdx));
                 }
             }
@@ -203,7 +208,7 @@ public class Algorithm {
             Pair<ArraySet<GroundTerm>, Integer> E1 = specialConjunction(aut.T1, freshVar);
             Pair<ArraySet<GroundTerm>, Integer> E2 = specialConjunction(aut.T2, E1.right);
             assert !E1.left.isEmpty() && !E2.left.isEmpty();
-            return new AUT(aut.var, E1.left, E2.left);
+            return new AUT(aut.variable, E1.left, E2.left);
         });
     }
     
@@ -227,8 +232,8 @@ public class Algorithm {
                 if (mergedLHS.left.isEmpty() || mergedRHS.left.isEmpty()) {
                     notCollected.add(candidate);
                 } else {
-                    collectedVars.add(candidate.var);
-                    collector = new AUT(collector.var, mergedLHS.left, mergedRHS.left);
+                    collectedVars.add(candidate.variable);
+                    collector = new AUT(collector.variable, mergedLHS.left, mergedRHS.left);
                     freshVar = mergedRHS.right;
                 }
             }
@@ -237,26 +242,24 @@ public class Algorithm {
             if (collectedVars.isEmpty()) {
                 result.add(collector);
             } else {
-                collectedVars.add(collector.var);
+                collectedVars.add(collector.variable);
                 final VariableTerm y = new VariableTerm(freshVar);
                 collectedVars.forEach(var -> expandedCfg.substitutions.add(new Substitution(var, y)));
                 result.add(new AUT(y.var, collector.T1, collector.T2));
             }
         }
-        assert Util.allUnique(result);
+        assert Util.isSet(result);
         return result;
     }
     
     private Set<Solution> generateSolutions(Collection<Config> configs) {
         Set<Solution> solutions = configs.stream().map(config -> {
             Term r = Substitution.applyAll(config.substitutions, VariableTerm.VAR_0);
-            Pair<Witness, Witness> witnesses =
-                    generateWitnesses ? generateWitnesses(config, r) : new Pair<>(null, null);
+            Pair<Witness, Witness> witnesses = includeWitnesses ? generateWitnesses(config, r) : new Pair<>(null, null);
             return new Solution(r, witnesses.left, witnesses.right, config.alpha1, config.alpha2);
         }).collect(Collectors.toSet());
         
-        log.info(ANSI.green("SOLUTIONS:"));
-        solutions.forEach(solution -> log.info("{}", solution));
+        log.info(Util.log(ANSI.yellow("SOLUTIONS:"), solutions));
         log.info("🧇");
         return solutions;
     }
@@ -274,7 +277,7 @@ public class Algorithm {
     
     // *** special conjunction ***
     
-    private boolean notConsistent(ArraySet<GroundTerm> terms) {
+    private boolean inconsistent(ArraySet<GroundTerm> terms) {
         return runConj(terms, VariableTerm.VAR_0, true) != IS_CONSISTENT;
     }
     
@@ -308,14 +311,14 @@ public class Algorithm {
                     assert Q != null;
                     State childState = state.copy();
                     
-                    List<Term> h_args = Util.newList(R.arity(h), i -> {
+                    List<Term> h_args = Util.list(R.arity(h), idx -> {
                         int yi = childState.freshVar();
-                        childState.expressions.add(new Expression(yi, Q.get(i)));
+                        childState.expressions.add(new Expression(yi, Q.get(idx)));
                         return new VariableTerm(yi);
                     });
                     
                     freshVar = Math.max(freshVar, childState.peekVar());
-                    Term h_term = R.isMappedVariable(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, h_args);
+                    Term h_term = R.isMappedVariable(h) ? new MappedVariableTerm(h) : new FunctionTerm<>(h, h_args);
                     childState.s.add(new Substitution(expression.var, h_term));
                     branches.add(childState);
                 }

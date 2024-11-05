@@ -1,18 +1,22 @@
-import at.jku.risc.uarau.data.Solution;
+import at.jku.risc.uarau.Solution;
+import at.jku.risc.uarau.util.ANSI;
 
 public abstract class BaseTest {
-    protected static void check(Solution solution, String sigma1, String sigma2, String r, float alpha1, float alpha2) {
+    protected static void check(Solution solution, String lhs, String rhs, String r, float alpha1, float alpha2) {
+        boolean wasEnabled = ANSI.enabled;
+        ANSI.enabled = false;
         if (r != null) {
             assert solution.r.toString().equals(r);
         }
+        ANSI.enabled = wasEnabled;
         
-        if (sigma1 != null) {
-            assert solution.sigma1 != null;
-            assert solution.sigma1.toString().equals(sigma1);
+        if (lhs != null) {
+            assert solution.lhs != null;
+            assert solution.lhs.toString().equals(lhs);
         }
-        if (sigma2 != null) {
-            assert solution.sigma2 != null;
-            assert solution.sigma2.toString().equals(sigma2);
+        if (rhs != null) {
+            assert solution.rhs != null;
+            assert solution.rhs.toString().equals(rhs);
         }
         
         if (alpha1 > 0 || close(alpha1, 0)) { // alpha1 >= 0

@@ -1,10 +1,9 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
-import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.util.Except;
 import at.jku.risc.uarau.util.Pair;
-import at.jku.risc.uarau.util.Util;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,7 +14,7 @@ public class Problem {
     private Collection<ProximityRelation> proximityRelations = new HashSet<>();
     private float lambda = 1.0f;
     private TNorm tNorm = Math::min;
-    private boolean merge = true, witness = true;
+    private boolean merge = true, witnesses = true;
     
     /**
      * Run the {@linkplain Algorithm} on the defined problem.
@@ -25,7 +24,7 @@ public class Problem {
      * @return the set of possible solutions to the defined problem
      */
     public Set<Solution> solve() {
-        return Algorithm.solve(this.equation, this.proximityRelations, this.lambda, this.tNorm, this.merge, this.witness);
+        return Algorithm.solve(this.equation, this.proximityRelations, this.lambda, this.tNorm, this.merge, this.witnesses);
     }
     
     // *** constructors ***
@@ -36,7 +35,7 @@ public class Problem {
      * Define the problem further via chaining with
      * <br>
      * {@linkplain Problem#proximityRelations(Collection)} || {@linkplain Problem#lambda(float)} || {@linkplain Problem#tNorm(TNorm)} ||
-     * {@linkplain Problem#merge(boolean)} || {@linkplain Problem#witness(boolean)}
+     * {@linkplain Problem#merge(boolean)} || {@linkplain Problem#witnesses(boolean)}
      * <br><br>
      * Finally, call {@linkplain Problem#solve()} to run the {@linkplain Algorithm} against the Problem.
      */
@@ -61,7 +60,7 @@ public class Problem {
      * Define the problem further via chaining with
      * <br>
      * {@linkplain Problem#proximityRelations(Collection)} || {@linkplain Problem#lambda(float)} || {@linkplain Problem#tNorm(TNorm)} ||
-     * {@linkplain Problem#merge(boolean)} || {@linkplain Problem#witness(boolean)}
+     * {@linkplain Problem#merge(boolean)} || {@linkplain Problem#witnesses(boolean)}
      * <br><br>
      * Finally, call {@linkplain Problem#solve()} to run the {@linkplain Algorithm} against the Problem.
      */
@@ -121,7 +120,7 @@ public class Problem {
      */
     public Problem lambda(float lambda) {
         if (lambda < 0.0f || lambda > 1.0f) {
-            throw Util.except("Lambda must be in range [0,1]");
+           throw Except.argument("Lambda must be in range [0,1]");
         }
         this.lambda = lambda;
         return this;
@@ -145,7 +144,7 @@ public class Problem {
      * <br>
      * Otherwise, we can skip some computation steps.
      * <br>
-     * If this and {@linkplain Problem#witness} are both <b>false</b>,
+     * If this and {@linkplain Problem#witnesses} are both <b>false</b>,
      * the <b>expand</b> step is skipped, which is usually the most expensive.
      *
      * @param merge default: <b>true</b>
@@ -163,10 +162,10 @@ public class Problem {
      * If this and {@linkplain Problem#merge} are both <b>false</b>,
      * the <b>expand</b> step is skipped, which is usually the most expensive.
      *
-     * @param witness default: <b>true</b>
+     * @param witnesses default: <b>true</b>
      */
-    public Problem witness(boolean witness) {
-        this.witness = witness;
+    public Problem witnesses(boolean witnesses) {
+        this.witnesses = witnesses;
         return this;
     }
 }

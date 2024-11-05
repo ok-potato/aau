@@ -24,7 +24,7 @@ public class ProximityRelation {
     public ProximityRelation flipped() {
         int flippedSize = argRelation.stream().flatMap(Set::stream).max(Comparator.naturalOrder()).orElse(-1) + 1;
         
-        List<List<Integer>> flippedArgs = Util.newList(flippedSize, i -> new ArrayList<>());
+        List<List<Integer>> flippedArgs = Util.list(flippedSize, idx -> new ArrayList<>());
         for (int idx = 0; idx < argRelation.size(); idx++) {
             for (int flippedIdx : argRelation.get(idx)) {
                 flippedArgs.get(flippedIdx).add(idx);
@@ -35,13 +35,16 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return "(" + ANSI.red(f + " ► " + g) + " " + argRelationtoString() + " " + proximity + ")";
+        return String.format("(%s%s %s)", ANSI.blue(f + " " + g), argRelationtoString(), proximity);
     }
     
     private String argRelationtoString() {
-        StringBuilder sb = new StringBuilder();
+        if (argRelation.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(" ");
         for (Set<Integer> args : argRelation) {
-            sb.append(Util.str(args, ",", "[]", "[", "]"));
+            sb.append(Util.str(args, " ", "[]", "[", "]"));
         }
         return sb.toString();
     }

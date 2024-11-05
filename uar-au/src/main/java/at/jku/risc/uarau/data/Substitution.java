@@ -4,6 +4,7 @@ import at.jku.risc.uarau.data.term.Term;
 import at.jku.risc.uarau.data.term.FunctionTerm;
 import at.jku.risc.uarau.data.term.GroundTerm;
 import at.jku.risc.uarau.data.term.VariableTerm;
+import at.jku.risc.uarau.util.Except;
 import at.jku.risc.uarau.util.Util;
 
 import java.util.ArrayDeque;
@@ -33,21 +34,10 @@ public class Substitution {
     public static GroundTerm applyAllForceGroundTerm(Queue<Substitution> substitutions, int baseVariable) {
         Term term = applyAll(substitutions, baseVariable);
         try {
-            return forceGroundTerm(term);
+            return GroundTerm.force(term);
         } catch (UnsupportedOperationException e) {
             throw new IllegalArgumentException("Couldn't force cast: " + term, e);
         }
-    }
-    
-    private static GroundTerm forceGroundTerm(Term term) {
-        if (term instanceof GroundTerm) {
-            return (GroundTerm) term;
-        }
-        if (!(term instanceof FunctionTerm)) {
-            throw new UnsupportedOperationException("Couldn't cast sub-term: " + term + " of type " + term.getClass());
-        }
-        FunctionTerm functionTerm = (FunctionTerm) term;
-        return new GroundTerm(functionTerm.head, Util.mapList(functionTerm.arguments, Substitution::forceGroundTerm));
     }
     
     public Term apply(Term term) {
@@ -58,10 +48,10 @@ public class Substitution {
             return term;
         }
         if (!(term instanceof FunctionTerm)) {
-            throw new IllegalStateException("Unknown Term type used in substitution: " + term.getClass());
+            throw Except.state("Unknown Term type used in substitution: %s", term.getClass());
         }
-        FunctionTerm functionTerm = (FunctionTerm) term;
-        return new FunctionTerm(functionTerm.head, Util.mapList(functionTerm.arguments, this::apply));
+        FunctionTerm<?> functionTerm = (FunctionTerm<?>) term;
+        return new FunctionTerm<>(functionTerm.head, Util.mapList(functionTerm.arguments, this::apply));
     }
     
     @Override

@@ -1,6 +1,6 @@
 import at.jku.risc.uarau.Algorithm;
 import at.jku.risc.uarau.Problem;
-import at.jku.risc.uarau.data.Solution;
+import at.jku.risc.uarau.Solution;
 import at.jku.risc.uarau.util.Util;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
@@ -33,7 +33,7 @@ public class AlgorithmTest extends BaseTest {
         String problem = bigProblem();
         String relations = "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
         
-        new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(false).solve();
+        new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witnesses(false).solve();
     }
     
     // @Test
@@ -51,9 +51,9 @@ public class AlgorithmTest extends BaseTest {
         }
         
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 50; i++) {
-            new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(false).solve();
-            new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witness(true).solve();
+        for (int idx = 0; idx < 50; idx++) {
+            new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witnesses(false).solve();
+            new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witnesses(true).solve();
         }
         System.out.println(System.currentTimeMillis() - startTime);
     }

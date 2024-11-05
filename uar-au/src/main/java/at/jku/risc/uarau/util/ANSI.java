@@ -1,27 +1,42 @@
 package at.jku.risc.uarau.util;
 
+import java.util.Arrays;
+
+/**
+ * Utility class for colorful logging.
+ * <br>
+ * Can be toggled globally with {@linkplain ANSI#enabled} (off by default).
+ */
 public class ANSI {
+    public static boolean enabled = true;
+    
     public static final String RESET = "\u001B[0m";
     public static final String RED = "\u001B[31m";
     public static final String GREEN = "\u001B[32m";
     public static final String YELLOW = "\u001B[33m";
     public static final String BLUE = "\u001B[34m";
     
-    public static boolean ansi = false;
-    
-    public static String red(Object o) {
-        return ansi ? RED + o + RESET : o.toString();
+    public static String red(Object... o) {
+        return color(RED, o);
     }
     
-    public static String green(Object o) {
-        return ansi ? GREEN + o + RESET : o.toString();
+    public static String green(Object... o) {
+        return color(GREEN, o);
     }
     
-    public static String yellow(Object o) {
-        return ansi ? YELLOW + o + RESET : o.toString();
+    public static String yellow(Object... o) {
+        return color(YELLOW, o);
     }
     
-    public static String blue(Object o) {
-        return ansi ? BLUE + o + RESET : o.toString();
+    public static String blue(Object... o) {
+        return color(BLUE, o);
+    }
+    
+    public static String regular(Object... o) {
+        return Util.str(Arrays.asList(o));
+    }
+    
+    private static String color(String color, Object... o) {
+        return enabled ? color + Util.str(Arrays.asList(o)) + RESET : Util.str(Arrays.asList(o));
     }
 }
