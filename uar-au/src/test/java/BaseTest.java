@@ -1,4 +1,4 @@
-import at.jku.risc.uarau.Solution;
+import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.ANSI;
 
 public abstract class BaseTest {
@@ -6,7 +6,7 @@ public abstract class BaseTest {
         boolean wasEnabled = ANSI.enabled;
         ANSI.enabled = false;
         if (r != null) {
-            assert solution.r.toString().equals(r);
+            assert solution.generalization.toString().equals(r);
         }
         ANSI.enabled = wasEnabled;
         

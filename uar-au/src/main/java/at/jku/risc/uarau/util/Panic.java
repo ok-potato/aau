@@ -1,10 +1,10 @@
 package at.jku.risc.uarau.util;
 
 /**
- * Make throwing common exceptions with formatted messages slightly less verbose.
+ * Throw common exceptions with formatted messages
  */
-public class Except {
-    public static IllegalArgumentException argument(String message, Object... args) {
+public class Panic {
+    public static IllegalArgumentException arg(String message, Object... args) {
         return new IllegalArgumentException(String.format(message, args));
     }
     

@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Utility class for colorful logging.
  * <br>
- * Can be toggled globally with {@linkplain ANSI#enabled} (off by default).
+ * Can be toggled globally with {@linkplain ANSI#enabled ANSI.enabled}
  */
 public class ANSI {
     public static boolean enabled = true;

@@ -1,9 +1,10 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.data.ProximityRelation;
+import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.data.term.GroundTerm;
-import at.jku.risc.uarau.util.Except;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.Panic;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,17 +16,6 @@ public class Problem {
     private float lambda = 1.0f;
     private TNorm tNorm = Math::min;
     private boolean merge = true, witnesses = true;
-    
-    /**
-     * Run the {@linkplain Algorithm} on the defined problem.
-     * <br>
-     * The Problem is not consumed, so it can be modified and reused for subsequent calculations if desired.
-     *
-     * @return the set of possible solutions to the defined problem
-     */
-    public Set<Solution> solve() {
-        return Algorithm.solve(this.equation, this.proximityRelations, this.lambda, this.tNorm, this.merge, this.witnesses);
-    }
     
     // *** constructors ***
     
@@ -54,7 +44,7 @@ public class Problem {
      * function/variable names can't contain whitespace or '( ) ,'
      * <br><br>
      * <code>
-     *     Example: "f(x1, a()) ?= g(h(x2))"
+     * Example: "f(x1, a()) ?= g(h(x2))"
      * </code>
      * <br><br>
      * Define the problem further via chaining with
@@ -68,7 +58,22 @@ public class Problem {
         this(Parser.parseEquation(equation));
     }
     
-    // *** chaining methods ***
+    public Pair<GroundTerm, GroundTerm> getEquation() {
+        return equation;
+    }
+    
+    // *** run ***
+    
+    /**
+     * Run the {@linkplain Algorithm} with the defined problem and its current settings.
+     *
+     * @return the set of possible {@linkplain Solution}s to the defined problem
+     */
+    public Set<Solution> solve() {
+        return Algorithm.solve(this);
+    }
+    
+    // *** additional parameters ***
     
     /**
      * Define the set of (non-zero) <b>proximity relations</b>
@@ -80,7 +85,7 @@ public class Problem {
      * <br><br>
      * A proximity relation that isn't in the set is assumed to be of <b>proximity = 0</b>, and thus below all possible lambda-cuts,
      * which means it can't affect the calculation.
-     *<br>
+     * <br>
      * (If you have a <b>fixed lambda</b>, you can also omit relations with <b>proximity < lambda</b> for similar reasons)
      */
     public Problem proximityRelations(Collection<ProximityRelation> relations) {
@@ -111,6 +116,10 @@ public class Problem {
         return proximityRelations(Parser.parseProximityRelations(relations));
     }
     
+    public Collection<ProximityRelation> getProximityRelations() {
+        return proximityRelations;
+    }
+    
     /**
      * Define the lambda-cut within the range [0,1]
      * <br>
@@ -120,10 +129,14 @@ public class Problem {
      */
     public Problem lambda(float lambda) {
         if (lambda < 0.0f || lambda > 1.0f) {
-           throw Except.argument("Lambda must be in range [0,1]");
+            throw Panic.arg("Lambda must be in range [0,1]");
         }
         this.lambda = lambda;
         return this;
+    }
+    
+    public float getLambda() {
+        return lambda;
     }
     
     /**
@@ -138,6 +151,12 @@ public class Problem {
         this.tNorm = tNorm;
         return this;
     }
+    
+    public TNorm getTNorm() {
+        return tNorm;
+    }
+    
+    // *** settings ***
     
     /**
      * Define if the algorithm should try merging compatible solutions.
@@ -154,6 +173,10 @@ public class Problem {
         return this;
     }
     
+    public boolean doMerge() {
+        return merge;
+    }
+    
     /**
      * Define if the algorithm should produce witness substitutions.
      * <br>
@@ -167,5 +190,9 @@ public class Problem {
     public Problem witnesses(boolean witnesses) {
         this.witnesses = witnesses;
         return this;
+    }
+    
+    public boolean giveWitnesses() {
+        return witnesses;
     }
 }

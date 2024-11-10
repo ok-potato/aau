@@ -13,7 +13,7 @@ import java.util.Queue;
 import java.util.Set;
 
 /**
- * This data structure represents the Anti-Unification Triples described in the paper.
+ * {@linkplain AUT}s represent the Anti-Unification Triples described in the paper.
  * <br>
  * {@linkplain AUT#T1} and {@linkplain AUT#T2} are the sets of the {@linkplain AUT#variable}'s possible substitutions
  * on the left- and right-hand side, respectively.

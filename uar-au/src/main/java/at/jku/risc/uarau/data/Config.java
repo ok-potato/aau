@@ -8,10 +8,15 @@ import at.jku.risc.uarau.util.Util;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.function.Function;
 
 /**
- * Configs are mutable
+ * {@linkplain Config}s are mutable representations of program states, where:
+ * <ul>
+ *     <li> {@linkplain Config#substitutions} is the substitutions needed to arrive at that state
+ *     <li> {@linkplain Config#A} is the remaining set of sub-terms which might be generalizable
+ *     <li> {@linkplain Config#S} is the set of fully generalized sub-terms
+ * </ul>
+ * When branching occurs, a {@linkplain Config#copy()} is made for each possible rule application.
  */
 public class Config {
     public final Queue<AUT> A, S;
@@ -35,6 +40,10 @@ public class Config {
         this(original, original.S);
     }
     
+    public Config copy() {
+        return new Config(this);
+    }
+    
     private Config(Config original, Queue<AUT> S) {
         this.A = new ArrayDeque<>(original.A);
         this.S = new ArrayDeque<>(S);
@@ -44,12 +53,8 @@ public class Config {
         this.freshVar = original.freshVar;
     }
     
-    public Config copy() {
-        return new Config(this);
-    }
-    
-    public Config mapSolutions(Function<Config, Queue<AUT>> mappingFunction) {
-        return new Config(this, mappingFunction.apply(this));
+    public Config copyWithNewS(Queue<AUT> S) {
+        return new Config(this, S);
     }
     
     public int freshVar() {

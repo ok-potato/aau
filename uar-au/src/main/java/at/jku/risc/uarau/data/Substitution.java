@@ -4,7 +4,7 @@ import at.jku.risc.uarau.data.term.Term;
 import at.jku.risc.uarau.data.term.FunctionTerm;
 import at.jku.risc.uarau.data.term.GroundTerm;
 import at.jku.risc.uarau.data.term.VariableTerm;
-import at.jku.risc.uarau.util.Except;
+import at.jku.risc.uarau.util.Panic;
 import at.jku.risc.uarau.util.Util;
 
 import java.util.ArrayDeque;
@@ -48,10 +48,10 @@ public class Substitution {
             return term;
         }
         if (!(term instanceof FunctionTerm)) {
-            throw Except.state("Unknown Term type used in substitution: %s", term.getClass());
+            throw Panic.state("Unknown Term type used in substitution: %s", term.getClass());
         }
-        FunctionTerm<?> functionTerm = (FunctionTerm<?>) term;
-        return new FunctionTerm<>(functionTerm.head, Util.mapList(functionTerm.arguments, this::apply));
+        FunctionTerm functionTerm = (FunctionTerm) term;
+        return new FunctionTerm(functionTerm.head, Util.mapList(functionTerm.arguments, this::apply));
     }
     
     @Override

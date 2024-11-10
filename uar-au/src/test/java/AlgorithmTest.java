@@ -1,6 +1,6 @@
 import at.jku.risc.uarau.Algorithm;
 import at.jku.risc.uarau.Problem;
-import at.jku.risc.uarau.Solution;
+import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.Util;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
@@ -31,7 +31,7 @@ public class AlgorithmTest extends BaseTest {
     @Test
     public void big() {
         String problem = bigProblem();
-        String relations = "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
+        String relations = bigRelations();
         
         new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witnesses(false).solve();
     }
@@ -39,7 +39,7 @@ public class AlgorithmTest extends BaseTest {
     // @Test
     public void benchmark() {
         String problem = bigProblem();
-        String relations = "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
+        String relations = bigRelations();
         
         try { // disable logging
             Log4jLogger algorithmLoggerImpl = (Log4jLogger) LoggerFactory.getLogger(Algorithm.class);
@@ -58,7 +58,7 @@ public class AlgorithmTest extends BaseTest {
         System.out.println(System.currentTimeMillis() - startTime);
     }
     
-    private String bigProblem() { // |f| = 2  |g| = 3  |h| = 3
+    public static String bigProblem() { // |f| = 2  |g| = 3  |h| = 3
         String l_h1 = "h( a(), b(), f(a(),b()) )";
         String l_g1 = String.format("g( c(), d(), %s )", l_h1);
         String l_h2 = String.format("h( f(c(),d()), %s, c() )", l_g1);
@@ -70,6 +70,10 @@ public class AlgorithmTest extends BaseTest {
         String rhs = String.format("g( g(a(),b(),d()), %s, d() )", r_f1);
         
         return String.format("%s ?= %s", lhs, rhs);
+    }
+    
+    public static String bigRelations() {
+        return "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
     }
     
     // *** examples from the paper ***

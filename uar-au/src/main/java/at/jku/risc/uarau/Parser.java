@@ -4,8 +4,8 @@ import at.jku.risc.uarau.data.ProximityRelation;
 import at.jku.risc.uarau.data.term.GroundTerm;
 import at.jku.risc.uarau.data.term.MappedVariableTerm;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Except;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.Panic;
 import at.jku.risc.uarau.util.Util;
 import org.junit.platform.commons.util.StringUtils;
 
@@ -18,7 +18,7 @@ public class Parser {
     public static Pair<GroundTerm, GroundTerm> parseEquation(String equationStr) {
         String[] tokens = equationStr.split("\\?=");
         if (tokens.length != 2) {
-           throw Except.argument("Need 2 sides per equation, but got %s", tokens.length);
+            throw Panic.arg("Need 2 sides per equation, but got %s", tokens.length);
         }
         return new Pair<>(parseTerm(tokens[0]), parseTerm(tokens[1]));
     }
@@ -39,7 +39,7 @@ public class Parser {
             if (token.equals(")")) {
                 GroundTermBuilder subTerm = subTerms.pop();
                 if (subTerms.isEmpty()) {
-                   throw Except.argument("Too many closing parentheses in term: %s", termStr);
+                    throw Panic.arg("Too many closing parentheses in term: %s", termStr);
                 }
                 subTerms.peek().arguments.add(subTerm.build());
                 continue;
@@ -47,7 +47,7 @@ public class Parser {
             if (token.endsWith("(")) {
                 String head = token.substring(0, token.length() - 1);
                 if (StringUtils.isBlank(head)) {
-                   throw Except.argument("Missing function name in term: %s", termStr);
+                    throw Panic.arg("Missing function name in term: %s", termStr);
                 }
                 subTerms.push(new GroundTermBuilder(head));
                 continue;
@@ -55,12 +55,12 @@ public class Parser {
             subTerms.peek().arguments.add(new MappedVariableTerm(token));
         }
         if (subTerms.size() > 1) {
-           throw Except.argument("Unclosed parentheses in term: %s", termStr);
+            throw Panic.arg("Unclosed parentheses in term: %s", termStr);
         }
         
         GroundTermBuilder dummyTerm = subTerms.pop();
         if (dummyTerm.arguments.size() > 1) {
-           throw Except.argument("More than one top level term on one side: %s", termStr);
+            throw Panic.arg("More than one top level term on one side: %s", termStr);
         }
         return dummyTerm.arguments.get(0);
     }
@@ -86,7 +86,7 @@ public class Parser {
             proximity = relationStr.substring(relationStr.lastIndexOf('['), relationStr.indexOf(']') + 1);
             argRelation = relationStr.substring(relationStr.lastIndexOf('{'), relationStr.indexOf('}') + 1);
         } catch (StringIndexOutOfBoundsException e) {
-            throw Except.argument("Couldn't get proximity or argument relation from: %s", relationStr);
+            throw Panic.arg("Couldn't get proximity or argument relation from: %s", relationStr);
         }
         
         // find two function symbols
@@ -96,11 +96,11 @@ public class Parser {
                 .filter(s -> !StringUtils.isBlank(s))
                 .collect(Collectors.toList());
         if (rest.size() != 2) {
-           throw Except.argument("Couldn't get two function symbols from: %s", relationStr);
+            throw Panic.arg("Couldn't get two function symbols from: %s", relationStr);
         }
         float parsedProximity = parseProximity(proximity);
         if (parsedProximity < 0.0f || parsedProximity > 1.0f) {
-           throw Except.argument("Proximity outside of range [0,1]: %s", parsedProximity);
+            throw Panic.arg("Proximity outside of range [0,1]: %s", parsedProximity);
         }
         return new ProximityRelation(rest.get(0), rest.get(1), parsedProximity, parseArgumentRelation(argRelation));
     }
@@ -119,11 +119,11 @@ public class Parser {
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
         } catch (NumberFormatException e) {
-            throw Except.argument("Some argument positions couldn't be parsed as int: %s", argRelationStr);
+            throw Panic.arg("Some argument positions couldn't be parsed as int: %s", argRelationStr);
         }
         
         if (pairs.size() % 2 != 0) {
-           throw Except.argument("Odd number of argument positions in: %s", argRelationStr);
+            throw Panic.arg("Odd number of argument positions in: %s", argRelationStr);
         }
         
         // convert to index-based representation, e.g. [1,2, 1,3, 3,1] -> [[2,3], [], [1]]

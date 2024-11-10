@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * See {@linkplain Solution}
+ */
 public class Witness {
     public final Map<Integer, Set<Term>> substitutions;
     
@@ -21,7 +24,7 @@ public class Witness {
     public String toString() {
         return Util.str(substitutions.entrySet()
                 .stream()
-                .flatMap(entry -> Stream.of(ANSI.blue(entry.getKey()), entry.getValue()))
-                .collect(Collectors.toList()), " ", "..");
+                .flatMap(entry -> Stream.of(ANSI.blue(entry.getKey()), Util.str(entry.getValue())))
+                .collect(Collectors.toList()));
     }
 }

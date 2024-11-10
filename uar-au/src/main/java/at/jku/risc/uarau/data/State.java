@@ -7,7 +7,12 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
- * mutable
+ * {@linkplain State}s are a mutable representations of the branching program states while running special conjugation, where:
+ * <ul>
+ *     <li> {@linkplain State#s} is the substitutions needed to arrive at the state
+ *     <li> {@linkplain State#expressions} TODO
+ * </ul>
+ * Their behaviour is analogous to {@linkplain Config}, in that a {@linkplain State#copy()} is created for each branch.
  */
 public class State {
     public final Queue<Expression> expressions;

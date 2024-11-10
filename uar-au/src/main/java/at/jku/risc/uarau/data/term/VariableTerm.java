@@ -1,19 +1,17 @@
 package at.jku.risc.uarau.data.term;
 
+import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
 
 import java.util.Set;
 
 /**
- * Variable terms are generated during the computation process.
+ * See {@linkplain MappedVariableTerm} for representing variables in the problem statement.
  * <br><br>
- * They can't be used in the problem input, since the problem terms are assumed to be ground.
- * <br>
- * Instead, use {@linkplain MappedVariableTerm} to map your variables to their respective constant representation.
- * <br><br>
- * In the final output, they appear in the solutions terms, together with their corresponding
- * {@linkplain at.jku.risc.uarau.data.Witness} substitutions.
+ * Variable terms are terms which can be substituted.
+ * In a {@linkplain Solution}, the possible substitutions for each variable
+ * are given by the corresponding {@linkplain at.jku.risc.uarau.data.Witness Witness}.
  */
 public class VariableTerm implements Term {
     public static final int VAR_0 = 0;
@@ -47,6 +45,5 @@ public class VariableTerm implements Term {
     @Override
     public String toString() {
         return ANSI.blue(var);
-        // return String.valueOf(var);
     }
 }

@@ -3,9 +3,9 @@ package at.jku.risc.uarau.data;
 import at.jku.risc.uarau.data.term.GroundTerm;
 import at.jku.risc.uarau.data.term.MappedVariableTerm;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Util;
-import at.jku.risc.uarau.util.Except;
 import at.jku.risc.uarau.util.Pair;
+import at.jku.risc.uarau.util.Panic;
+import at.jku.risc.uarau.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,18 +16,21 @@ import java.util.stream.Stream;
 /**
  * A precomputed view of a given generalization problem.
  * <br>
- * It is used by the {@linkplain at.jku.risc.uarau.Algorithm} to look up information about the problem:
+ * It is used by the {@linkplain at.jku.risc.uarau.Algorithm Algorithm} to look up information about the problem:
  * <br>
  * <ul>
  *     <li> proximity relations between functions
  *     <li> function arities
  *     <li> 'mapped variable' status of functions
- *     <li> the relations' restriction type
+ *     <li> the relations' overall restriction type
  * </ul>
  */
-public class ProximityMap {
+public class ProblemMap {
     public enum RestrictionType {
-        UNRESTRICTED(false, false), CORRESPONDENCE(true, false), MAPPING(false, true), CORRESPONDENCE_MAPPING(true, true);
+        UNRESTRICTED(false, false),
+        CORRESPONDENCE(true, false),
+        MAPPING(false, true),
+        CORRESPONDENCE_MAPPING(true, true);
         
         public final boolean correspondence, mapping;
         
@@ -37,7 +40,7 @@ public class ProximityMap {
         }
     }
     
-    private static final Logger log = LoggerFactory.getLogger(ProximityMap.class);
+    private static final Logger log = LoggerFactory.getLogger(ProblemMap.class);
     
     private final Map<String, Map<String, ProximityRelation>> proximityRelations;
     private final Map<String, Integer> arities;
@@ -47,7 +50,7 @@ public class ProximityMap {
     /**
      * Constructs a precomputed view of the problem described by the problem terms, relations and λ-cut.
      */
-    public ProximityMap(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> statedRelations, float lambda) {
+    public ProblemMap(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> statedRelations, float lambda) {
         // include flipped relations
         List<ProximityRelation> allProximityRelations = new ArrayList<>(statedRelations.size() * 2);
         for (ProximityRelation relation : statedRelations) {
@@ -71,13 +74,17 @@ public class ProximityMap {
     
     /**
      * True iff the function/constant 'f' was mapped from a variable in the original stated problem.
+     * <br>
+     * <b>Undefined</b> for ANON.
      */
-    public boolean isMappedVariable(String f) {
+    public boolean isMappedVar(String f) {
         return mappedVariables.contains(f);
     }
     
     /**
      * Map of all proximates of function/constant 'f' to their respective proximity relation.
+     * <br>
+     * <b>Undefined</b> for ANON.
      */
     private Map<String, ProximityRelation> proximityClass(String f) {
         assert proximityRelations.containsKey(f);
@@ -86,6 +93,8 @@ public class ProximityMap {
     
     /**
      * Proximity relation between functions/constants 'f' and 'g'.
+     * <br>
+     * <b>Undefined</b> if either side is ANON.
      */
     public ProximityRelation proximityRelation(String f, String g) {
         assert proximityRelations.containsKey(g);
@@ -94,6 +103,8 @@ public class ProximityMap {
     
     /**
      * Arity of the given function/constant 'f'.
+     * <br>
+     * <b>Undefined</b> for ANON.
      */
     public int arity(String f) {
         assert arities.containsKey(f);
@@ -106,6 +117,8 @@ public class ProximityMap {
     /**
      * Finds all terms which are proximates of all terms in the given set.
      * <br>
+     * <b>Undefined</b> for sets containing ANON.
+     * <br><br>
      * Uses some rudimentary memoization, since we can often expect calls on the same sets of terms.
      */
     public ArraySet<String> commonProximates(ArraySet<GroundTerm> terms) {
@@ -165,7 +178,7 @@ public class ProximityMap {
         return proximityRelations.values().stream().map(map -> Util.str(map.values())).collect(Collectors.toList());
     }
     
-    // *** used only during construction ***
+    // *** private methods used during construction ***
     
     /**
      * Enforces that there be no duplicate relations or identity relations.
@@ -174,11 +187,11 @@ public class ProximityMap {
         Set<String> existing = new HashSet<>();
         for (ProximityRelation relation : proximityRelations) {
             if (relation.f == relation.g) {
-                throw Except.argument("Identity proximity relation: %s", relation);
+                throw Panic.arg("Identity proximity relation: %s", relation);
             }
             String key = relation.f + "," + relation.g;
             if (existing.contains(key)) {
-                throw Except.argument("Multiple proximity relations between '%s' and '%s'", relation.f, relation.g);
+                throw Panic.arg("Multiple proximity relations between '%s' and '%s'", relation.f, relation.g);
             }
             existing.add(key);
         }
@@ -201,10 +214,12 @@ public class ProximityMap {
         Map<String, Integer> arities = new HashMap<>(termArities);
         for (ProximityRelation relation : proximityRelations) {
             if (mappedVariables.contains(relation.f)) {
-                throw Except.argument("Variable '%s' can't be close to '%s'", relation.f, relation.g);
+                throw Panic.arg("Variable '%s' can't be close to '%s'", relation.f, relation.g);
             }
             if (termArities.containsKey(relation.f) && termArities.get(relation.f) < relation.argRelation.size()) {
-                throw Except.argument("'%s' has a higher arity in its argument relation %s than in the equation", relation.f, relation);
+                throw Panic.arg("'%s' has a higher arity in its argument relation %s than in the equation",
+                        relation.f,
+                        relation);
             }
             arities.put(relation.f, Math.max(relation.argRelation.size(), arities.getOrDefault(relation.f, 0)));
         }
@@ -217,10 +232,10 @@ public class ProximityMap {
     private void inferAritiesFromTerm(GroundTerm term, Map<String, Integer> arities, Set<String> mappedVariables) {
         if (arities.containsKey(term.head)) {
             if (arities.get(term.head) != term.arguments.size()) {
-                throw Except.argument("'%s' appears in the posed problem with multiple arities", term.head);
+                throw Panic.arg("'%s' appears in the posed problem with multiple arities", term.head);
             }
             if (mappedVariables.contains(term.head) != term instanceof MappedVariableTerm) {
-                throw Except.argument("%s appears as both a variable and a function/const symbol", term.head);
+                throw Panic.arg("%s appears as both a variable and a function/const symbol", term.head);
             }
         } else { // first occurrence
             arities.put(term.head, term.arguments.size());
@@ -266,9 +281,9 @@ public class ProximityMap {
     /**
      * Creates map representation of the given proximity relations.
      * <br><br>
-     * From it, we can retrieve the {@linkplain ProximityMap#proximityClass} of 'f' with <b>proximityRelations.get(f)</b>,
+     * From it, we can retrieve the {@linkplain ProblemMap#proximityClass} of 'f' with <b>proximityRelations.get(f)</b>,
      * <br>
-     * and the {@linkplain ProximityMap#proximityRelation(String, String)} of 'f' and 'g' with <b>proximityRelations.get(f).get(g)</b>.
+     * and the {@linkplain ProblemMap#proximityRelation(String, String)} of 'f' and 'g' with <b>proximityRelations.get(f).get(g)</b>.
      */
     private Map<String, Map<String, ProximityRelation>> buildMap(Collection<ProximityRelation> relations) {
         Map<String, Map<String, ProximityRelation>> map = new HashMap<>();

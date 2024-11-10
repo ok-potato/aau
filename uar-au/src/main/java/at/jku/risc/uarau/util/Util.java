@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Utility collection operations.
+ * Useful collection operations
  */
 public class Util {
     
@@ -70,11 +70,7 @@ public class Util {
     // *** String ***
     
     public static String str(Collection<?> collection) {
-        return str(collection, " ", "..");
-    }
-    
-    public static String str(Collection<?> collection, String separator, String empty) {
-        return str(collection, separator, empty, "", "");
+        return str(collection, " ", "..", "", "");
     }
     
     public static String str(Collection<?> collection, String separator, String empty, String open, String close) {

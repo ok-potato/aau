@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+// TODO documentation
 public class ProximityRelation {
     public final float proximity;
     public final String f, g;

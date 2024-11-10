@@ -1,5 +1,7 @@
 package at.jku.risc.uarau.util;
 
+import at.jku.risc.uarau.data.ProblemMap;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -7,9 +9,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Compact representation of immutable, ordered (see {@linkplain ArraySet#equals(Object)}) sets, optimized for small- to medium-sized sets.
+ * Compact representation of immutable, ordered (see {@linkplain ArraySet#equals(Object) ArraySet.equals(Object)})
+ * sets, optimized for small- to medium-sized sets.
  * <br>
- * Doesn't allow null elements.
+ * Null elements are undefined.
  */
 public class ArraySet<E> implements Set<E> {
     private final E[] elements;
@@ -32,16 +35,13 @@ public class ArraySet<E> implements Set<E> {
         this(collection, false);
     }
     
-    public static <E> ArraySet<E> singleton(E element) {
-        return new ArraySet<>(element);
-    }
-    
-    /**
-     * access with {@linkplain ArraySet#singleton(Object)}
-     */
     @SuppressWarnings("unchecked")
     private ArraySet(E element) {
         elements = (E[]) new Object[]{element};
+    }
+    
+    public static <E> ArraySet<E> singleton(E element) {
+        return new ArraySet<>(element);
     }
     
     public <M> ArraySet<M> map(Function<E, M> mapFunction) {
@@ -50,9 +50,14 @@ public class ArraySet<E> implements Set<E> {
     }
     
     public ArraySet<E> filter(Predicate<E> filterPredicate) {
-        List<E> list = this.stream().filter(filterPredicate).collect(Collectors.toList());
+        List<E> list = new ArrayList<>(this.size());
+        for (E element : this) {
+            if (filterPredicate.test(element)) {
+                list.add(element);
+            }
+        }
         if (list.size() == this.size()) {
-            return new ArraySet<>(this);
+            return this;
         }
         return new ArraySet<>(list, true);
     }
@@ -76,7 +81,6 @@ public class ArraySet<E> implements Set<E> {
     
     @Override
     public boolean contains(Object o) {
-        assert o != null;
         for (E element : this) {
             if (o.equals(element)) {
                 return true;
@@ -127,7 +131,7 @@ public class ArraySet<E> implements Set<E> {
     
     /**
      * In regard to their usage, ArraySets don't in principle need to be ordered, and the decision is mostly based on
-     * performance in {@linkplain at.jku.risc.uarau.data.ProximityMap#commonProximates(ArraySet)}.
+     * performance in {@linkplain ProblemMap#commonProximates(ArraySet)}.
      * <br><br>
      * Memory 'hits' usually greatly outnumber the 'misses' that arise from permutations of the same set of function symbols.
      * This usually makes it worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).
