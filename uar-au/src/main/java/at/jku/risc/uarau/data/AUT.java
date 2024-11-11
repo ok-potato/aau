@@ -13,10 +13,9 @@ import java.util.Queue;
 import java.util.Set;
 
 /**
- * {@linkplain AUT}s represent the Anti-Unification Triples described in the paper.
- * <br>
- * {@linkplain AUT#T1} and {@linkplain AUT#T2} are the sets of the {@linkplain AUT#variable}'s possible substitutions
- * on the left- and right-hand side, respectively.
+ * {@linkplain AUT Anti-Unification Triples} are part of a {@linkplain Config Config's} description of a program state.
+ * <br><br>
+ * {@linkplain AUT#T1} and {@linkplain AUT#T2} are possible LHS and RHS substitutions for the {@linkplain AUT#variable}.
  * <br>
  * The triples that appear in a final {@linkplain Config#S} are used to generate that solution's {@linkplain Witness} substitutions.
  */
@@ -32,6 +31,7 @@ public class AUT {
         this.T2 = T2;
     }
     
+    // TODO documentation
     public static Pair<Set<Term>, Set<Term>> applyAll(Queue<AUT> auts, Term baseTerm) {
         Pair<Set<Term>, Set<Term>> applied = new Pair<>(new HashSet<>(), new HashSet<>());
         applied.left.add(baseTerm);

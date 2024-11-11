@@ -7,11 +7,13 @@ import at.jku.risc.uarau.util.ArraySet;
 import java.util.Set;
 
 /**
- * See {@linkplain MappedVariableTerm} for representing variables in the problem statement.
+ * {@linkplain VariableTerm VariableTerms} are terms to be substituted.
+ * <br>
+ * If enabled, {@linkplain Solution Solutions} supply
+ * {@linkplain at.jku.risc.uarau.data.Witness#substitutions Witness.substitutions}
+ * for each variable in their generalization.
  * <br><br>
- * Variable terms are terms which can be substituted.
- * In a {@linkplain Solution}, the possible substitutions for each variable
- * are given by the corresponding {@linkplain at.jku.risc.uarau.data.Witness Witness}.
+ * See {@linkplain MappedVariableTerm} for representing variables in the problem statement.
  */
 public class VariableTerm implements Term {
     public static final int VAR_0 = 0;

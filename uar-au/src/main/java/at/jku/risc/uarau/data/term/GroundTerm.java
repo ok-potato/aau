@@ -2,7 +2,6 @@ package at.jku.risc.uarau.data.term;
 
 import at.jku.risc.uarau.util.Panic;
 import at.jku.risc.uarau.util.Util;
-import org.junit.platform.commons.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,19 +14,16 @@ import java.util.Set;
  * <br>
  * If the problem domain also contains variable terms, those can be encoded as {@linkplain MappedVariableTerm MappedVariableTerms}.
  * <br>
- * Each function/variable symbols must be representable by a String (which cannot contain '(', ')' or ',').
+ * Function heads/variable symbols are represented as a string.
  * <br><br>
- * Alternatively, the whole equation can be supplied as a String
- * (see {@linkplain at.jku.risc.uarau.Problem#Problem(String) Problem(String)})
+ * Alternatively, the equation can be supplied as a string
+ * (see {@linkplain at.jku.risc.uarau.Problem#Problem(String) Problem(String)}).
  */
 public class GroundTerm implements Term {
     public final String head;
     public final List<GroundTerm> arguments;
     
     public GroundTerm(String head, List<GroundTerm> arguments) {
-        if (StringUtils.isBlank(head) || head.contains("(") || head.contains(")") || head.contains(",")) {
-            throw Panic.arg("Illegal head '%s'", head);
-        }
         this.head = head.intern();
         this.arguments = Collections.unmodifiableList(arguments);
     }

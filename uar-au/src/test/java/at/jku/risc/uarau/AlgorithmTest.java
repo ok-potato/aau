@@ -1,5 +1,5 @@
-import at.jku.risc.uarau.Algorithm;
-import at.jku.risc.uarau.Problem;
+package at.jku.risc.uarau;
+
 import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.Util;
 import org.apache.logging.log4j.Level;
@@ -14,6 +14,24 @@ import java.util.Set;
 import static at.jku.risc.uarau.Algorithm.solve;
 
 public class AlgorithmTest extends BaseTest {
+    public static String bigProblem() { // |f| = 2  |g| = 3  |h| = 3
+        String l_h1 = "h( a(), b(), f(a(),b()) )";
+        String l_g1 = String.format("g( c(), d(), %s )", l_h1);
+        String l_h2 = String.format("h( f(c(),d()), %s, c() )", l_g1);
+        String lhs = String.format("f( %s, b() )", l_h2);
+        
+        String r_g1 = "g( a(), c(), f(a(),b()) )";
+        String r_h1 = String.format("h( g(c(),e(),a()), %s, d() )", r_g1);
+        String r_f1 = String.format("f( %s, c() )", r_h1);
+        String rhs = String.format("g( g(a(),b(),d()), %s, d() )", r_f1);
+        
+        return String.format("%s ?= %s", lhs, rhs);
+    }
+    
+    public static String bigRelations() {
+        return "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
+    }
+    
     @Test
     public void small() {
         String problem = "f(a, b) ?= g(a, c, d)";
@@ -56,24 +74,6 @@ public class AlgorithmTest extends BaseTest {
             new Problem(problem).proximityRelations(relations).lambda(0.5f).merge(true).witnesses(true).solve();
         }
         System.out.println(System.currentTimeMillis() - startTime);
-    }
-    
-    public static String bigProblem() { // |f| = 2  |g| = 3  |h| = 3
-        String l_h1 = "h( a(), b(), f(a(),b()) )";
-        String l_g1 = String.format("g( c(), d(), %s )", l_h1);
-        String l_h2 = String.format("h( f(c(),d()), %s, c() )", l_g1);
-        String lhs = String.format("f( %s, b() )", l_h2);
-        
-        String r_g1 = "g( a(), c(), f(a(),b()) )";
-        String r_h1 = String.format("h( g(c(),e(),a()), %s, d() )", r_g1);
-        String r_f1 = String.format("f( %s, c() )", r_h1);
-        String rhs = String.format("g( g(a(),b(),d()), %s, d() )", r_f1);
-        
-        return String.format("%s ?= %s", lhs, rhs);
-    }
-    
-    public static String bigRelations() {
-        return "h f [0.7] {1 1, 2 1, 3 2)} ; c d [0.6] {} ; b c [0.9] {} ; f g [0.9] {1 2, 2 3, 2 1)}";
     }
     
     // *** examples from the paper ***

@@ -14,17 +14,17 @@ import java.util.stream.Collectors;
  * <br>
  * <a href="https://doi.org/10.1007/978-3-031-10769-6_34">A Framework for Approximate Generalization in Quantitative Theories</a>
  * <br><br>
- * You can run the Algorithm by defining a {@linkplain Problem}, and calling {@linkplain Problem#solve()} (or {@linkplain Algorithm#solve(Problem)})
+ * You can run the Algorithm by defining a {@linkplain Problem}, and calling {@linkplain Problem#solve()}
  * <br>
- * or directly calling {@linkplain Algorithm#solve(String, String, float)} with some string input
+ * (or with the convenience method {@linkplain Algorithm#solve(String, String, float)}).
  */
 public class Algorithm {
     // *** api ***
     
     /**
-     * Convenience method for simple string-based inputs
+     * Convenience method for simple string-based inputs.
      * <br>
-     * For more complex queries, use {@linkplain Problem#solve()}
+     * For more complex queries, use {@linkplain Problem#solve()}.
      */
     public static Set<Solution> solve(String equation, String proximityRelations, float lambda) {
         Problem problem = new Problem(Parser.parseEquation(equation));
@@ -32,7 +32,7 @@ public class Algorithm {
     }
     
     /**
-     * Gets called by {@linkplain Problem#solve()}, but you can also call it directly, if that's how you like doing things
+     * Equivalent to calling {@linkplain Problem#solve()} on the {@linkplain Problem} itself.
      */
     public static Set<Solution> solve(Problem problem) {
         return new Algorithm(problem).run();
@@ -63,6 +63,7 @@ public class Algorithm {
         giveWitnesses = problem.giveWitnesses();
     }
     
+    // TODO documentation?
     private Set<Solution> run() {
         log.info(ANSI.yellow("SOLVING: ") + lhs + ANSI.yellow(" == ") + rhs + ANSI.yellow(" λ=", lambda));
         
@@ -198,7 +199,7 @@ public class Algorithm {
                 return new Pair<>(null, beta);
             }
             for (int hIdx = 0; hIdx < hArity; hIdx++) {
-                for (int termIdx : htRelation.argRelation.get(hIdx)) {
+                for (int termIdx : htRelation.argMapping.get(hIdx)) {
                     Q.get(hIdx).add(t.arguments.get(termIdx));
                 }
             }
@@ -210,8 +211,8 @@ public class Algorithm {
         final int freshVar = linearCfg.freshVar();
         
         Queue<AUT> expanded = Util.mapQueue(linearCfg.S, aut -> {
-            Pair<ArraySet<GroundTerm>, Integer> E1 = conjunction(aut.T1, freshVar);
-            Pair<ArraySet<GroundTerm>, Integer> E2 = conjunction(aut.T2, E1.right);
+            Pair<ArraySet<GroundTerm>, Integer> E1 = conjoin(aut.T1, freshVar);
+            Pair<ArraySet<GroundTerm>, Integer> E2 = conjoin(aut.T2, E1.right);
             assert !E1.left.isEmpty() && !E2.left.isEmpty();
             return new AUT(aut.variable, E1.left, E2.left);
         });
@@ -232,9 +233,9 @@ public class Algorithm {
             // try merge on each remaining AUT
             for (AUT candidate : remaining) {
                 Pair<ArraySet<GroundTerm>, Integer> mergedLHS =
-                        conjunction(ArraySet.merged(collector.T1, candidate.T1), freshVar);
+                        conjoin(ArraySet.merged(collector.T1, candidate.T1), freshVar);
                 Pair<ArraySet<GroundTerm>, Integer> mergedRHS = mergedLHS.left.isEmpty() ? mergedLHS :
-                        conjunction(ArraySet.merged(collector.T2, candidate.T2), mergedLHS.right);
+                        conjoin(ArraySet.merged(collector.T2, candidate.T2), mergedLHS.right);
                 
                 if (mergedLHS.left.isEmpty() || mergedRHS.left.isEmpty()) {
                     notCollected.add(candidate);
@@ -285,18 +286,19 @@ public class Algorithm {
     // *** special conjunction ***
     
     private boolean inconsistent(ArraySet<GroundTerm> terms) {
-        return runConj(terms, VariableTerm.VAR_0, true) != IS_CONSISTENT;
+        return doConjoin(terms, VariableTerm.VAR_0, true) != IS_CONSISTENT;
     }
     
-    private Pair<ArraySet<GroundTerm>, Integer> conjunction(ArraySet<GroundTerm> terms, int freshVar) {
-        Pair<ArraySet<GroundTerm>, Integer> result = runConj(terms, freshVar, false);
+    private Pair<ArraySet<GroundTerm>, Integer> conjoin(ArraySet<GroundTerm> terms, int freshVar) {
+        Pair<ArraySet<GroundTerm>, Integer> result = doConjoin(terms, freshVar, false);
         assert result != null;
         return result;
     }
     
     private final Pair<ArraySet<GroundTerm>, Integer> IS_CONSISTENT = new Pair<>(null, null);
     
-    private Pair<ArraySet<GroundTerm>, Integer> runConj(ArraySet<GroundTerm> terms, int freshVar, boolean consistencyCheck) {
+    // TODO it might be a good idea to just duplicate this method
+    private Pair<ArraySet<GroundTerm>, Integer> doConjoin(ArraySet<GroundTerm> terms, int freshVar, boolean consistencyCheck) {
         Queue<State> branches = new ArrayDeque<>();
         branches.add(new State(terms, freshVar));
         
@@ -313,7 +315,7 @@ public class Algorithm {
                 if (consistencyCheck && nonAnonTerms.size() <= 1) {
                     continue;
                 } else if (nonAnonTerms.isEmpty()) {
-                    state.s.add(new Substitution(expression.var, MappedVariableTerm.ANON));
+                    state.s.add(new Substitution(expression.variable, MappedVariableTerm.ANON));
                     continue;
                 }
                 // REDUCE
@@ -332,7 +334,7 @@ public class Algorithm {
                     freshVar = Math.max(freshVar, childState.peekVar());
                     Term hTerm = problemMap.isMappedVar(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, hArgs);
                     if (!consistencyCheck) {
-                        childState.s.add(new Substitution(expression.var, hTerm));
+                        childState.s.add(new Substitution(expression.variable, hTerm));
                     }
                     branches.add(childState);
                 }

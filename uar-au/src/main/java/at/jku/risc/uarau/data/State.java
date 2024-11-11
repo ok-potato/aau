@@ -7,12 +7,15 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
- * {@linkplain State}s are a mutable representations of the branching program states while running special conjugation, where:
+ * {@linkplain State States} are mutable representations of the branching program states during a
+ * {@linkplain at.jku.risc.uarau.Algorithm#doConjoin(ArraySet, int, boolean) conjunction}, where:
  * <ul>
  *     <li> {@linkplain State#s} is the substitutions needed to arrive at the state
- *     <li> {@linkplain State#expressions} TODO
+ *     <li> {@linkplain State#expressions} is the remaining set of sub-terms to be reduced
  * </ul>
- * Their behaviour is analogous to {@linkplain Config}, in that a {@linkplain State#copy()} is created for each branch.
+ * Similarly to {@linkplain Config}, when branching, a new {@linkplain State#copy()} is created per branch.
+ * <br><br>
+ * A {@linkplain State} with no remaining {@linkplain Expression Expressions} is a success state.
  */
 public class State {
     public final Queue<Expression> expressions;

@@ -1,8 +1,6 @@
 package at.jku.risc.uarau.data.term;
 
-import at.jku.risc.uarau.util.Panic;
 import at.jku.risc.uarau.util.Util;
-import org.junit.platform.commons.util.StringUtils;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,6 +8,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * {@linkplain FunctionTerm FunctionTerms} are generated during
+ * {@linkplain at.jku.risc.uarau.data.Substitution#apply(Term) substitutions}.
+ * <br><br>
  * See {@linkplain GroundTerm} for representing function terms in the problem statement.
  */
 public class FunctionTerm implements Term {
@@ -17,9 +18,6 @@ public class FunctionTerm implements Term {
     public final List<Term> arguments;
     
     public FunctionTerm(String head, List<Term> arguments) {
-        if (StringUtils.isBlank(head) || head.contains("(") || head.contains(")") || head.contains(",")) {
-           throw Panic.arg("Illegal head '%s'", head);
-        }
         this.head = head.intern();
         this.arguments = Collections.unmodifiableList(arguments);
     }

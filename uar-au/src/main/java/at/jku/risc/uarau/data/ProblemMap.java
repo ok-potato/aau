@@ -19,9 +19,9 @@ import java.util.stream.Stream;
  * It is used by the {@linkplain at.jku.risc.uarau.Algorithm Algorithm} to look up information about the problem:
  * <br>
  * <ul>
- *     <li> proximity relations between functions
+ *     <li> proximity classes / relations of functions
  *     <li> function arities
- *     <li> 'mapped variable' status of functions
+ *     <li> status of constants as {@linkplain MappedVariableTerm mapped variables}
  *     <li> the relations' overall restriction type
  * </ul>
  */
@@ -42,7 +42,7 @@ public class ProblemMap {
     
     private static final Logger log = LoggerFactory.getLogger(ProblemMap.class);
     
-    private final Map<String, Map<String, ProximityRelation>> proximityRelations;
+    private final Map<String, Map<String, ProximityRelation>> proximityMap;
     private final Map<String, Integer> arities;
     private final Set<String> mappedVariables;
     public final RestrictionType restrictionType, theoreticalRestrictionType;
@@ -60,14 +60,14 @@ public class ProblemMap {
         enforceValidRelations(allProximityRelations);
         
         Pair<Map<String, Integer>, Set<String>> pair = inferArities(lhs, rhs, allProximityRelations);
-        arities = Collections.unmodifiableMap(pair.left);
-        mappedVariables = Collections.unmodifiableSet(pair.right);
+        this.arities = Collections.unmodifiableMap(pair.left);
+        this.mappedVariables = Collections.unmodifiableSet(pair.right);
         
-        theoreticalRestrictionType = inferRestriction(allProximityRelations);
+        this.theoreticalRestrictionType = inferRestriction(allProximityRelations);
         removeBelowLambdaCut(allProximityRelations, lambda);
-        restrictionType = inferRestriction(allProximityRelations);
+        this.restrictionType = inferRestriction(allProximityRelations);
         
-        this.proximityRelations = Collections.unmodifiableMap(buildMap(allProximityRelations));
+        this.proximityMap = Collections.unmodifiableMap(buildMap(allProximityRelations));
     }
     
     // *** public methods ***
@@ -87,8 +87,8 @@ public class ProblemMap {
      * <b>Undefined</b> for ANON.
      */
     private Map<String, ProximityRelation> proximityClass(String f) {
-        assert proximityRelations.containsKey(f);
-        return proximityRelations.get(f);
+        assert proximityMap.containsKey(f);
+        return proximityMap.get(f);
     }
     
     /**
@@ -97,7 +97,7 @@ public class ProblemMap {
      * <b>Undefined</b> if either side is ANON.
      */
     public ProximityRelation proximityRelation(String f, String g) {
-        assert proximityRelations.containsKey(g);
+        assert proximityMap.containsKey(g);
         return proximityClass(f).get(g);
     }
     
@@ -157,12 +157,12 @@ public class ProblemMap {
     public List<String> compactView() {
         List<String> view = new ArrayList<>();
         Set<String> listed = new HashSet<>();
-        for (String k : proximityRelations.keySet()) {
+        for (String k : proximityMap.keySet()) {
             if (listed.contains(k)) {
                 continue;
             }
             listed.add(k);
-            List<ProximityRelation> list = proximityRelations.get(k)
+            List<ProximityRelation> list = proximityMap.get(k)
                     .values()
                     .stream()
                     .filter(relation -> !listed.contains(relation.g))
@@ -175,7 +175,7 @@ public class ProblemMap {
     }
     
     public List<String> fullView() {
-        return proximityRelations.values().stream().map(map -> Util.str(map.values())).collect(Collectors.toList());
+        return proximityMap.values().stream().map(map -> Util.str(map.values())).collect(Collectors.toList());
     }
     
     // *** private methods used during construction ***
@@ -184,14 +184,17 @@ public class ProblemMap {
      * Enforces that there be no duplicate relations or identity relations.
      */
     private void enforceValidRelations(Collection<ProximityRelation> proximityRelations) {
-        Set<String> existing = new HashSet<>();
         for (ProximityRelation relation : proximityRelations) {
             if (relation.f == relation.g) {
                 throw Panic.arg("Identity proximity relation: %s", relation);
             }
-            String key = relation.f + "," + relation.g;
+        }
+        
+        Set<Pair<String, String>> existing = new HashSet<>();
+        for (ProximityRelation relation : proximityRelations) {
+            Pair<String, String> key = new Pair<>(relation.f, relation.g);
             if (existing.contains(key)) {
-                throw Panic.arg("Multiple proximity relations between '%s' and '%s'", relation.f, relation.g);
+                throw Panic.arg("Multiple proximity relations defined between '%s' and '%s'", relation.f, relation.g);
             }
             existing.add(key);
         }
@@ -216,12 +219,12 @@ public class ProblemMap {
             if (mappedVariables.contains(relation.f)) {
                 throw Panic.arg("Variable '%s' can't be close to '%s'", relation.f, relation.g);
             }
-            if (termArities.containsKey(relation.f) && termArities.get(relation.f) < relation.argRelation.size()) {
+            if (termArities.containsKey(relation.f) && termArities.get(relation.f) < relation.argMapping.size()) {
                 throw Panic.arg("'%s' has a higher arity in its argument relation %s than in the equation",
                         relation.f,
                         relation);
             }
-            arities.put(relation.f, Math.max(relation.argRelation.size(), arities.getOrDefault(relation.f, 0)));
+            arities.put(relation.f, Math.max(relation.argMapping.size(), arities.getOrDefault(relation.f, 0)));
         }
         return new Pair<>(arities, mappedVariables);
     }
@@ -256,8 +259,8 @@ public class ProblemMap {
      * however, we still get information about the kind of the generated generalization set.
      */
     private RestrictionType inferRestriction(Collection<ProximityRelation> relations) {
-        boolean correspondence = Util.all(relations, relation -> Util.none(relation.argRelation, Set::isEmpty));
-        boolean mapping = Util.all(relations, relation -> Util.none(relation.argRelation, argRel -> argRel.size() > 1));
+        boolean correspondence = Util.all(relations, relation -> Util.none(relation.argMapping, Set::isEmpty));
+        boolean mapping = Util.all(relations, relation -> Util.none(relation.argMapping, argRel -> argRel.size() > 1));
         if (correspondence) {
             return mapping ? RestrictionType.CORRESPONDENCE_MAPPING : RestrictionType.CORRESPONDENCE;
         } else {
@@ -296,7 +299,7 @@ public class ProblemMap {
         }
         // add all relations that were computed from the stated relations
         for (ProximityRelation relation : relations) {
-            Util.pad(relation.argRelation, arity(relation.f), Collections::emptySet);
+            Util.pad(relation.argMapping, arity(relation.f), Collections::emptySet);
             map.get(relation.f).put(relation.g, relation);
         }
         return map;

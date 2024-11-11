@@ -1,8 +1,8 @@
 package at.jku.risc.uarau.data;
 
-import at.jku.risc.uarau.data.term.Term;
 import at.jku.risc.uarau.data.term.FunctionTerm;
 import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.data.term.Term;
 import at.jku.risc.uarau.data.term.VariableTerm;
 import at.jku.risc.uarau.util.Panic;
 import at.jku.risc.uarau.util.Util;
@@ -10,6 +10,7 @@ import at.jku.risc.uarau.util.Util;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+// TODO documentation
 public class Substitution {
     public final int var;
     public final Term substitute;

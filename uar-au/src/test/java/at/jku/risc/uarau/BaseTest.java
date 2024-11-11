@@ -1,3 +1,5 @@
+package at.jku.risc.uarau;
+
 import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.ANSI;
 
@@ -5,9 +7,7 @@ public abstract class BaseTest {
     protected static void check(Solution solution, String lhs, String rhs, String r, float alpha1, float alpha2) {
         boolean wasEnabled = ANSI.enabled;
         ANSI.enabled = false;
-        if (r != null) {
-            assert solution.generalization.toString().equals(r);
-        }
+        assert r == null || solution.generalization.toString().equals(r);
         ANSI.enabled = wasEnabled;
         
         if (lhs != null) {
@@ -19,12 +19,8 @@ public abstract class BaseTest {
             assert solution.rhs.toString().equals(rhs);
         }
         
-        if (alpha1 > 0 || close(alpha1, 0)) { // alpha1 >= 0
-            assert close(alpha1, solution.alpha1);
-        }
-        if (alpha2 > 0 || close(alpha2, 0)) { // alpha2 >= 0
-            assert close(alpha2, solution.alpha2);
-        }
+        assert !(alpha1 > 0) && !close(alpha1, 0) || close(alpha1, solution.alpha1);
+        assert !(alpha2 > 0) && !close(alpha2, 0) || close(alpha2, solution.alpha2);
     }
     
     protected static boolean close(double a, double b) {

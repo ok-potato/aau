@@ -1,5 +1,8 @@
+package at.jku.risc.uarau.data;
+
+import at.jku.risc.uarau.AlgorithmTest;
+import at.jku.risc.uarau.BaseTest;
 import at.jku.risc.uarau.Parser;
-import at.jku.risc.uarau.data.ProximityRelation;
 import org.junit.jupiter.api.Test;
 
 public class ProblemMapTest extends BaseTest {
@@ -18,17 +21,17 @@ public class ProblemMapTest extends BaseTest {
             return false;
         }
         // if f|n maps to g|m, g|m must map to f|n
-        for (int fwIdx = 0; fwIdx < forward.argRelation.size(); fwIdx++) {
-            for (int bwIdx : forward.argRelation.get(fwIdx)) {
-                if (!flipped.argRelation.get(bwIdx).contains(fwIdx)) {
+        for (int fwIdx = 0; fwIdx < forward.argMapping.size(); fwIdx++) {
+            for (int bwIdx : forward.argMapping.get(fwIdx)) {
+                if (!flipped.argMapping.get(bwIdx).contains(fwIdx)) {
                     return false;
                 }
             }
         }
         // same in reverse
-        for (int bwIdx = 0; bwIdx < flipped.argRelation.size(); bwIdx++) {
-            for (int fwIdx : flipped.argRelation.get(bwIdx)) {
-                if (!forward.argRelation.get(fwIdx).contains(bwIdx)) {
+        for (int bwIdx = 0; bwIdx < flipped.argMapping.size(); bwIdx++) {
+            for (int fwIdx : flipped.argMapping.get(bwIdx)) {
+                if (!forward.argMapping.get(fwIdx).contains(bwIdx)) {
                     return false;
                 }
             }

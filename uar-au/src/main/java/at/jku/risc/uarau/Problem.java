@@ -10,6 +10,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * For a given anti-unification problem, create a {@linkplain Problem} object, and call
+ * {@linkplain Problem#solve()} on it to execute the {@linkplain Algorithm}.
+ */
 public class Problem {
     private final Pair<GroundTerm, GroundTerm> equation;
     private Collection<ProximityRelation> proximityRelations = new HashSet<>();
@@ -35,6 +39,14 @@ public class Problem {
     }
     
     /**
+     * Create a {@linkplain Problem} instance based on predefined sides of the equation.
+     * (See also {@linkplain Problem#Problem(Pair)})
+     */
+    public Problem(GroundTerm lhs, GroundTerm rhs) {
+        this(new Pair<>(lhs, rhs));
+    }
+    
+    /**
      * Create a {@linkplain Problem} instance based on an equation in String representation:
      * <br><br>
      * The equation consists of two sides, separated by "?="
@@ -56,6 +68,14 @@ public class Problem {
      */
     public Problem(String equation) {
         this(Parser.parseEquation(equation));
+    }
+    
+    /**
+     * Create a {@linkplain Problem} instance from Strings representing each side of the equation
+     * (See also {@linkplain Problem#Problem(String)})
+     */
+    public Problem(String lhs, String rhs) {
+        this(new Pair<>(Parser.parseTerm(lhs), Parser.parseTerm(rhs)));
     }
     
     public Pair<GroundTerm, GroundTerm> getEquation() {
@@ -140,7 +160,7 @@ public class Problem {
     }
     
     /**
-     * Define a custom bi-function for composing two proximities, i.e.:
+     * Define a custom {@linkplain TNorm#apply(float, float) bi-function} for composing two proximities, i.e.:
      * <pre>{@code a~c = tNorm(a~b, b~c)}</pre>
      * The function must follow the definition of
      * <a href="https://en.wikipedia.org/wiki/T-norm">triangular norm</a>
