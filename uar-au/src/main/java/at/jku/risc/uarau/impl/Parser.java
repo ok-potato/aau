@@ -130,9 +130,6 @@ public class Parser {
             throw Panic.parse("Could not parse proximity for proximity relation: ", relationString);
         }
         
-        if (parsedProximity < 0.0f || parsedProximity > 1.0f) {
-            throw Panic.arg("Proximity outside of range [0,1]: %s", parsedProximity);
-        }
         return new ProximityRelation(rest.get(0), rest.get(1), parsedProximity, parseArgumentRelation(argRelation));
     }
     

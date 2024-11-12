@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 public class ProblemMapTest extends BaseTest {
     @Test
     public void flippedRelationsAreSymmetric() {
-        assert symmetric(Parser.parseProximityRelation("f g [1.0] {1 1, 3 2, 1 1}"));
-        assert symmetric(Parser.parseProximityRelation("f g [1.0] {1 1, 1 2, 1 3}"));
+        assert symmetric(Parser.parseProximityRelation("f g [0.9] {1 1, 3 2, 1 1}"));
+        assert symmetric(Parser.parseProximityRelation("f g [0.9] {1 1, 1 2, 1 3}"));
         for (String relation : AlgorithmTest.bigRelations().split(";")) {
             assert symmetric(Parser.parseProximityRelation(relation));
         }

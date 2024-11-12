@@ -44,22 +44,19 @@ public class InitializerTest extends BaseTest {
         solve("f(a(), b()) ?= g(a(), c(), d())", "", 1.0f);
         solve("f(a, b) ?= g(a, c, d)", " ; ", 1.0f);
         // empty relations
-        solve("f() ?= g()", "f g {}[1.0]", 1.0f);
-        solve("f() ?= g()", "f g {} [1.0]", 1.0f);
-        solve("f() ?= g()", "f  {} g[1.0]", 1.0f);
-        solve("f() ?= g()", "  f  [1.0]{}g", 1.0f);
+        solve("f() ?= g()", "f g {}[0.9]", 1.0f);
+        solve("f() ?= g()", "f g {} [0.9]", 1.0f);
+        solve("f() ?= g()", "f  {} g[0.9]", 1.0f);
+        solve("f() ?= g()", "  f  [0.9]{}g", 1.0f);
         // alternative arg map syntax
-        solve("f(a(), b()) ?= g(c)", "f g [1.0] {1, 1, 2, 1}", 1.0f);
-        solve("f(a, b) ?= g(c())", "f g [1.0] {(1 1)(2, 1)}", 1.0f);
-        solve("f(a(), b) ?= g(c())", "f g [1.0] {1 1 2 1}", 1.0f);
-        solve("f(a(), b) ?= g(c)", "f g [1.0] {) ) ()() ,,  1, , ))( 1 )))))))))))))2   ,,), 1}", 1.0f);
+        solve("f(a(), b()) ?= g(c)", "f g [0.9] {1, 1, 2, 1}", 1.0f);
+        solve("f(a, b) ?= g(c())", "f g [0.9] {(1 1)(2, 1)}", 1.0f);
+        solve("f(a(), b) ?= g(c())", "f g [0.9] {1 1 2 1}", 1.0f);
+        solve("f(a(), b) ?= g(c)", "f g [0.9] {) ) ()() ,,  1, , ))( 1 )))))))))))))2   ,,), 1}", 1.0f);
     }
     
     @Test
     public void idRelations() {
-        assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f f [0.9f]{}", 1.0f));
-        assertThrows(IllegalArgumentException.class, () -> solve("f() ?= g()", "f f [0.9f]{}", 0.8f));
-        assertThrows(IllegalArgumentException.class, () -> solve("f(a) ?= g()", "f f [1.0f]{}", 1.0f));
         assertThrows(IllegalArgumentException.class, () -> solve("f(a, b) ?= g()", "f f [1.0f]{(1, 1), (1, 2)}", 1.0f));
         assertThrows(IllegalArgumentException.class, () -> solve("f(a, b) ?= g()", "f f [1.0f]{(1, 1), (2, 2)}", 1.0f));
     }
@@ -68,5 +65,11 @@ public class InitializerTest extends BaseTest {
     public void duplicateRelations() {
         assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b(c())", "a b [0.6]{} ; a b [0.6]{}", 0.5f));
         assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b(c())", "a b [0.6]{} ; b a [0.6]{}", 0.5f));
+    }
+    
+    @Test
+    public void rangeCheck() {
+        solve("a() ?= b()", "a b [0.999999] {}", 0.5f);
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [0.999999999] {}", 0.5f));
     }
 }
