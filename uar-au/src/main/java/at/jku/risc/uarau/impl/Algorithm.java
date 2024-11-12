@@ -1,7 +1,7 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.impl;
 
-import at.jku.risc.uarau.data.*;
-import at.jku.risc.uarau.data.term.*;
+import at.jku.risc.uarau.*;
+import at.jku.risc.uarau.term.*;
 import at.jku.risc.uarau.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,9 +68,9 @@ public class Algorithm {
         log.info(ANSI.yellow("SOLVING: ") + lhs + ANSI.yellow(" == ") + rhs + ANSI.yellow(" λ=", lambda));
         
         if (log.isDebugEnabled()) {
-            log.debug(Util.log(ANSI.yellow("R:"), problemMap.fullView()));
+            log.debug(Data.log(ANSI.yellow("R:"), problemMap.fullView()));
         } else {
-            log.info(ANSI.yellow("R: ") + Util.str(problemMap.compactView()));
+            log.info(ANSI.yellow("R: ") + Data.str(problemMap.compactView()));
         }
         
         if (problemMap.restrictionType == problemMap.theoreticalRestrictionType) {
@@ -91,7 +91,7 @@ public class Algorithm {
         
         BRANCHING:
         while (!branches.isEmpty()) {
-            assert Util.isSet(branches);
+            assert Data.isSet(branches);
             Config cfg = branches.remove();
             while (!cfg.A.isEmpty()) {
                 AUT aut = cfg.A.remove();
@@ -106,7 +106,7 @@ public class Algorithm {
                 if (!children.isEmpty()) {
                     branches.addAll(children);
                     if (log.isDebugEnabled()) {
-                        log.debug("DEC => {}", Util.str(children));
+                        log.debug("DEC => {}", Data.str(children));
                     }
                     continue BRANCHING;
                 }
@@ -117,25 +117,25 @@ public class Algorithm {
             linearConfigs.add(cfg);
         }
         
-        assert Util.isSet(linearConfigs);
+        assert Data.isSet(linearConfigs);
         if (!doMerge && !giveWitnesses) {
             return generateSolutions(linearConfigs);
         }
         
         // *** POST PROCESS ***
-        log.info(Util.log(ANSI.yellow("LINEAR:"), linearConfigs));
+        log.info(Data.log(ANSI.yellow("LINEAR:"), linearConfigs));
         
         // EXPAND
-        Queue<Config> expandedConfigs = Util.mapQueue(linearConfigs, this::expand);
-        assert Util.isSet(expandedConfigs);
+        Queue<Config> expandedConfigs = Data.mapQueue(linearConfigs, this::expand);
+        assert Data.isSet(expandedConfigs);
         if (!doMerge) {
             return generateSolutions(expandedConfigs);
         }
-        log.info(Util.log(ANSI.yellow("EXPANDED:"), expandedConfigs));
+        log.info(Data.log(ANSI.yellow("EXPANDED:"), expandedConfigs));
         
         // MERGE
-        Queue<Config> mergedConfigs = Util.mapQueue(expandedConfigs, this::merge);
-        assert Util.isSet(mergedConfigs);
+        Queue<Config> mergedConfigs = Data.mapQueue(expandedConfigs, this::merge);
+        assert Data.isSet(mergedConfigs);
         return generateSolutions(mergedConfigs);
     }
     
@@ -158,7 +158,7 @@ public class Algorithm {
             }
             assert Q1 != null && Q2 != null;
             if (!problemMap.restrictionType.mapping) {
-                if (Util.any(Q1, this::inconsistent) || Util.any(Q2, this::inconsistent)) {
+                if (Data.any(Q1, this::inconsistent) || Data.any(Q2, this::inconsistent)) {
                     continue;
                 }
             }
@@ -166,7 +166,7 @@ public class Algorithm {
             Config child = commonProximates.size() == 1 ? cfg : cfg.copy();
             child.alpha1 = alpha1;
             child.alpha2 = alpha2;
-            List<Term> hArgs = Util.list(problemMap.arity(h), idx -> {
+            List<Term> hArgs = Data.list(problemMap.arity(h), idx -> {
                 int yi = child.freshVar();
                 child.A.add(new AUT(yi, Q1.get(idx), Q2.get(idx)));
                 return new VariableTerm(yi);
@@ -191,7 +191,7 @@ public class Algorithm {
      */
     private Pair<List<ArraySet<GroundTerm>>, Float> mapArgs(String h, ArraySet<GroundTerm> T, float beta) {
         int hArity = problemMap.arity(h);
-        List<Set<GroundTerm>> Q = Util.list(hArity, idx -> new HashSet<>());
+        List<Set<GroundTerm>> Q = Data.list(hArity, idx -> new HashSet<>());
         for (GroundTerm t : T) {
             ProximityRelation htRelation = problemMap.proximityRelation(h, t.head);
             beta = tNorm.apply(beta, htRelation.proximity);
@@ -204,13 +204,13 @@ public class Algorithm {
                 }
             }
         }
-        return new Pair<>(Util.mapList(Q, ArraySet::new), beta);
+        return new Pair<>(Data.mapList(Q, ArraySet::new), beta);
     }
     
     private Config expand(Config linearCfg) {
         final int freshVar = linearCfg.freshVar();
         
-        Queue<AUT> expanded = Util.mapQueue(linearCfg.S, aut -> {
+        Queue<AUT> expanded = Data.mapQueue(linearCfg.S, aut -> {
             Pair<ArraySet<GroundTerm>, Integer> E1 = conjoin(aut.T1, freshVar);
             Pair<ArraySet<GroundTerm>, Integer> E2 = conjoin(aut.T2, E1.right);
             assert !E1.left.isEmpty() && !E2.left.isEmpty();
@@ -256,7 +256,7 @@ public class Algorithm {
                 merged.add(new AUT(y.var, collector.T1, collector.T2));
             }
         }
-        assert Util.isSet(merged);
+        assert Data.isSet(merged);
         return expandedCfg.copyWithNewS(merged);
     }
     
@@ -267,7 +267,7 @@ public class Algorithm {
             return new Solution(term, witnesses.left, witnesses.right, cfg.alpha1, cfg.alpha2);
         }).collect(Collectors.toSet());
         
-        log.info(Util.log(ANSI.yellow("SOLUTIONS:"), solutions));
+        log.info(Data.log(ANSI.yellow("SOLUTIONS:"), solutions));
         log.info("🧇");
         return solutions;
     }
@@ -325,7 +325,7 @@ public class Algorithm {
                     assert Q != null;
                     State childState = commonProximates.size() == 1 ? state : state.copy();
                     
-                    List<Term> hArgs = Util.list(problemMap.arity(h), idx -> {
+                    List<Term> hArgs = Data.list(problemMap.arity(h), idx -> {
                         int yi = childState.freshVar();
                         childState.expressions.add(new Expression(yi, Q.get(idx)));
                         return new VariableTerm(yi);

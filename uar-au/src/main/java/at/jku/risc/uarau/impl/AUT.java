@@ -1,11 +1,12 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau.impl;
 
-import at.jku.risc.uarau.data.term.GroundTerm;
-import at.jku.risc.uarau.data.term.Term;
+import at.jku.risc.uarau.Witness;
+import at.jku.risc.uarau.term.GroundTerm;
+import at.jku.risc.uarau.term.Term;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Pair;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.Data;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,9 +20,9 @@ import java.util.Set;
  * <br>
  * The triples that appear in a final {@linkplain Config#S} are used to generate that solution's {@linkplain Witness} substitutions.
  */
-public class AUT {
-    public final int variable;
-    public final ArraySet<GroundTerm> T1, T2;
+class AUT {
+    final int variable;
+    final ArraySet<GroundTerm> T1, T2;
     
     private Integer hash = null;
     
@@ -32,7 +33,7 @@ public class AUT {
     }
     
     // TODO documentation
-    public static Pair<Set<Term>, Set<Term>> applyAll(Queue<AUT> auts, Term baseTerm) {
+    static Pair<Set<Term>, Set<Term>> applyAll(Queue<AUT> auts, Term baseTerm) {
         Pair<Set<Term>, Set<Term>> applied = new Pair<>(new HashSet<>(), new HashSet<>());
         applied.left.add(baseTerm);
         applied.right.add(baseTerm);
@@ -43,7 +44,7 @@ public class AUT {
         return applied;
     }
     
-    public Pair<Set<Term>, Set<Term>> apply(Set<Term> Q1, Set<Term> Q2) {
+    Pair<Set<Term>, Set<Term>> apply(Set<Term> Q1, Set<Term> Q2) {
         Set<Term> lhs = new HashSet<>();
         Set<Term> rhs = new HashSet<>();
         
@@ -55,7 +56,7 @@ public class AUT {
     
     @Override
     public String toString() {
-        return String.format("%s [%s]==[%s]", ANSI.blue(variable), Util.str(T1), Util.str(T2));
+        return String.format("%s [%s]==[%s]", ANSI.blue(variable), Data.str(T1), Data.str(T2));
     }
     
     @Override

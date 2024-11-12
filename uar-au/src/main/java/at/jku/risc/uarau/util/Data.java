@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 /**
  * Useful collection operations
  */
-public class Util {
+public class Data {
     
     // *** Instantiations, mappings ***
     

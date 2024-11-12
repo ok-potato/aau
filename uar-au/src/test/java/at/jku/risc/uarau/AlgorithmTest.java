@@ -1,7 +1,7 @@
 package at.jku.risc.uarau;
 
-import at.jku.risc.uarau.data.Solution;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.impl.Algorithm;
+import at.jku.risc.uarau.util.Data;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.slf4j.Log4jLogger;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.util.Set;
 
-import static at.jku.risc.uarau.Algorithm.solve;
+import static at.jku.risc.uarau.impl.Algorithm.solve;
 
 public class AlgorithmTest extends BaseTest {
     public static String bigProblem() { // |f| = 2  |g| = 3  |h| = 3
@@ -84,11 +84,11 @@ public class AlgorithmTest extends BaseTest {
         
         Set<Solution> solutions1 = Algorithm.solve("f(a(), c()) ?= g(a())", relations, 0.5f);
         assert solutions1.size() == 1;
-        check(Util.getAny(solutions1), "..", "..", "h(b())", 0.7f, 0.6f);
+        check(Data.getAny(solutions1), "..", "..", "h(b())", 0.7f, 0.6f);
         
         Set<Solution> solutions2 = Algorithm.solve("f(a(), d()) ?= g(a())", relations, 0.5f);
         assert solutions2.size() == 1;
-        check(Util.getAny(solutions2), null, null, "0", 1.0f, 1.0f);
+        check(Data.getAny(solutions2), null, null, "0", 1.0f, 1.0f);
     }
     
     @Test

@@ -1,8 +1,8 @@
 package at.jku.risc.uarau;
 
-import at.jku.risc.uarau.data.ProximityRelation;
-import at.jku.risc.uarau.data.Solution;
-import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.impl.Parser;
+import at.jku.risc.uarau.term.GroundTerm;
+import at.jku.risc.uarau.impl.Algorithm;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Panic;
 
@@ -124,10 +124,10 @@ public class Problem {
      *     <li> <b>prox</b> is the proximity between functions <b>f</b> and <b>g</b>, in the range [0,1]
      *     <li> <b>f_n</b> and <b>g_n</b> are <b>1-indexed</b> argument positions of <b>f</b> and <b>g</b> respectively, which map onto each other
      * </ul>
-     * Argument relations can optionally include '<b>(...)</b>' and ' <b>,</b> ' for readability.
+     * Argument relations can optionally include '<b>(...)</b>' and/or ' <b>,</b> ' for readability.
      * <br><br>
      * <code>
-     * Example 1: "f h [0.9] { (1 1), (1 2) } ; g h [0.5] { (1 2), (2 2), (3 1) }"
+     * Example 1: "f h [0.9] {(1 1), (1 2)} ; g h [0.5] {(1 2), (2 2), (3 1)}"
      * <br>
      * Example 2: "f h [0.9] { 1 1 1 2 } ; g h [0.5] { 1 2 2 2 3 1 }"
      * </code>

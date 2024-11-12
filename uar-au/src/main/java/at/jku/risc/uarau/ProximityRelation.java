@@ -1,20 +1,24 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.Data;
 
 import java.util.*;
 
 /**
- * {@linkplain ProximityRelation} represents one of the directions of the proximity relation between
- * {@linkplain ProximityRelation#f} to {@linkplain ProximityRelation#g}.
+ * A set of {@linkplain ProximityRelation ProximityRelations} is part of the {@linkplain Problem#proximityRelations(Collection) Problem input}.
+ * Each relation is defined on two functions {@linkplain ProximityRelation#f} and {@linkplain ProximityRelation#g}.
  * <br><br>
- * The set of proximity relations for a given {@linkplain at.jku.risc.uarau.Problem Problem}
- * is modeled by {@linkplain ProblemMap}.
+ * Since these relations are by definition symmetric, the input should contain only one "direction" per pair of function symbols.
+ * If <i>neither</i> direction is provided, the proximity is assumed to be 0.
+ * <br>
+ * The identity relation of every function is also predefined, so should also not be provided.
+ * <br><br>
+ * The modelling/validation of this occurs in {@linkplain at.jku.risc.uarau.impl.ProblemMap ProblemMap}.
  */
 public class ProximityRelation {
-    final String f, g;
+    public final String f, g;
     public final float proximity;
     public final List<Set<Integer>> argMapping;
     
@@ -28,13 +32,13 @@ public class ProximityRelation {
     public ProximityRelation flipped() {
         int flippedSize = argMapping.stream().flatMap(Set::stream).max(Comparator.naturalOrder()).orElse(-1) + 1;
         
-        List<List<Integer>> flippedArgs = Util.list(flippedSize, idx -> new ArrayList<>());
+        List<List<Integer>> flippedArgs = Data.list(flippedSize, idx -> new ArrayList<>());
         for (int idx = 0; idx < argMapping.size(); idx++) {
             for (int flippedIdx : argMapping.get(idx)) {
                 flippedArgs.get(flippedIdx).add(idx);
             }
         }
-        return new ProximityRelation(g, f, proximity, Util.mapList(flippedArgs, relation -> new ArraySet<>(relation, true)));
+        return new ProximityRelation(g, f, proximity, Data.mapList(flippedArgs, relation -> new ArraySet<>(relation, true)));
     }
     
     @Override
@@ -48,7 +52,7 @@ public class ProximityRelation {
         }
         StringBuilder sb = new StringBuilder(" ");
         for (Set<Integer> args : argMapping) {
-            sb.append(Util.str(args, " ", "[]", "[", "]"));
+            sb.append(Data.str(args, " ", "[]", "[", "]"));
         }
         return sb.toString();
     }

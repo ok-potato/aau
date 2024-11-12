@@ -33,10 +33,10 @@ public class ANSI {
     }
     
     public static String regular(Object... o) {
-        return Util.str(Arrays.asList(o));
+        return Data.str(Arrays.asList(o));
     }
     
     private static String color(String color, Object... o) {
-        return enabled ? color + Util.str(Arrays.asList(o)) + RESET : Util.str(Arrays.asList(o));
+        return enabled ? color + Data.str(Arrays.asList(o)) + RESET : Data.str(Arrays.asList(o));
     }
 }

@@ -1,7 +1,7 @@
-package at.jku.risc.uarau.data.term;
+package at.jku.risc.uarau.term;
 
+import at.jku.risc.uarau.util.Data;
 import at.jku.risc.uarau.util.Panic;
-import at.jku.risc.uarau.util.Util;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +33,7 @@ public class GroundTerm implements Term {
      * {@linkplain GroundTerm} representation.
      * <br>
      * This is essentially a convenient way to universally assert ground-ness of terms in
-     * {@linkplain at.jku.risc.uarau.data.AUT AUTs} on the type level.
+     * {@linkplain at.jku.risc.uarau.impl.AUT AUTs} on the type level.
      * <br><br>
      * <b>Note:</b> this is also why ANON is a {@linkplain MappedVariableTerm} and not a {@linkplain VariableTerm}.
      * The latter representation is technically more correct, but not as useful.
@@ -46,7 +46,7 @@ public class GroundTerm implements Term {
             throw Panic.state("Couldn't cast sub-term '%s' of type %s", term, term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        return new GroundTerm(functionTerm.head, Util.mapList(functionTerm.arguments, GroundTerm::force));
+        return new GroundTerm(functionTerm.head, Data.mapList(functionTerm.arguments, GroundTerm::force));
     }
     
     @Override
@@ -84,6 +84,6 @@ public class GroundTerm implements Term {
     
     @Override
     public String toString() {
-        return head + Util.str(arguments, ",", "()", "(", ")");
+        return head + Data.str(arguments, ",", "()", "(", ")");
     }
 }

@@ -2,7 +2,8 @@ package at.jku.risc.uarau.data;
 
 import at.jku.risc.uarau.AlgorithmTest;
 import at.jku.risc.uarau.BaseTest;
-import at.jku.risc.uarau.Parser;
+import at.jku.risc.uarau.ProximityRelation;
+import at.jku.risc.uarau.impl.Parser;
 import org.junit.jupiter.api.Test;
 
 public class ProblemMapTest extends BaseTest {

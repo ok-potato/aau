@@ -1,11 +1,12 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau.impl;
 
-import at.jku.risc.uarau.data.term.GroundTerm;
-import at.jku.risc.uarau.data.term.MappedVariableTerm;
+import at.jku.risc.uarau.ProximityRelation;
+import at.jku.risc.uarau.term.GroundTerm;
+import at.jku.risc.uarau.term.MappedVariableTerm;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Panic;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 /**
  * A precomputed view of a given generalization problem.
  * <br>
- * It is used by the {@linkplain at.jku.risc.uarau.Algorithm Algorithm} to look up information about the problem:
+ * It is used by the {@linkplain Algorithm Algorithm} to look up information about the problem:
  * <br>
  * <ul>
  *     <li> proximity classes / relations of functions
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
  *     <li> the relations' overall restriction type
  * </ul>
  */
-public class ProblemMap {
+class ProblemMap {
     public enum RestrictionType {
         UNRESTRICTED(false, false),
         CORRESPONDENCE(true, false),
@@ -131,7 +132,7 @@ public class ProblemMap {
         
         Set<String> commonProximates = null;
         for (String head : heads) {
-            Stream<String> proximates = proximityClass(head).values().stream().map(rel -> rel.g);
+            Stream<String> proximates = proximityClass(head).values().stream().map(relation -> relation.g);
             if (commonProximates != null) {
                 commonProximates.retainAll(proximates.collect(Collectors.toList()));
             } else { // first element
@@ -148,7 +149,7 @@ public class ProblemMap {
     
     @Override
     public String toString() {
-        return Util.str(compactView());
+        return Data.str(compactView());
     }
     
     /**
@@ -168,14 +169,14 @@ public class ProblemMap {
                     .filter(relation -> !listed.contains(relation.g))
                     .collect(Collectors.toList());
             if (!list.isEmpty()) {
-                view.add(Util.str(list));
+                view.add(Data.str(list));
             }
         }
         return view;
     }
     
     public List<String> fullView() {
-        return proximityMap.values().stream().map(map -> Util.str(map.values())).collect(Collectors.toList());
+        return proximityMap.values().stream().map(map -> Data.str(map.values())).collect(Collectors.toList());
     }
     
     // *** private methods used during construction ***
@@ -259,8 +260,8 @@ public class ProblemMap {
      * however, we still get information about the kind of the generated generalization set.
      */
     private RestrictionType inferRestriction(Collection<ProximityRelation> relations) {
-        boolean correspondence = Util.all(relations, relation -> Util.none(relation.argMapping, Set::isEmpty));
-        boolean mapping = Util.all(relations, relation -> Util.none(relation.argMapping, argRel -> argRel.size() > 1));
+        boolean correspondence = Data.all(relations, relation -> Data.none(relation.argMapping, Set::isEmpty));
+        boolean mapping = Data.all(relations, relation -> Data.none(relation.argMapping, argRel -> argRel.size() > 1));
         if (correspondence) {
             return mapping ? RestrictionType.CORRESPONDENCE_MAPPING : RestrictionType.CORRESPONDENCE;
         } else {
@@ -292,14 +293,14 @@ public class ProblemMap {
         Map<String, Map<String, ProximityRelation>> map = new HashMap<>();
         // initialize each proximity class with the identity relation
         for (String f : arities.keySet()) {
-            List<Set<Integer>> mapping = Util.list(arities.get(f), ArraySet::singleton);
+            List<Set<Integer>> mapping = Data.list(arities.get(f), ArraySet::singleton);
             Map<String, ProximityRelation> proximityClass = new HashMap<>();
             proximityClass.put(f, new ProximityRelation(f, f, 1.0f, mapping));
             map.put(f, proximityClass);
         }
         // add all relations that were computed from the stated relations
         for (ProximityRelation relation : relations) {
-            Util.pad(relation.argMapping, arity(relation.f), Collections::emptySet);
+            Data.pad(relation.argMapping, arity(relation.f), Collections::emptySet);
             map.get(relation.f).put(relation.g, relation);
         }
         return map;

@@ -1,6 +1,5 @@
 package at.jku.risc.uarau;
 
-import at.jku.risc.uarau.data.Solution;
 import at.jku.risc.uarau.util.ANSI;
 
 public abstract class BaseTest {

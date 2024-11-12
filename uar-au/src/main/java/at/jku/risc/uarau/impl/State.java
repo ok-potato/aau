@@ -1,6 +1,6 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau.impl;
 
-import at.jku.risc.uarau.data.term.GroundTerm;
+import at.jku.risc.uarau.term.GroundTerm;
 import at.jku.risc.uarau.util.ArraySet;
 
 import java.util.ArrayDeque;
@@ -8,7 +8,7 @@ import java.util.Queue;
 
 /**
  * {@linkplain State States} are mutable representations of the branching program states during a
- * {@linkplain at.jku.risc.uarau.Algorithm#doConjoin(ArraySet, int, boolean) conjunction}, where:
+ * {@linkplain Algorithm#doConjoin(ArraySet, int, boolean) conjunction}, where:
  * <ul>
  *     <li> {@linkplain State#s} is the substitutions needed to arrive at the state
  *     <li> {@linkplain State#expressions} is the remaining set of sub-terms to be reduced
@@ -17,7 +17,7 @@ import java.util.Queue;
  * <br><br>
  * A {@linkplain State} with no remaining {@linkplain Expression Expressions} is a success state.
  */
-public class State {
+class State {
     public final Queue<Expression> expressions;
     public final Queue<Substitution> s;
     

@@ -1,7 +1,5 @@
 package at.jku.risc.uarau.util;
 
-import at.jku.risc.uarau.data.ProblemMap;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -9,10 +7,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Compact representation of immutable, ordered (see {@linkplain ArraySet#equals(Object) ArraySet.equals(Object)})
- * sets, optimized for small- to medium-sized sets.
+ * Compact representation of {@linkplain ArraySet#equals(Object) ordered} immutable sets - optimized for small-medium size.
  * <br>
- * Null elements are undefined.
+ * <b>null</b> elements are undefined.
  */
 public class ArraySet<E> implements Set<E> {
     private final E[] elements;
@@ -130,13 +127,12 @@ public class ArraySet<E> implements Set<E> {
     // *** equals/hashCode ***
     
     /**
-     * In regard to their usage, ArraySets don't in principle need to be ordered, and the decision is mostly based on
-     * performance in {@linkplain ProblemMap#commonProximates(ArraySet)}.
+     * w.r.t. their usage, ArraySets don't in principle need to be ordered, and the decision is mostly based on performance in
+     * {@linkplain at.jku.risc.uarau.impl.ProblemMap#commonProximates(ArraySet) ProblemMap.commonProximates(ArraySet)}.
      * <br><br>
-     * Memory 'hits' usually greatly outnumber the 'misses' that arise from permutations of the same set of function symbols.
-     * This usually makes it worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).
+     * Memory "hits" usually greatly outnumber the "misses" due to permutations of a single set of function symbols.
+     * This makes it usually worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).
      */
-    
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof ArraySet)) {

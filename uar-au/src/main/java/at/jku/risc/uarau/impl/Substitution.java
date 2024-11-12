@@ -1,11 +1,11 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau.impl;
 
-import at.jku.risc.uarau.data.term.FunctionTerm;
-import at.jku.risc.uarau.data.term.GroundTerm;
-import at.jku.risc.uarau.data.term.Term;
-import at.jku.risc.uarau.data.term.VariableTerm;
+import at.jku.risc.uarau.term.FunctionTerm;
+import at.jku.risc.uarau.term.GroundTerm;
+import at.jku.risc.uarau.term.Term;
+import at.jku.risc.uarau.term.VariableTerm;
 import at.jku.risc.uarau.util.Panic;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.Data;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -52,7 +52,7 @@ public class Substitution {
             throw Panic.state("Unknown Term type used in substitution: %s", term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        return new FunctionTerm(functionTerm.head, Util.mapList(functionTerm.arguments, this::apply));
+        return new FunctionTerm(functionTerm.head, Data.mapList(functionTerm.arguments, this::apply));
     }
     
     @Override

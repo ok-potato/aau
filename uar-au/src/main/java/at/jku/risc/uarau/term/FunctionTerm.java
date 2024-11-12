@@ -1,6 +1,7 @@
-package at.jku.risc.uarau.data.term;
+package at.jku.risc.uarau.term;
 
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.impl.Substitution;
+import at.jku.risc.uarau.util.Data;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,7 +10,7 @@ import java.util.Set;
 
 /**
  * {@linkplain FunctionTerm FunctionTerms} are generated during
- * {@linkplain at.jku.risc.uarau.data.Substitution#apply(Term) substitutions}.
+ * {@linkplain Substitution#apply(Term) substitutions}.
  * <br><br>
  * See {@linkplain GroundTerm} for representing function terms in the problem statement.
  */
@@ -62,6 +63,6 @@ public class FunctionTerm implements Term {
     
     @Override
     public String toString() {
-        return head + Util.str(arguments, ",", "()", "(", ")");
+        return head + Data.str(arguments, ",", "()", "(", ")");
     }
 }

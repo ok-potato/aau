@@ -3,7 +3,7 @@ package at.jku.risc.uarau;
 import at.jku.risc.uarau.util.Panic;
 import org.junit.jupiter.api.Test;
 
-import static at.jku.risc.uarau.Algorithm.solve;
+import static at.jku.risc.uarau.impl.Algorithm.solve;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class InitializerTest extends BaseTest {

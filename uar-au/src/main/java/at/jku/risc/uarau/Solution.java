@@ -1,10 +1,11 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau;
 
-import at.jku.risc.uarau.data.term.Term;
+import at.jku.risc.uarau.term.Term;
+import at.jku.risc.uarau.impl.Algorithm;
 import at.jku.risc.uarau.util.ANSI;
 
 /**
- * The output of the {@linkplain at.jku.risc.uarau.Algorithm Algorithm} is a set of all possible
+ * The output of the {@linkplain Algorithm Algorithm} is a set of all possible
  * {@linkplain Solution Solutions}.
  * <br>
  * Each {@linkplain Solution} gives a unique, minimal {@linkplain Solution#generalization} for the problem terms.

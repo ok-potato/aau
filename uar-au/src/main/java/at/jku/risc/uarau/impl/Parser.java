@@ -1,12 +1,13 @@
-package at.jku.risc.uarau;
+package at.jku.risc.uarau.impl;
 
-import at.jku.risc.uarau.data.ProximityRelation;
-import at.jku.risc.uarau.data.term.GroundTerm;
-import at.jku.risc.uarau.data.term.MappedVariableTerm;
+import at.jku.risc.uarau.Problem;
+import at.jku.risc.uarau.ProximityRelation;
+import at.jku.risc.uarau.term.GroundTerm;
+import at.jku.risc.uarau.term.MappedVariableTerm;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Panic;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.Data;
 import org.junit.platform.commons.util.StringUtils;
 
 import java.util.*;
@@ -136,12 +137,12 @@ public class Parser {
     }
     
     // [<proximity>]    :=  float between 0.0 and 1.0
-    public static float parseProximity(String proximityString) {
+    private static float parseProximity(String proximityString) {
         return Float.parseFloat(proximityString.substring(1, proximityString.length() - 1));
     }
     
     // {<arg-relation>} :=  (1,1), (2,3), (3,1), ...
-    public static List<Set<Integer>> parseArgumentRelation(String argRelationString) {
+    private static List<Set<Integer>> parseArgumentRelation(String argRelationString) {
         List<Integer> pairs;
         try {
             pairs = Arrays.stream(argRelationString.substring(1, argRelationString.length() - 1).split("[(),\\s]+"))
@@ -168,14 +169,14 @@ public class Parser {
         for (int idx = 0; idx < pairs.size() / 2; idx++) {
             argRelationsIndexed.get(pairs.get(idx * 2) - 1).add(pairs.get(idx * 2 + 1) - 1);
         }
-        return Util.mapList(argRelationsIndexed, ArraySet::new);
+        return Data.mapList(argRelationsIndexed, ArraySet::new);
     }
     
     private static class GroundTermBuilder {
         public String head;
         public List<GroundTerm> arguments = new ArrayList<>();
         
-        public GroundTermBuilder(String head) {
+        GroundTermBuilder(String head) {
             if (StringUtils.isBlank(head) || head.contains(",") || head.contains("(") || head.contains(")")) {
                 throw Panic.state("Came up with head '%s' while parsing the problem equation", head);
             }

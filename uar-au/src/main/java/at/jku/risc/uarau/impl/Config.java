@@ -1,10 +1,10 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau.impl;
 
-import at.jku.risc.uarau.data.term.GroundTerm;
-import at.jku.risc.uarau.data.term.VariableTerm;
+import at.jku.risc.uarau.term.GroundTerm;
+import at.jku.risc.uarau.term.VariableTerm;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.Data;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -18,15 +18,15 @@ import java.util.Queue;
  * </ul>
  * When branching occurs, a new {@linkplain Config#copy()} is created per branch.
  */
-public class Config {
-    public final Queue<AUT> A, S;
-    public final Queue<Substitution> substitutions;
+class Config {
+    final Queue<AUT> A, S;
+    final Queue<Substitution> substitutions;
     
-    public float alpha1, alpha2;
+    float alpha1, alpha2;
     
-    private int freshVar;
+    int freshVar;
     
-    public Config(GroundTerm T1, GroundTerm T2) {
+    Config(GroundTerm T1, GroundTerm T2) {
         A = new ArrayDeque<>();
         S = new ArrayDeque<>();
         substitutions = new ArrayDeque<>();
@@ -40,7 +40,7 @@ public class Config {
         this(original, original.S);
     }
     
-    public Config copy() {
+    Config copy() {
         return new Config(this);
     }
     
@@ -53,15 +53,15 @@ public class Config {
         this.freshVar = original.freshVar;
     }
     
-    public Config copyWithNewS(Queue<AUT> S) {
+    Config copyWithNewS(Queue<AUT> S) {
         return new Config(this, S);
     }
     
-    public int freshVar() {
+    int freshVar() {
         return freshVar++;
     }
     
-    public int peekVar() {
+    int peekVar() {
         return freshVar + 1;
     }
     
@@ -69,10 +69,10 @@ public class Config {
     public String toString() {
         StringBuilder sb = new StringBuilder().append(Substitution.applyAll(substitutions, VariableTerm.VAR_0));
         if (!A.isEmpty()) {
-            sb.append(ANSI.yellow("  A.. ")).append(Util.str(A));
+            sb.append(ANSI.yellow("  A.. ")).append(Data.str(A));
         }
         if (!S.isEmpty()) {
-            sb.append(ANSI.yellow("  S.. ")).append(Util.str(S));
+            sb.append(ANSI.yellow("  S.. ")).append(Data.str(S));
         }
         sb.append(ANSI.yellow("  α..", alpha1, alpha2));
         

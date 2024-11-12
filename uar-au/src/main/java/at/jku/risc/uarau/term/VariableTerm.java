@@ -1,6 +1,7 @@
-package at.jku.risc.uarau.data.term;
+package at.jku.risc.uarau.term;
 
-import at.jku.risc.uarau.data.Solution;
+import at.jku.risc.uarau.Solution;
+import at.jku.risc.uarau.Witness;
 import at.jku.risc.uarau.util.ANSI;
 import at.jku.risc.uarau.util.ArraySet;
 
@@ -10,7 +11,7 @@ import java.util.Set;
  * {@linkplain VariableTerm VariableTerms} are terms to be substituted.
  * <br>
  * If enabled, {@linkplain Solution Solutions} supply
- * {@linkplain at.jku.risc.uarau.data.Witness#substitutions Witness.substitutions}
+ * {@linkplain Witness#substitutions Witness.substitutions}
  * for each variable in their generalization.
  * <br><br>
  * See {@linkplain MappedVariableTerm} for representing variables in the problem statement.

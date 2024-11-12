@@ -1,13 +1,14 @@
-package at.jku.risc.uarau.data.term;
+package at.jku.risc.uarau.term;
 
-import at.jku.risc.uarau.data.Solution;
+import at.jku.risc.uarau.Solution;
+import at.jku.risc.uarau.impl.Algorithm;
 
 import java.util.Collections;
 
 /**
  * {@linkplain MappedVariableTerm} represent variables from the original problem domain.
  * <br>
- * From the perspective of the {@linkplain at.jku.risc.uarau.Algorithm Algorithm},
+ * From the perspective of the {@linkplain Algorithm Algorithm},
  * they act like constants - i.e. they are not substituted.
  * <br><br>
  * (See {@linkplain GroundTerm} for more details)

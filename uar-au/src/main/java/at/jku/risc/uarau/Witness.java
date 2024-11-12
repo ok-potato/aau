@@ -1,8 +1,8 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau;
 
-import at.jku.risc.uarau.data.term.Term;
+import at.jku.risc.uarau.term.Term;
 import at.jku.risc.uarau.util.ANSI;
-import at.jku.risc.uarau.util.Util;
+import at.jku.risc.uarau.util.Data;
 
 import java.util.Collections;
 import java.util.Map;
@@ -24,9 +24,9 @@ public class Witness {
     
     @Override
     public String toString() {
-        return Util.str(substitutions.entrySet()
+        return Data.str(substitutions.entrySet()
                 .stream()
-                .flatMap(entry -> Stream.of(ANSI.blue(entry.getKey()), Util.str(entry.getValue())))
+                .flatMap(entry -> Stream.of(ANSI.blue(entry.getKey()), Data.str(entry.getValue())))
                 .collect(Collectors.toList()));
     }
 }
