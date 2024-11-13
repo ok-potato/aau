@@ -113,6 +113,7 @@ public class Problem {
         return this;
     }
     
+    // TODO put some varargs in this bih?? :^o
     /**
      * Define the set of <b>proximity relations</b> (see {@linkplain Problem#proximityRelations(Collection)}) via String representation:
      * <ul>

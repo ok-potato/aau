@@ -88,7 +88,6 @@ public class Algorithm {
         giveWitnesses = problem.giveWitnesses();
     }
     
-    // TODO documentation?
     private Set<Solution> run() {
         log.info(ANSI.yellow("SOLVING: ") + lhs + ANSI.yellow(" == ") + rhs + ANSI.yellow(" λ=", lambda));
         
@@ -322,7 +321,6 @@ public class Algorithm {
     
     private final Pair<ArraySet<GroundTerm>, Integer> IS_CONSISTENT = new Pair<>(null, null);
     
-    // TODO it might be a good idea to just duplicate this method
     private Pair<ArraySet<GroundTerm>, Integer> doConjoin(ArraySet<GroundTerm> terms, int freshVar, boolean consistencyCheck) {
         Queue<State> branches = new ArrayDeque<>();
         branches.add(new State(terms, freshVar));
