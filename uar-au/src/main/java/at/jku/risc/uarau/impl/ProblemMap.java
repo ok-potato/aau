@@ -65,7 +65,7 @@ class ProblemMap {
         this.mappedVariables = Collections.unmodifiableSet(pair.right);
         
         this.theoreticalRestrictionType = inferRestriction(allProximityRelations);
-        removeBelowLambdaCut(allProximityRelations, lambda);
+        removeProximitesBelowLambda(allProximityRelations, lambda);
         this.restrictionType = inferRestriction(allProximityRelations);
         
         this.proximityMap = Collections.unmodifiableMap(buildMap(allProximityRelations));
@@ -201,8 +201,6 @@ class ProblemMap {
         }
     }
     
-    // TODO Do we want/need to allow manually defining arities?
-    
     /**
      * Infers function arities from their occurrences in the problem terms and proximity relations.
      * <br>
@@ -272,7 +270,7 @@ class ProblemMap {
     /**
      * <b>Optimisation:</b> removes all relations below the lambda-cut, since they can't contribute to solutions.
      */
-    private void removeBelowLambdaCut(Collection<ProximityRelation> proximityRelations, float lambda) {
+    private void removeProximitesBelowLambda(Collection<ProximityRelation> proximityRelations, float lambda) {
         proximityRelations.removeIf(relation -> {
             if (relation.proximity < lambda) {
                 log.info("Discarding relation {} with proximity < λ [{}]", relation, lambda);

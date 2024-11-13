@@ -1,8 +1,8 @@
 package at.jku.risc.uarau;
 
+import at.jku.risc.uarau.impl.Algorithm;
 import at.jku.risc.uarau.impl.Parser;
 import at.jku.risc.uarau.term.GroundTerm;
-import at.jku.risc.uarau.impl.Algorithm;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Panic;
 

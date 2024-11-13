@@ -26,8 +26,8 @@ public class ProximityRelation {
     public ProximityRelation(String f, String g, float proximity, List<Set<Integer>> argMapping) {
         this.f = f.intern();
         this.g = g.intern();
-        if (proximity < 0.0f || proximity >= 1.0f && f != g) {
-            throw Panic.arg("Proximity outside of range [0,1): %s", proximity);
+        if (proximity < 0.0f || proximity > 1.0f) {
+            throw Panic.arg("Proximity outside of range [0,1]: %s", proximity);
         }
         this.proximity = proximity;
         this.argMapping = argMapping;

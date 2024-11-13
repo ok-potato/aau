@@ -69,7 +69,10 @@ public class InitializerTest extends BaseTest {
     
     @Test
     public void rangeCheck() {
-        solve("a() ?= b()", "a b [0.999999] {}", 0.5f);
-        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [0.999999999] {}", 0.5f));
+        solve("a() ?= b()", "a b [0] {}", 0.5f);
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [-0.000001] {}", 0.5f));
+        
+        solve("a() ?= b()", "a b [1] {}", 0.5f);
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [1.000001] {}", 0.5f));
     }
 }

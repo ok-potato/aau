@@ -9,6 +9,31 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// TODO should you be able to implement your own proximity map?
+//  - I.e. implement an interface with proxClass(f) + proximity(f, g) instead of listing all relations upfront?
+//  - In that case I'd have to rework ProblemMap, since it infers arities through the predefined relations.
+
+// TODO should you be able to specify arities?
+//  - I can infer everything except trailing irrelevant positions in functions which don't appear in the problem terms.
+//  - These don't effect the calculation, but would not appear in the output now.
+//  - Currently, you could work around this with a 'bogus' relation, with proximity 0.0,
+//    which includes the last position of that function in its argument relation.
+
+// TODO is it weird to have ANON as a MappedVariableTerm?
+//  - I like being able to encode that AUTs and Expressions only contain GroundTerms + ANON
+//  - could make it GroundTerm -> might make it clearer that it's a hack
+//  - depending on what you do with the output, it might be annoying that ANON is not of type Variable
+//  - could make its own type which extends both Variable and GroundTerm ???
+//  - also, since ANON is a GroundTerm, that means you can include it in the input, is that a problem?
+
+// TODO handle case lambda := 0.0
+
+// TODO test that var(Solution) is always equal to keys(witnesses)
+
+// TODO maybe test for witnesses contain original terms, and that all substitution application give you proximates
+
+// TODO should the sets of substitutions in Witness be Substitutions instead of Terms? or at least a method to generate them?
+
 /**
  * Core implementation of the Algorithm described in the paper:
  * <br>
