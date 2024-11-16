@@ -29,10 +29,9 @@ import java.util.stream.Collectors;
 // TODO handle case lambda := 0.0
 
 // TODO test that var(Solution) is always equal to keys(witnesses)
-
 // TODO maybe test for witnesses contain original terms, and that all substitution application give you proximates
 
-// TODO should the sets of substitutions in Witness be Substitutions instead of Terms? or at least a method to generate them?
+// TODO should the sets of substitutions in Witness be Substitutions instead of Terms?
 
 /**
  * Core implementation of the Algorithm described in the paper:
