@@ -15,23 +15,22 @@ import java.util.stream.Collectors;
 
 // TODO should you be able to specify arities?
 //  - I can infer everything except trailing irrelevant positions in functions which don't appear in the problem terms.
-//  - These don't effect the calculation, but would not appear in the output now.
+//  - These don't affect the calculation, but would not appear in the output now.
 //  - Currently, you could work around this with a 'bogus' relation, with proximity 0.0,
 //    which includes the last position of that function in its argument relation.
 
-// TODO is it weird to have ANON as a MappedVariableTerm?
+// TODO is it okay to have ANON as a MappedVariableTerm?
 //  - I like being able to encode that AUTs and Expressions only contain GroundTerms + ANON
-//  - could make it GroundTerm -> might make it clearer that it's a hack
-//  - depending on what you do with the output, it might be annoying that ANON is not of type Variable
+//  - depending on what you do with the output, it might be a problem that ANON is not of type Variable?
 //  - could make its own type which extends both Variable and GroundTerm ???
-//  - also, since ANON is a GroundTerm, that means you can include it in the input, is that a problem?
-
-// TODO handle case lambda := 0.0
-
-// TODO test that var(Solution) is always equal to keys(witnesses)
-// TODO maybe test for witnesses contain original terms, and that all substitution application give you proximates
+//  - also, since ANON is a GroundTerm, that means you can include it in the input -> could check for this
 
 // TODO should the sets of substitutions in Witness be Substitutions instead of Terms?
+
+// TODO yellow commas between terms e.g. in witnesses
+// TODO different color for relations?
+
+// TODO provide TestUtils.verify() in library?
 
 /**
  * Core implementation of the Algorithm described in the paper:
@@ -74,20 +73,23 @@ public class Algorithm {
     private final float lambda;
     private final boolean doMerge, giveWitnesses;
     
-    private Algorithm(Problem problem) {
+    public Algorithm(Problem problem) {
         lhs = problem.getEquation().left;
         rhs = problem.getEquation().right;
         lambda = problem.getLambda();
         if (lambda < 0.0f || lambda > 1.0f) {
             throw Panic.arg("Lambda must be in range [0,1]");
         }
+        if (lambda == 0.0f) {
+            throw Panic.arg("Cannot produce the solution set for case λ = %s, since it is infinitely big.", lambda);
+        }
         problemMap = new ProblemMap(lhs, rhs, problem.getProximityRelations(), lambda);
         tNorm = problem.getTNorm();
-        doMerge = problem.doMerge();
-        giveWitnesses = problem.giveWitnesses();
+        doMerge = problem.wantsMerge();
+        giveWitnesses = problem.wantsWitnesses();
     }
     
-    private Set<Solution> run() {
+    public Set<Solution> run() {
         log.info(ANSI.yellow("SOLVING: ") + lhs + ANSI.yellow(" == ") + rhs + ANSI.yellow(" λ=", lambda));
         
         if (log.isDebugEnabled()) {
@@ -181,7 +183,7 @@ public class Algorithm {
             }
             assert Q1 != null && Q2 != null;
             if (!problemMap.restrictionType.mapping) {
-                if (Data.any(Q1, this::inconsistent) || Data.any(Q2, this::inconsistent)) {
+                if (Data.any(Q1, q -> !consistent(q)) || Data.any(Q2, q -> !consistent(q))) {
                     continue;
                 }
             }
@@ -299,7 +301,7 @@ public class Algorithm {
         Map<Integer, Set<Term>> W1 = new HashMap<>();
         Map<Integer, Set<Term>> W2 = new HashMap<>();
         for (int var : r.v_named()) {
-            Pair<Set<Term>, Set<Term>> applied = AUT.applyAll(cfg.S, new VariableTerm(var));
+            Pair<Set<Term>, Set<Term>> applied = AUT.substituteAll(cfg.S, new VariableTerm(var));
             W1.put(var, applied.left);
             W2.put(var, applied.right);
         }
@@ -308,8 +310,8 @@ public class Algorithm {
     
     // *** special conjunction ***
     
-    private boolean inconsistent(ArraySet<GroundTerm> terms) {
-        return doConjoin(terms, VariableTerm.VAR_0, true) != IS_CONSISTENT;
+    public boolean consistent(ArraySet<GroundTerm> terms) {
+        return doConjoin(terms, VariableTerm.VAR_0.var, true) == IS_CONSISTENT;
     }
     
     private Pair<ArraySet<GroundTerm>, Integer> conjoin(ArraySet<GroundTerm> terms, int freshVar) {
@@ -320,7 +322,8 @@ public class Algorithm {
     
     private final Pair<ArraySet<GroundTerm>, Integer> IS_CONSISTENT = new Pair<>(null, null);
     
-    private Pair<ArraySet<GroundTerm>, Integer> doConjoin(ArraySet<GroundTerm> terms, int freshVar, boolean consistencyCheck) {
+    private Pair<ArraySet<GroundTerm>, Integer> doConjoin(ArraySet<GroundTerm> terms, int baseVar, boolean consistencyCheck) {
+        int freshVar = baseVar;
         Queue<State> branches = new ArrayDeque<>();
         branches.add(new State(terms, freshVar));
         
@@ -365,7 +368,7 @@ public class Algorithm {
             if (consistencyCheck) {
                 return IS_CONSISTENT;
             }
-            solutions.add(Substitution.applyAllForceGroundTerm(state.s, state.peekVar()));
+            solutions.add(Substitution.applyAllForceGroundTerm(state.s, new VariableTerm(baseVar)));
         }
         if (consistencyCheck) {
             return null;

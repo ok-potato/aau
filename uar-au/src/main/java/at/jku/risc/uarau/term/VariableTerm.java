@@ -3,8 +3,8 @@ package at.jku.risc.uarau.term;
 import at.jku.risc.uarau.Solution;
 import at.jku.risc.uarau.Witness;
 import at.jku.risc.uarau.util.ANSI;
-import at.jku.risc.uarau.util.ArraySet;
 
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -17,7 +17,7 @@ import java.util.Set;
  * See {@linkplain MappedVariableTerm} for representing variables in the problem statement.
  */
 public class VariableTerm implements Term {
-    public static final int VAR_0 = 0;
+    public static final VariableTerm VAR_0 = new VariableTerm(0);
     public final int var;
     
     public VariableTerm(int var) {
@@ -26,7 +26,7 @@ public class VariableTerm implements Term {
     
     @Override
     public Set<Integer> v_named() {
-        return ArraySet.singleton(var);
+        return Collections.singleton(var);
     }
     
     @Override

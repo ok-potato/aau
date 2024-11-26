@@ -194,7 +194,7 @@ public class Problem {
         return this;
     }
     
-    public boolean doMerge() {
+    public boolean wantsMerge() {
         return merge;
     }
     
@@ -213,7 +213,7 @@ public class Problem {
         return this;
     }
     
-    public boolean giveWitnesses() {
+    public boolean wantsWitnesses() {
         return witnesses;
     }
 }

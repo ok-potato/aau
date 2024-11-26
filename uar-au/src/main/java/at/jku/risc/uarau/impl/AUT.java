@@ -32,19 +32,19 @@ class AUT {
         this.T2 = T2;
     }
     
-    // TODO documentation
-    static Pair<Set<Term>, Set<Term>> applyAll(Queue<AUT> auts, Term baseTerm) {
+    // TODO document
+    static Pair<Set<Term>, Set<Term>> substituteAll(Queue<AUT> auts, Term baseTerm) {
         Pair<Set<Term>, Set<Term>> applied = new Pair<>(new HashSet<>(), new HashSet<>());
         applied.left.add(baseTerm);
         applied.right.add(baseTerm);
         
         for (AUT aut : auts) {
-            applied = aut.apply(applied.left, applied.right);
+            applied = aut.substitute(applied.left, applied.right);
         }
         return applied;
     }
     
-    Pair<Set<Term>, Set<Term>> apply(Set<Term> Q1, Set<Term> Q2) {
+    Pair<Set<Term>, Set<Term>> substitute(Set<Term> Q1, Set<Term> Q2) {
         Set<Term> lhs = new HashSet<>();
         Set<Term> rhs = new HashSet<>();
         

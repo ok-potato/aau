@@ -33,10 +33,11 @@ public class ArraySet<E> implements Set<E> {
     }
     
     @SuppressWarnings("unchecked")
-    private ArraySet(E element) {
-        elements = (E[]) new Object[]{element};
+    public ArraySet(E... elements) {
+        this.elements = elements;
     }
     
+    @SuppressWarnings("unchecked")
     public static <E> ArraySet<E> singleton(E element) {
         return new ArraySet<>(element);
     }
@@ -127,11 +128,11 @@ public class ArraySet<E> implements Set<E> {
     // *** equals/hashCode ***
     
     /**
-     * w.r.t. their usage, ArraySets don't in principle need to be ordered, and the decision is mostly based on performance in
+     * ArraySets don't in principle need to be ordered, and the decision is mostly based on performance in
      * {@linkplain at.jku.risc.uarau.impl.ProblemMap#commonProximates(ArraySet) ProblemMap.commonProximates(ArraySet)}.
      * <br><br>
      * Memory "hits" usually greatly outnumber the "misses" due to permutations of a single set of function symbols.
-     * This makes it usually worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).
+     * This usually makes it worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).
      */
     @Override
     public boolean equals(Object obj) {
@@ -159,6 +160,11 @@ public class ArraySet<E> implements Set<E> {
             }
         }
         return hash;
+    }
+    
+    @Override
+    public String toString() {
+        return Arrays.toString(elements);
     }
     
     // *** iterator ***

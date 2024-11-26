@@ -1,12 +1,9 @@
-package at.jku.risc.uarau.data;
+package at.jku.risc.uarau;
 
-import at.jku.risc.uarau.AlgorithmTest;
-import at.jku.risc.uarau.BaseTest;
-import at.jku.risc.uarau.ProximityRelation;
 import at.jku.risc.uarau.impl.Parser;
 import org.junit.jupiter.api.Test;
 
-public class ProblemMapTest extends BaseTest {
+public class ProblemMapTest {
     @Test
     public void flippedRelationsAreSymmetric() {
         assert symmetric(Parser.parseProximityRelation("f g [0.9] {1 1, 3 2, 1 1}"));

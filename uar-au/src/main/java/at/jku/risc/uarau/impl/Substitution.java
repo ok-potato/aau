@@ -4,13 +4,13 @@ import at.jku.risc.uarau.term.FunctionTerm;
 import at.jku.risc.uarau.term.GroundTerm;
 import at.jku.risc.uarau.term.Term;
 import at.jku.risc.uarau.term.VariableTerm;
-import at.jku.risc.uarau.util.Panic;
 import at.jku.risc.uarau.util.Data;
+import at.jku.risc.uarau.util.Panic;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-// TODO documentation
+// TODO document
 public class Substitution {
     public final int var;
     public final Term substitute;
@@ -20,20 +20,20 @@ public class Substitution {
         this.substitute = substitute;
     }
     
-    public static Term applyAll(Queue<Substitution> substitutions, int baseVariable) {
+    public static Term applyAll(Queue<Substitution> substitutions, Term baseTerm) {
         if (substitutions.isEmpty()) {
-            return new VariableTerm(baseVariable);
+            return baseTerm;
         }
         substitutions = new ArrayDeque<>(substitutions);
-        Term term = substitutions.remove().substitute;
+        Term term = baseTerm;
         for (Substitution substitution : substitutions) {
             term = substitution.apply(term);
         }
         return term;
     }
     
-    public static GroundTerm applyAllForceGroundTerm(Queue<Substitution> substitutions, int baseVariable) {
-        Term term = applyAll(substitutions, baseVariable);
+    public static GroundTerm applyAllForceGroundTerm(Queue<Substitution> substitutions, Term baseTerm) {
+        Term term = applyAll(substitutions, baseTerm);
         try {
             return GroundTerm.force(term);
         } catch (UnsupportedOperationException e) {

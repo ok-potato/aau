@@ -1,12 +1,13 @@
 package at.jku.risc.uarau.util;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Useful collection operations
+ * Useful collection operations, in part inspired by the Kotlin stdlib
  */
 public class Data {
     
@@ -51,8 +52,18 @@ public class Data {
         return true;
     }
     
+    public static <E, T> Set<E> permute(Set<E> set, Collection<Set<T>> steps, BiFunction<E, T, E> mapping) {
+        for (Set<T> transforms : steps) {
+            set = set.stream().flatMap(e -> transforms.stream().map(t -> mapping.apply(e, t))).collect(Collectors.toSet());
+        }
+        return set;
+    }
+    
     public static <E> E getAny(Set<E> set) {
-        return set.stream().findFirst().orElseThrow(IllegalArgumentException::new);
+        for (E e : set) {
+            return e;
+        }
+        throw Panic.arg("No element present");
     }
     
     public static <E> boolean any(Collection<E> collection, Function<E, Boolean> check) {

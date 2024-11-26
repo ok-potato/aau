@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static at.jku.risc.uarau.impl.Algorithm.solve;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class InitializerTest extends BaseTest {
+public class InitializerTest {
     @Test
     public void parseArities() {
         solve("f(a()) ?= f(b())", "", 0.5f);
@@ -69,10 +69,16 @@ public class InitializerTest extends BaseTest {
     
     @Test
     public void rangeCheck() {
+        // alpha
         solve("a() ?= b()", "a b [0] {}", 0.5f);
         assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [-0.000001] {}", 0.5f));
         
         solve("a() ?= b()", "a b [1] {}", 0.5f);
         assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [1.000001] {}", 0.5f));
+        
+        // lambda
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [0.5] {}", 0.0f));
+        solve("a() ?= b()", "a b [0.5] {}", 1.0f);
+        assertThrows(IllegalArgumentException.class, () -> solve("a() ?= b()", "a b [0.5] {}", 1.000001f));
     }
 }

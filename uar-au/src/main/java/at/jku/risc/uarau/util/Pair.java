@@ -3,7 +3,7 @@ package at.jku.risc.uarau.util;
 import java.util.Objects;
 
 /**
- * Utility data structure used for two-valued function returns, in particular compact representation of LHS + RHS.
+ * Utility data structure used for two-valued function returns, particularly for compact representation of LHS + RHS.
  */
 public class Pair<L, R> {
     public final L left;
@@ -27,5 +27,10 @@ public class Pair<L, R> {
     @Override
     public int hashCode() {
         return 31 * Objects.hashCode(left) + Objects.hashCode(right);
+    }
+    
+    @Override
+    public String toString() {
+        return left + ANSI.yellow(" -- ") + right;
     }
 }
