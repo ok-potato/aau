@@ -24,9 +24,7 @@ public class TestUtils {
                         && v_named.equals(solution.rhs.substitutions.keySet());
                 
                 Pair<Set<GroundTerm>, Set<GroundTerm>> enumerated = solution.enumerate();
-                System.out.println(problem.getEquation());
-                System.out.println(enumerated);
-                
+
                 // all substitutions should lead to proximates of the problem terms
                 assert Data.all(enumerated.left, groundTerm -> algorithm.consistent(new ArraySet<>(groundTerm, problem.getEquation().left)));
                 assert Data.all(enumerated.right, groundTerm -> algorithm.consistent(new ArraySet<>(groundTerm, problem.getEquation().right)));

@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO documentation
-
 /**
  * See {@linkplain Solution}
  */

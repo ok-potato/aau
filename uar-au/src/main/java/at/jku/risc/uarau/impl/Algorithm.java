@@ -25,11 +25,6 @@ import java.util.stream.Collectors;
 //  - could make its own type which extends both Variable and GroundTerm ???
 //  - also, since ANON is a GroundTerm, that means you can include it in the input -> could check for this
 
-// TODO should the sets of substitutions in Witness be Substitutions instead of Terms?
-
-// TODO yellow commas between terms e.g. in witnesses
-// TODO different color for relations?
-
 // TODO provide TestUtils.verify() in library?
 
 /**

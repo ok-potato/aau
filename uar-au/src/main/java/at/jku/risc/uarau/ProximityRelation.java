@@ -47,7 +47,7 @@ public class ProximityRelation {
     
     @Override
     public String toString() {
-        return String.format("(%s%s %s)", ANSI.blue(f + " " + g), argRelationtoString(), proximity);
+        return String.format("(%s%s %s)", ANSI.green(f + " " + g), argRelationtoString(), proximity);
     }
     
     private String argRelationtoString() {
