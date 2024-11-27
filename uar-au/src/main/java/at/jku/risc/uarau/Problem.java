@@ -134,7 +134,7 @@ public class Problem {
      */
     public Problem proximityRelations(String relations) {
         if (customFuzzySystem != null) {
-            throw Panic.arg("Ambiguous problem definition: cannot define both a custom problem space and proximity relations or arities.");
+            throw Panic.arg("Ambiguous problem definition: cannot define both a custom fuzzy system and proximity relations or arities.");
         }
         return proximityRelations(Parser.parseProximityRelations(relations));
     }
@@ -143,10 +143,14 @@ public class Problem {
         return proximityRelations;
     }
     
-    // TODO document
+    /**
+     * Explicitly define the arities of some (or all) functions.
+     * <br>
+     * This is usually unnecessary, except in the case described in the README section on arities.
+     */
     public Problem arities(Map<String, Integer> arities) {
         if (customFuzzySystem != null) {
-            throw Panic.arg("Ambiguous problem definition: cannot define both a custom problem space and proximity relations or arities.");
+            throw Panic.arg("Ambiguous problem definition: cannot define both a custom fuzzy system and proximity relations or arities.");
         }
         this.definedArities = arities;
         return this;
@@ -156,16 +160,23 @@ public class Problem {
         return this.definedArities;
     }
     
-    // TODO document
-    public Problem customProblemSpace(FuzzySystem customFuzzySystem) {
+    /**
+     * Provide a custom fuzzy logic system.
+     * <br>
+     * This is only needed if it's impractical to provide all relevant proximity relations upfront.
+     * <br><br>
+     * If a custom fuzzy system is provided, {@linkplain Problem#proximityRelations(Collection) proximityRelations}
+     * and {@linkplain Problem#arities(Map) arities} no longer make sense as inputs.
+     */
+    public Problem customFuzzySystem(FuzzySystem customFuzzySystem) {
         if (!proximityRelations.isEmpty() || !definedArities.isEmpty()) {
-            throw Panic.arg("Ambiguous problem definition: cannot define both a custom problem space and proximity relations or arities.");
+            throw Panic.arg("Ambiguous problem definition: cannot define both a custom fuzzy system and proximity relations or arities.");
         }
         this.customFuzzySystem = customFuzzySystem;
         return this;
     }
     
-    public FuzzySystem getCustomProblemSpace() {
+    public FuzzySystem getCustomFuzzySystem() {
         return customFuzzySystem;
     }
     

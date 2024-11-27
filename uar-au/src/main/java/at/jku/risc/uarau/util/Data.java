@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Useful collection operations, in part inspired by the Kotlin stdlib
+ * Useful collection operations (partially inspired by Kotlin's stdlib)
  */
 public class Data {
     
@@ -30,21 +30,21 @@ public class Data {
         return list;
     }
     
-    public static <E, M> List<M> mapList(List<E> original, Function<E, M> mappingFunction) {
+    public static <E, M> List<M> mapToList(Collection<E> original, Function<E, M> mapping) {
         return original.stream()
-                .map(mappingFunction)
+                .map(mapping)
                 .collect(Collectors.toCollection(() -> new ArrayList<>(original.size())));
     }
     
-    public static <E, M> Queue<M> mapQueue(Queue<E> original, Function<E, M> mappingFunction) {
+    public static <E, M> Queue<M> mapToQueue(Collection<E> original, Function<E, M> mapping) {
         return original.stream()
-                .map(mappingFunction)
+                .map(mapping)
                 .collect(Collectors.toCollection(() -> new ArrayDeque<>(original.size())));
     }
     
-    public static <E> void pad(Collection<E> collection, int newSize, Supplier<E> supplier) {
+    public static <E> void pad(Collection<E> collection, int newSize, Supplier<E> filler) {
         for (int idx = collection.size(); idx < newSize; idx++) {
-            collection.add(supplier.get());
+            collection.add(filler.get());
         }
     }
     
@@ -87,7 +87,7 @@ public class Data {
         return collection.stream().noneMatch(check::apply);
     }
     
-    // *** String ***
+    // *** toStrings ***
     
     public static String str(Collection<?> collection) {
         return str(collection, " ", "..", "", "");

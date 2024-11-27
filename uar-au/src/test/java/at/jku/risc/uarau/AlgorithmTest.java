@@ -1,6 +1,8 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.impl.Algorithm;
+import at.jku.risc.uarau.util.Data;
+import at.jku.risc.uarau.util.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.slf4j.Log4jLogger;
@@ -109,9 +111,10 @@ public class AlgorithmTest {
     
     @Test
     public void example7() {
-        String equation = "p(f1(a), g1(b)) ?= p(f2(a), g2(b))";
-        String relations = "f1 h1 [0.6] {1 1} ; f2 h2 [0.7] {1 1} ; g1 h1 [0.8] {1 2} ; g2 h2 [0.9] {1 2}";
-        Problem problem = new Problem(equation).proximityRelations(relations).lambda(0.5f);
+        Problem problem = new Problem("p(f1(a), g1(b)) ?= p(f2(a), g2(b))")
+                .proximityRelations("f1 h1 [0.6] {1 1} ; f2 h2 [0.7] {1 1} ; g1 h1 [0.8] {1 2} ; g2 h2 [0.9] {1 2}")
+                .arities(Data.mapOf(Pair.of("h1", 3), Pair.of("h2", 3)))
+                .lambda(0.5f);
         TestUtils.verify(problem);
     }
     

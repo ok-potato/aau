@@ -15,22 +15,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * The output of the {@linkplain Algorithm Algorithm} is a set of all possible
- * {@linkplain Solution Solutions}.
- * <br>
- * Each {@linkplain Solution} gives a unique, minimal {@linkplain Solution#generalization} for the problem terms.
+ * The output of the {@linkplain Algorithm Algorithm} is a set of {@linkplain Solution Solutions},
+ * where each solution gives a unique {@linkplain Solution#generalization} of the problem terms.
  * <br><br>
- * With {@linkplain at.jku.risc.uarau.Problem#witnesses(boolean) Problem.witnesses(boolean)}
- * enabled, every variable in the {@linkplain Solution#generalization}
- * will have an associated entry of possible {@linkplain Witness#substitutions} per side.
- * <br>
- * If one of the possible substitutions is applied for each variable,
- * you get a term which approximates the respective side of the posed problem, proving that the
- * {@linkplain Solution#generalization} is indeed valid.
+ * If enabled, each variable in the {@linkplain Solution#generalization}
+ * gets an associated {@linkplain Witness#substitutions} entry per side of the equation.
+ * You can apply any combination of these to get a term which approximates the respective problem term.
+ * You can get all possible approximating terms with {@linkplain Solution#enumerate()}.
  * <br><br>
- * {@linkplain Solution#alpha1} and {@linkplain Solution#alpha2} are the proximity of the
- * {@linkplain Solution#generalization} to the left- and right-hand problem terms respectively
- * (if you choose one of the optimal {@linkplain Witness#substitutions} for each variable).
+ * {@linkplain Solution#alpha1} and {@linkplain Solution#alpha2} are the maximum proximities you can get for each side.
  */
 public class Solution {
     public final Term generalization;
@@ -52,7 +45,6 @@ public class Solution {
         this.alpha2 = alpha2;
     }
     
-    // TODO document
     public Pair<Set<GroundTerm>, Set<GroundTerm>> enumerate() {
         return Pair.of(enumerateSide(lhs.substitutions), enumerateSide(rhs.substitutions));
     }

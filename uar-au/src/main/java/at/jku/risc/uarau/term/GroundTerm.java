@@ -46,7 +46,7 @@ public class GroundTerm implements Term {
             throw Panic.state("Couldn't cast sub-term '%s' of type %s", term, term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        return new GroundTerm(functionTerm.head, Data.mapList(functionTerm.arguments, GroundTerm::force));
+        return new GroundTerm(functionTerm.head, Data.mapToList(functionTerm.arguments, GroundTerm::force));
     }
     
     @Override

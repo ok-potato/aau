@@ -32,7 +32,6 @@ class AUT {
         this.T2 = T2;
     }
     
-    // TODO document
     static Pair<Set<Term>, Set<Term>> substituteAll(Queue<AUT> auts, Term baseTerm) {
         Pair<Set<Term>, Set<Term>> applied = Pair.of(new HashSet<>(), new HashSet<>());
         applied.left.add(baseTerm);

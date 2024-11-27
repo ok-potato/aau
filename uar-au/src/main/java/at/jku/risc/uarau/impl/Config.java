@@ -12,8 +12,8 @@ import java.util.Queue;
 /**
  * {@linkplain Config}s are mutable representations of the branching program states, where:
  * <ul>
- *     <li> {@linkplain Config#substitutions} is the substitutions needed to arrive at that state
- *     <li> {@linkplain Config#A} is the remaining set of sub-terms which might be generalizable
+ *     <li> {@linkplain Config#substitutions} is the substitutions needed to arrive at this state
+ *     <li> {@linkplain Config#A} is the remaining set of sub-terms which might be more generalizable
  *     <li> {@linkplain Config#S} is the set of fully generalized sub-terms
  * </ul>
  * When branching occurs, a new {@linkplain Config#copy()} is created per branch.

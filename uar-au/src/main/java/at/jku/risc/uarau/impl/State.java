@@ -18,8 +18,8 @@ import java.util.Queue;
  * A {@linkplain State} with no remaining {@linkplain Expression Expressions} is a success state.
  */
 class State {
-    public final Queue<Expression> expressions;
     public final Queue<Substitution> s;
+    public final Queue<Expression> expressions;
     
     private int freshVar;
     

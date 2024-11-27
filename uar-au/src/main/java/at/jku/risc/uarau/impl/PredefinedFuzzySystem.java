@@ -132,7 +132,7 @@ class PredefinedFuzzySystem implements FuzzySystem {
     }
     
     /**
-     * Convenience method for logging.
+     * Used for logging.
      */
     public List<String> compactView() {
         List<String> view = new ArrayList<>();
@@ -154,6 +154,9 @@ class PredefinedFuzzySystem implements FuzzySystem {
         return view;
     }
     
+    /**
+     * Used for logging.
+     */
     public List<String> fullView() {
         return proximityMap.values().stream().map(map -> Data.str(map.values())).collect(Collectors.toList());
     }

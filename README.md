@@ -37,7 +37,7 @@ For example, `f(x)` generalizes `f(g(a(), b()))`, because you can substitute `x`
 > E.g. we consider the terms `f(x, x, y)` and `f(x1, x1, x2)` to be the same "up to variable renaming".
 
 ---
-### 🧲 Proximity
+### 🌫️ Proximity
 
 To model a system (e.g. a real-life system), we make some `statements` about it.
 Classically, those statements are either `true` or `false`.
@@ -145,16 +145,7 @@ over the range [0.0, 1.0])`.
 > If nothing is provided, we use the `minimum` function as our `T-Norm` (which is most commonly used in fuzzy logic).
 
 ---
-### Custom Arities
-> TODO
-
----
-### Custom Fuzzy System
-
-> TODO
-
----
-### ⚖️ Lambda-Cut
+### 🔪 Lambda-Cut
 You can specify a `lambda-cut` value within the range `[0.0, 1.0]`, which defines a solution's minimum proximity
 to count as close enough.
 <br> The algorithm creates generalizations which are as specific as possible without falling under the lambda-cut.
@@ -184,8 +175,41 @@ Given a computed generalization, it's sometimes possible to combine the substitu
 If `merge` is enabled, the program checks for this, and merges the variables where possible.
 
 ---
+### 🦄 Custom Arities
 
-## ⚙️ Miscellaneous
+The program does its best to infer function arities,
+but custom arities are needed in one (relatively specific) scenario.
+
+If a function appears in the problem terms, the arity is taken from there.
+<br>
+If a function only appears in the proximity relations, we assume that the maximum position that appears in the argument mappings
+is the last position of the function.
+
+Ergo, if the function doesn't appear in the problem terms, and the last position is not a `relevant position` -
+i.e. there are no argument mappings to/from it - then the arity of that function has to be manually defined.
+
+An example of this occurring is `Example 7` in the paper,
+where the final positions of `h1` and `h2` are each irrelevant positions.
+
+---
+### 🎭 Custom Fuzzy System
+
+The default implementation of the algorithm assumes that you can enumerate all proximity relations that exist in your fuzzy system.
+However, this isn't technically required.
+
+The proximity classes must be finite, but there could, for instance, be an infinite number of functions in the system.
+It might then be impractical to figure out which proximity relations can be 'touched' by the algorithm.
+
+In this case, the user can provide a custom implementation of `FuzzySystem`.
+It needs to implement the methods:
+- `ProximityRelation proximityRelation(String f, String g)` 
+- `ArraySet<String> commonProximates(ArraySet<GroundTerm> f)`
+- `int arity(String f)`
+- `RestrictionType restrictionType()`
+
+---
+
+### 📦 Miscellaneous
 
  - Both generating witnesses and merging variables require the preprocessing step `expand`,
 which can be significantly more expensive than the rest of the algorithm.

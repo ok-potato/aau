@@ -4,6 +4,7 @@ import at.jku.risc.uarau.term.GroundTerm;
 import at.jku.risc.uarau.util.ArraySet;
 import at.jku.risc.uarau.util.Data;
 
+// TODO this is not clear
 /**
  * {@linkplain Expression Expressions} are part of a {@linkplain State State's} description of a program state
  * during a {@linkplain Algorithm#doConjoin(ArraySet, int, boolean) conjunction}.

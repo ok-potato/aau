@@ -8,7 +8,7 @@ public interface TNorm {
      * <br>
      * <b>commutativity</b>, <b>monotonicity</b> and <b>associativity</b>, with <b>1 as the identity</b>.
      * <br><br>
-     * The usual implementation is {@linkplain Math#min(float, float)}
+     * The default implementation is {@linkplain Math#min(float, float)}
      */
     float apply(float a, float b);
 }

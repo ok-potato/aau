@@ -10,7 +10,9 @@ import at.jku.risc.uarau.util.Panic;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-// TODO document
+/**
+ * Usually part of a chain of substitutions which will later be applied to a term.
+ */
 public class Substitution {
     public final int var;
     public final Term substitute;
@@ -32,6 +34,9 @@ public class Substitution {
         return term;
     }
     
+    /**
+     * Asserts at type level that there are no unsubstituted variables (besides ANON) remaining after substitution
+     */
     public static GroundTerm applyAllForceGroundTerm(Queue<Substitution> substitutions, Term baseTerm) {
         Term term = applyAll(substitutions, baseTerm);
         try {
@@ -52,7 +57,7 @@ public class Substitution {
             throw Panic.state("Unknown Term type used in substitution: %s", term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        return new FunctionTerm(functionTerm.head, Data.mapList(functionTerm.arguments, this::apply));
+        return new FunctionTerm(functionTerm.head, Data.mapToList(functionTerm.arguments, this::apply));
     }
     
     @Override

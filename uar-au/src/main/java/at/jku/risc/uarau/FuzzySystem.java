@@ -3,6 +3,7 @@ package at.jku.risc.uarau;
 import at.jku.risc.uarau.term.GroundTerm;
 import at.jku.risc.uarau.util.ArraySet;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,7 +31,9 @@ public interface FuzzySystem {
         return restrictionType();
     }
     
-    List<String> fullView();
+    default List<String> fullView() {
+        return Collections.emptyList();
+    }
     
     default List<String> compactView() {
         return fullView();

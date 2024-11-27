@@ -42,7 +42,7 @@ public class ProximityRelation {
                 flippedArgs.get(flippedIdx).add(idx);
             }
         }
-        return new ProximityRelation(g, f, proximity, Data.mapList(flippedArgs, relation -> ArraySet.of(relation, true)));
+        return new ProximityRelation(g, f, proximity, Data.mapToList(flippedArgs, relation -> ArraySet.of(relation, true)));
     }
     
     @Override

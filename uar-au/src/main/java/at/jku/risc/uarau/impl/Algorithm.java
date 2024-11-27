@@ -70,8 +70,8 @@ public class Algorithm {
         if (lambda == 0.0f) {
             throw Panic.arg("Cannot produce the solution set for case λ=0, since it is infinitely big.");
         }
-        if (problem.getCustomProblemSpace() != null) {
-            fuzzySystem = problem.getCustomProblemSpace();
+        if (problem.getCustomFuzzySystem() != null) {
+            fuzzySystem = problem.getCustomFuzzySystem();
         } else {
             fuzzySystem = new PredefinedFuzzySystem(lhs, rhs, problem.getDefinedArities(), problem.getProximityRelations(), lambda);
         }
@@ -80,6 +80,7 @@ public class Algorithm {
         giveWitnesses = problem.wantsWitnesses();
     }
     
+    // TODO document
     public Set<Solution> run() {
         log.info(ANSI.yellow("SOLVING: ") + lhs + ANSI.yellow(" == ") + rhs + ANSI.yellow(" λ=", lambda));
         
@@ -142,7 +143,7 @@ public class Algorithm {
         log.info(Data.log(ANSI.yellow("LINEAR:"), linearConfigs));
         
         // EXPAND
-        Queue<Config> expandedConfigs = Data.mapQueue(linearConfigs, this::expand);
+        Queue<Config> expandedConfigs = Data.mapToQueue(linearConfigs, this::expand);
         assert Data.isSet(expandedConfigs);
         if (!doMerge) {
             return generateSolutions(expandedConfigs);
@@ -150,11 +151,12 @@ public class Algorithm {
         log.info(Data.log(ANSI.yellow("EXPANDED:"), expandedConfigs));
         
         // MERGE
-        Queue<Config> mergedConfigs = Data.mapQueue(expandedConfigs, this::merge);
+        Queue<Config> mergedConfigs = Data.mapToQueue(expandedConfigs, this::merge);
         assert Data.isSet(mergedConfigs);
         return generateSolutions(mergedConfigs);
     }
     
+    // TODO document
     private Queue<Config> decompose(AUT aut, Config cfg) {
         Queue<Config> children = new ArrayDeque<>();
         ArraySet<GroundTerm> merged = ArraySet.merged(aut.T1, aut.T2);
@@ -203,39 +205,11 @@ public class Algorithm {
         return children;
     }
     
-    /**
-     * for each <b>t</b> in <b>T</b>, add to <b>Q[i]</b> the arguments which <b>h|i</b> maps to
-     * <br><br>
-     * <code>
-     * ex.: given ... T = {f(a,b), g(c)}
-     * <br>
-     * .... with .... h -> f {(1,1),(2,1)} ,  h -> g {(2,1)}
-     * <br>
-     * .... then .... Q = [{a}, {b,c}]
-     * </code>
-     */
-    private Pair<List<ArraySet<GroundTerm>>, Float> mapArgs(String h, ArraySet<GroundTerm> T, float beta) {
-        int hArity = fuzzySystem.arity(h);
-        List<Set<GroundTerm>> Q = Data.list(hArity, idx -> new HashSet<>());
-        for (GroundTerm t : T) {
-            ProximityRelation htRelation = fuzzySystem.proximityRelation(h, t.head);
-            beta = tNorm.apply(beta, htRelation.proximity);
-            if (beta < lambda) {
-                return Pair.of(null, beta);
-            }
-            for (int hIdx = 0; hIdx < hArity; hIdx++) {
-                for (int termIdx : htRelation.argMapping.get(hIdx)) {
-                    Q.get(hIdx).add(t.arguments.get(termIdx));
-                }
-            }
-        }
-        return Pair.of(Data.mapList(Q, ArraySet::of), beta);
-    }
-    
+    // TODO document
     private Config expand(Config linearCfg) {
         final int freshVar = linearCfg.freshVar();
         
-        Queue<AUT> expanded = Data.mapQueue(linearCfg.S, aut -> {
+        Queue<AUT> expanded = Data.mapToQueue(linearCfg.S, aut -> {
             Pair<ArraySet<GroundTerm>, Integer> E1 = conjoin(aut.T1, freshVar);
             Pair<ArraySet<GroundTerm>, Integer> E2 = conjoin(aut.T2, E1.right);
             assert !E1.left.isEmpty() && !E2.left.isEmpty();
@@ -244,6 +218,7 @@ public class Algorithm {
         return linearCfg.copyWithNewS(expanded);
     }
     
+    // TODO document
     private Config merge(Config expandedCfg) {
         Queue<AUT> remaining = new ArrayDeque<>(expandedCfg.S);
         Queue<AUT> merged = new ArrayDeque<>();
@@ -285,6 +260,35 @@ public class Algorithm {
         return expandedCfg.copyWithNewS(merged);
     }
     
+    /**
+     * for each <b>t</b> in <b>T</b>, add to <b>Q[i]</b> the arguments which <b>h|i</b> maps to
+     * <br><br>
+     * <code>
+     * ex.: given ... T = {f(a,b), g(c)}
+     * <br>
+     * .... with .... h -> f {(1,1),(2,1)} ,  h -> g {(2,1)}
+     * <br>
+     * .... then .... Q = [{a}, {b,c}]
+     * </code>
+     */
+    private Pair<List<ArraySet<GroundTerm>>, Float> mapArgs(String h, ArraySet<GroundTerm> T, float beta) {
+        int hArity = fuzzySystem.arity(h);
+        List<Set<GroundTerm>> Q = Data.list(hArity, idx -> new HashSet<>());
+        for (GroundTerm t : T) {
+            ProximityRelation htRelation = fuzzySystem.proximityRelation(h, t.head);
+            beta = tNorm.apply(beta, htRelation.proximity);
+            if (beta < lambda) {
+                return Pair.of(null, beta);
+            }
+            for (int hIdx = 0; hIdx < hArity; hIdx++) {
+                for (int termIdx : htRelation.argMapping.get(hIdx)) {
+                    Q.get(hIdx).add(t.arguments.get(termIdx));
+                }
+            }
+        }
+        return Pair.of(Data.mapToList(Q, ArraySet::of), beta);
+    }
+    
     private Set<Solution> generateSolutions(Collection<Config> configs) {
         Set<Solution> solutions = configs.stream().map(cfg -> {
             Term term = Substitution.applyAll(cfg.substitutions, VariableTerm.VAR_0);
@@ -322,6 +326,7 @@ public class Algorithm {
     
     private final Pair<ArraySet<GroundTerm>, Integer> IS_CONSISTENT = Pair.of(null, null);
     
+    // TODO document
     private Pair<ArraySet<GroundTerm>, Integer> doConjoin(ArraySet<GroundTerm> terms, int baseVar, boolean consistencyCheck) {
         int freshVar = baseVar;
         Queue<State> branches = new ArrayDeque<>();
