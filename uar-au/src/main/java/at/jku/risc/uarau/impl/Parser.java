@@ -33,7 +33,7 @@ public class Parser {
         if (tokens.length != 2) {
             throw Panic.parse("Need 2 sides per equation, but got %s", tokens.length);
         }
-        return new Pair<>(parseTerm(tokens[0]), parseTerm(tokens[1]));
+        return Pair.of(parseTerm(tokens[0]), parseTerm(tokens[1]));
     }
     
     /**

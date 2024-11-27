@@ -1,7 +1,6 @@
 package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.impl.Algorithm;
-import at.jku.risc.uarau.testutil.TestUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.slf4j.Log4jLogger;

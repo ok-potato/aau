@@ -9,12 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// TODO should you be able to specify arities?
-//  - I can infer everything except trailing irrelevant positions in functions which don't appear in the problem terms.
-//  - These don't affect the calculation, but would not appear in the output now.
-//  - Currently, you could work around this with a 'bogus' relation, with proximity 0.0,
-//    which includes the last position of that function in its argument relation.
-
 // TODO is it okay to have ANON as a MappedVariableTerm?
 //  - I like being able to encode that AUTs and Expressions only contain GroundTerms + ANON
 //  - depending on what you do with the output, it might be a problem that ANON is not of type Variable?
@@ -79,7 +73,7 @@ public class Algorithm {
         if (problem.getCustomProblemSpace() != null) {
             fuzzySystem = problem.getCustomProblemSpace();
         } else {
-            fuzzySystem = new PredefinedFuzzySystem(lhs, rhs, problem.getProximityRelations(), lambda);
+            fuzzySystem = new PredefinedFuzzySystem(lhs, rhs, problem.getDefinedArities(), problem.getProximityRelations(), lambda);
         }
         tNorm = problem.getTNorm();
         doMerge = problem.wantsMerge();
@@ -227,7 +221,7 @@ public class Algorithm {
             ProximityRelation htRelation = fuzzySystem.proximityRelation(h, t.head);
             beta = tNorm.apply(beta, htRelation.proximity);
             if (beta < lambda) {
-                return new Pair<>(null, beta);
+                return Pair.of(null, beta);
             }
             for (int hIdx = 0; hIdx < hArity; hIdx++) {
                 for (int termIdx : htRelation.argMapping.get(hIdx)) {
@@ -235,7 +229,7 @@ public class Algorithm {
                 }
             }
         }
-        return new Pair<>(Data.mapList(Q, ArraySet::of), beta);
+        return Pair.of(Data.mapList(Q, ArraySet::of), beta);
     }
     
     private Config expand(Config linearCfg) {
@@ -294,7 +288,7 @@ public class Algorithm {
     private Set<Solution> generateSolutions(Collection<Config> configs) {
         Set<Solution> solutions = configs.stream().map(cfg -> {
             Term term = Substitution.applyAll(cfg.substitutions, VariableTerm.VAR_0);
-            Pair<Witness, Witness> witnesses = giveWitnesses ? generateWitnesses(cfg, term) : new Pair<>(null, null);
+            Pair<Witness, Witness> witnesses = giveWitnesses ? generateWitnesses(cfg, term) : Pair.of(null, null);
             return new Solution(term, witnesses.left, witnesses.right, cfg.alpha1, cfg.alpha2);
         }).collect(Collectors.toSet());
         
@@ -311,7 +305,7 @@ public class Algorithm {
             W1.put(var, applied.left);
             W2.put(var, applied.right);
         }
-        return new Pair<>(new Witness(W1), new Witness(W2));
+        return Pair.of(new Witness(W1), new Witness(W2));
     }
     
     // *** special conjunction ***
@@ -326,7 +320,7 @@ public class Algorithm {
         return result;
     }
     
-    private final Pair<ArraySet<GroundTerm>, Integer> IS_CONSISTENT = new Pair<>(null, null);
+    private final Pair<ArraySet<GroundTerm>, Integer> IS_CONSISTENT = Pair.of(null, null);
     
     private Pair<ArraySet<GroundTerm>, Integer> doConjoin(ArraySet<GroundTerm> terms, int baseVar, boolean consistencyCheck) {
         int freshVar = baseVar;
@@ -391,6 +385,6 @@ public class Algorithm {
         if (log.isDebugEnabled()) {
             log.debug("  conjunction: {} => {}", terms, solutions);
         }
-        return new Pair<>(ArraySet.of(solutions, true), freshVar);
+        return Pair.of(ArraySet.of(solutions, true), freshVar);
     }
 }

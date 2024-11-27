@@ -6,9 +6,7 @@ import at.jku.risc.uarau.term.GroundTerm;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Panic;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * For a given anti-unification problem, create a {@linkplain Problem} object, and call
@@ -17,6 +15,7 @@ import java.util.Set;
 public class Problem {
     private final Pair<GroundTerm, GroundTerm> equation;
     private Collection<ProximityRelation> proximityRelations = new HashSet<>();
+    private Map<String, Integer> definedArities = new HashMap<>();
     private FuzzySystem customFuzzySystem = null;
     private float lambda = 1.0f;
     private TNorm tNorm = Math::min;
@@ -44,7 +43,7 @@ public class Problem {
      * (See also {@linkplain Problem#Problem(Pair)})
      */
     public Problem(GroundTerm lhs, GroundTerm rhs) {
-        this(new Pair<>(lhs, rhs));
+        this(Pair.of(lhs, rhs));
     }
     
     /**
@@ -76,7 +75,7 @@ public class Problem {
      * (See also {@linkplain Problem#Problem(String)})
      */
     public Problem(String lhs, String rhs) {
-        this(new Pair<>(Parser.parseTerm(lhs), Parser.parseTerm(rhs)));
+        this(Pair.of(Parser.parseTerm(lhs), Parser.parseTerm(rhs)));
     }
     
     public Pair<GroundTerm, GroundTerm> getEquation() {
@@ -135,19 +134,32 @@ public class Problem {
      */
     public Problem proximityRelations(String relations) {
         if (customFuzzySystem != null) {
-            throw Panic.arg("Ambiguous problem definition: proximity relations and custom problem space both defined.");
+            throw Panic.arg("Ambiguous problem definition: cannot define both a custom problem space and proximity relations or arities.");
         }
         return proximityRelations(Parser.parseProximityRelations(relations));
     }
     
-    // TODO document
     public Collection<ProximityRelation> getProximityRelations() {
         return proximityRelations;
     }
     
+    // TODO document
+    public Problem arities(Map<String, Integer> arities) {
+        if (customFuzzySystem != null) {
+            throw Panic.arg("Ambiguous problem definition: cannot define both a custom problem space and proximity relations or arities.");
+        }
+        this.definedArities = arities;
+        return this;
+    }
+    
+    public Map<String, Integer> getDefinedArities() {
+        return this.definedArities;
+    }
+    
+    // TODO document
     public Problem customProblemSpace(FuzzySystem customFuzzySystem) {
-        if (!proximityRelations.isEmpty()) {
-            throw Panic.arg("Ambiguous problem definition: proximity relations and custom problem space both defined.");
+        if (!proximityRelations.isEmpty() || !definedArities.isEmpty()) {
+            throw Panic.arg("Ambiguous problem definition: cannot define both a custom problem space and proximity relations or arities.");
         }
         this.customFuzzySystem = customFuzzySystem;
         return this;

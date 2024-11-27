@@ -26,7 +26,9 @@ class PredefinedFuzzySystem implements FuzzySystem {
     /**
      * Constructs a precomputed view of the problem described by the problem terms, relations and λ-cut.
      */
-    public PredefinedFuzzySystem(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> statedRelations, float lambda) {
+    public PredefinedFuzzySystem(
+            GroundTerm lhs, GroundTerm rhs, Map<String, Integer> definedArities, Collection<ProximityRelation> statedRelations, float lambda
+    ) {
         // include flipped relations
         List<ProximityRelation> allProximityRelations = new ArrayList<>(statedRelations.size() * 2);
         for (ProximityRelation relation : statedRelations) {
@@ -35,7 +37,7 @@ class PredefinedFuzzySystem implements FuzzySystem {
         }
         enforceValidRelations(allProximityRelations);
         
-        this.arities = Collections.unmodifiableMap(inferArities(lhs, rhs, allProximityRelations));
+        this.arities = Collections.unmodifiableMap(inferArities(lhs, rhs, definedArities, allProximityRelations));
         
         this.restrictionType = inferRestriction(allProximityRelations);
         removeProximitesBelowLambda(allProximityRelations, lambda);
@@ -170,7 +172,7 @@ class PredefinedFuzzySystem implements FuzzySystem {
         
         Set<Pair<String, String>> existing = new HashSet<>();
         for (ProximityRelation relation : proximityRelations) {
-            Pair<String, String> key = new Pair<>(relation.f, relation.g);
+            Pair<String, String> key = Pair.of(relation.f, relation.g);
             if (existing.contains(key)) {
                 throw Panic.arg("Multiple proximity relations defined between '%s' and '%s'", relation.f, relation.g);
             }
@@ -183,20 +185,21 @@ class PredefinedFuzzySystem implements FuzzySystem {
      * <br>
      * Note: this limits our knowledge of non-relevant positions to those of functions that appear in the problem.
      */
-    private Map<String, Integer> inferArities(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> proximityRelations) {
-        Map<String, Integer> termArities = new HashMap<>();
+    private Map<String, Integer> inferArities(
+            GroundTerm lhs, GroundTerm rhs, Map<String, Integer> definedArities, Collection<ProximityRelation> proximityRelations
+    ) {
         Set<String> mappedVariables = new HashSet<>();
         
-        inferAritiesFromTerm(lhs, termArities, mappedVariables);
-        inferAritiesFromTerm(rhs, termArities, mappedVariables);
+        inferAritiesFromTerm(lhs, definedArities, mappedVariables);
+        inferAritiesFromTerm(rhs, definedArities, mappedVariables);
         
-        Map<String, Integer> arities = new HashMap<>(termArities);
+        Map<String, Integer> arities = new HashMap<>(definedArities);
         for (ProximityRelation relation : proximityRelations) {
             if (mappedVariables.contains(relation.f)) {
                 throw Panic.arg("Variable '%s' can't be close to '%s'", relation.f, relation.g);
             }
-            if (termArities.containsKey(relation.f) && termArities.get(relation.f) < relation.argMapping.size()) {
-                throw Panic.arg("'%s' has a higher arity in its argument relation %s than in the equation",
+            if (definedArities.containsKey(relation.f) && definedArities.get(relation.f) < relation.argMapping.size()) {
+                throw Panic.arg("'%s' has a higher arity in its argument relation %s than defined",
                         relation.f,
                         relation);
             }
@@ -211,7 +214,7 @@ class PredefinedFuzzySystem implements FuzzySystem {
     private void inferAritiesFromTerm(GroundTerm term, Map<String, Integer> arities, Set<String> mappedVariables) {
         if (arities.containsKey(term.head)) {
             if (arities.get(term.head) != term.arguments.size()) {
-                throw Panic.arg("'%s' appears in the posed problem with multiple arities", term.head);
+                throw Panic.arg("'%s' is defined or appears in the posed problem with multiple arities", term.head);
             }
             if (mappedVariables.contains(term.head) != term instanceof MappedVariableTerm) {
                 throw Panic.arg("%s appears as both a variable and a function/const symbol", term.head);

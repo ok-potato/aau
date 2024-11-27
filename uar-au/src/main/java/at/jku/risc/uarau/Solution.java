@@ -54,7 +54,7 @@ public class Solution {
     
     // TODO document
     public Pair<Set<GroundTerm>, Set<GroundTerm>> enumerate() {
-        return new Pair<>(enumerateSide(lhs.substitutions), enumerateSide(rhs.substitutions));
+        return Pair.of(enumerateSide(lhs.substitutions), enumerateSide(rhs.substitutions));
     }
     
     private Set<GroundTerm> enumerateSide(Map<Integer, Set<Term>> substitutions) {

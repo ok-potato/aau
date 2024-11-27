@@ -1,4 +1,4 @@
-package at.jku.risc.uarau.testutil;
+package at.jku.risc.uarau;
 
 import at.jku.risc.uarau.Problem;
 import at.jku.risc.uarau.Solution;

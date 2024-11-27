@@ -133,11 +133,6 @@ Also by definition, a function approximates itself with the identity `f f [1.0] 
 > If nothing is provided, we assume no proximity relations besides the `id` relations.
 
 ---
-### Custom Fuzzy System
-
-> TODO
-
----
 ### 📐 T-Norm
 When we compute a generalisation, we're doing as many substitutions as we can - and for each substitution,
 we're taking advantage of some proximity relation.
@@ -148,6 +143,15 @@ The `T-Norm` is just some function which satisfies certain mathematical properti
 over the range [0.0, 1.0])`.
 
 > If nothing is provided, we use the `minimum` function as our `T-Norm` (which is most commonly used in fuzzy logic).
+
+---
+### Custom Arities
+> TODO
+
+---
+### Custom Fuzzy System
+
+> TODO
 
 ---
 ### ⚖️ Lambda-Cut

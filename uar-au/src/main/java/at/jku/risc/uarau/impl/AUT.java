@@ -34,7 +34,7 @@ class AUT {
     
     // TODO document
     static Pair<Set<Term>, Set<Term>> substituteAll(Queue<AUT> auts, Term baseTerm) {
-        Pair<Set<Term>, Set<Term>> applied = new Pair<>(new HashSet<>(), new HashSet<>());
+        Pair<Set<Term>, Set<Term>> applied = Pair.of(new HashSet<>(), new HashSet<>());
         applied.left.add(baseTerm);
         applied.right.add(baseTerm);
         
@@ -51,7 +51,7 @@ class AUT {
         Q1.forEach(q1 -> T1.forEach(t1 -> lhs.add(new Substitution(variable, t1).apply(q1))));
         Q2.forEach(q2 -> T2.forEach(t2 -> rhs.add(new Substitution(variable, t2).apply(q2))));
         
-        return new Pair<>(Collections.unmodifiableSet(lhs), Collections.unmodifiableSet(rhs));
+        return Pair.of(Collections.unmodifiableSet(lhs), Collections.unmodifiableSet(rhs));
     }
     
     @Override

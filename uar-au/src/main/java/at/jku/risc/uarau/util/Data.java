@@ -13,6 +13,15 @@ public class Data {
     
     // *** Instantiations, mappings ***
     
+    @SafeVarargs
+    public static <K, V> Map<K, V> mapOf(Pair<K, V>... pairs) {
+        Map<K, V> map = new HashMap<>();
+        for (Pair<K, V> pair : pairs) {
+            map.put(pair.left, pair.right);
+        }
+        return map;
+    }
+    
     public static <E> List<E> list(int size, Function<Integer, E> initializer) {
         List<E> list = new ArrayList<>(size);
         for (int idx = 0; idx < size; idx++) {
