@@ -9,10 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// TODO should you be able to implement your own proximity map?
-//  - I.e. implement an interface with proxClass(f) + proximity(f, g) instead of listing all relations upfront?
-//  - In that case I'd have to rework ProblemMap, since it infers arities through the predefined relations.
-
 // TODO should you be able to specify arities?
 //  - I can infer everything except trailing irrelevant positions in functions which don't appear in the problem terms.
 //  - These don't affect the calculation, but would not appear in the output now.
@@ -26,6 +22,8 @@ import java.util.stream.Collectors;
 //  - also, since ANON is a GroundTerm, that means you can include it in the input -> could check for this
 
 // TODO provide TestUtils.verify() in library?
+
+// TODO is it halal to remove proximities < lambda?
 
 /**
  * Core implementation of the Algorithm described in the paper:
@@ -63,7 +61,7 @@ public class Algorithm {
     private final Logger log = LoggerFactory.getLogger(Algorithm.class);
     
     private final GroundTerm lhs, rhs;
-    private final ProblemMap problemMap;
+    private final FuzzySystem fuzzySystem;
     private final TNorm tNorm;
     private final float lambda;
     private final boolean doMerge, giveWitnesses;
@@ -76,9 +74,13 @@ public class Algorithm {
             throw Panic.arg("Lambda must be in range [0,1]");
         }
         if (lambda == 0.0f) {
-            throw Panic.arg("Cannot produce the solution set for case λ = %s, since it is infinitely big.", lambda);
+            throw Panic.arg("Cannot produce the solution set for case λ=0, since it is infinitely big.");
         }
-        problemMap = new ProblemMap(lhs, rhs, problem.getProximityRelations(), lambda);
+        if (problem.getCustomProblemSpace() != null) {
+            fuzzySystem = problem.getCustomProblemSpace();
+        } else {
+            fuzzySystem = new PredefinedFuzzySystem(lhs, rhs, problem.getProximityRelations(), lambda);
+        }
         tNorm = problem.getTNorm();
         doMerge = problem.wantsMerge();
         giveWitnesses = problem.wantsWitnesses();
@@ -88,19 +90,19 @@ public class Algorithm {
         log.info(ANSI.yellow("SOLVING: ") + lhs + ANSI.yellow(" == ") + rhs + ANSI.yellow(" λ=", lambda));
         
         if (log.isDebugEnabled()) {
-            log.debug(Data.log(ANSI.yellow("R:"), problemMap.fullView()));
+            log.debug(Data.log(ANSI.yellow("R:"), fuzzySystem.fullView()));
         } else {
-            log.info(ANSI.yellow("R: ") + Data.str(problemMap.compactView()));
+            log.info(ANSI.yellow("R: ") + Data.str(fuzzySystem.compactView()));
         }
         
-        if (problemMap.restrictionType == problemMap.theoreticalRestrictionType) {
-            log.info("The problem is of type {}.", ANSI.blue(problemMap.restrictionType));
+        if (fuzzySystem.restrictionType() == fuzzySystem.practicalRestrictionType()) {
+            log.info("The problem is of type {}.", ANSI.blue(fuzzySystem.restrictionType()));
         } else {
             log.info("The problem is in theory of type {}. But excluding relations below the λ-cut, it is of type {}.",
-                    ANSI.blue(problemMap.theoreticalRestrictionType),
-                    ANSI.blue(problemMap.restrictionType));
+                    ANSI.blue(fuzzySystem.restrictionType()),
+                    ANSI.blue(fuzzySystem.practicalRestrictionType()));
         }
-        log.info(problemMap.restrictionType.correspondence ?
+        log.info(fuzzySystem.practicalRestrictionType().correspondence ?
                 "Therefore, we get the minimal complete set of generalizations." :
                 "Therefore, we are not guaranteed to get the minimal complete set of generalizations.");
         
@@ -161,7 +163,17 @@ public class Algorithm {
     
     private Queue<Config> decompose(AUT aut, Config cfg) {
         Queue<Config> children = new ArrayDeque<>();
-        ArraySet<String> commonProximates = problemMap.commonProximates(ArraySet.merged(aut.T1, aut.T2));
+        ArraySet<GroundTerm> merged = ArraySet.merged(aut.T1, aut.T2);
+        ArraySet<String> commonProximates = fuzzySystem.commonProximates(merged);
+        
+        if (commonProximates.size() == 1 && Data.any(merged, term -> term instanceof MappedVariableTerm)) {
+            // special case: MappedVariableTerm as common proximate
+            assert merged.size() == 1;
+            cfg.substitutions.add(new Substitution(aut.variable, Data.getAny(merged)));
+            children.add(cfg);
+            return children;
+        }
+        
         for (String h : commonProximates) {
             // map arguments
             Pair<List<ArraySet<GroundTerm>>, Float> T1Mapped = mapArgs(h, aut.T1, cfg.alpha1);
@@ -177,7 +189,7 @@ public class Algorithm {
                 continue;
             }
             assert Q1 != null && Q2 != null;
-            if (!problemMap.restrictionType.mapping) {
+            if (!fuzzySystem.practicalRestrictionType().mapping) {
                 if (Data.any(Q1, q -> !consistent(q)) || Data.any(Q2, q -> !consistent(q))) {
                     continue;
                 }
@@ -186,13 +198,12 @@ public class Algorithm {
             Config child = commonProximates.size() == 1 ? cfg : cfg.copy();
             child.alpha1 = alpha1;
             child.alpha2 = alpha2;
-            List<Term> hArgs = Data.list(problemMap.arity(h), idx -> {
+            List<Term> hArgs = Data.list(fuzzySystem.arity(h), idx -> {
                 int yi = child.freshVar();
                 child.A.add(new AUT(yi, Q1.get(idx), Q2.get(idx)));
                 return new VariableTerm(yi);
             });
-            Term hTerm = problemMap.isMappedVar(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, hArgs);
-            child.substitutions.add(new Substitution(aut.variable, hTerm));
+            child.substitutions.add(new Substitution(aut.variable, new FunctionTerm(h, hArgs)));
             children.add(child);
         }
         return children;
@@ -210,10 +221,10 @@ public class Algorithm {
      * </code>
      */
     private Pair<List<ArraySet<GroundTerm>>, Float> mapArgs(String h, ArraySet<GroundTerm> T, float beta) {
-        int hArity = problemMap.arity(h);
+        int hArity = fuzzySystem.arity(h);
         List<Set<GroundTerm>> Q = Data.list(hArity, idx -> new HashSet<>());
         for (GroundTerm t : T) {
-            ProximityRelation htRelation = problemMap.proximityRelation(h, t.head);
+            ProximityRelation htRelation = fuzzySystem.proximityRelation(h, t.head);
             beta = tNorm.apply(beta, htRelation.proximity);
             if (beta < lambda) {
                 return new Pair<>(null, beta);
@@ -224,7 +235,7 @@ public class Algorithm {
                 }
             }
         }
-        return new Pair<>(Data.mapList(Q, ArraySet::new), beta);
+        return new Pair<>(Data.mapList(Q, ArraySet::of), beta);
     }
     
     private Config expand(Config linearCfg) {
@@ -339,25 +350,34 @@ public class Algorithm {
                     continue;
                 }
                 // REDUCE
-                ArraySet<String> commonProximates = problemMap.commonProximates(nonAnonTerms);
-                for (String h : commonProximates) {
-                    List<ArraySet<GroundTerm>> Q = mapArgs(h, nonAnonTerms, 1.0f).left;
-                    assert Q != null;
-                    State childState = commonProximates.size() == 1 ? state : state.copy();
-                    
-                    List<Term> hArgs = Data.list(problemMap.arity(h), idx -> {
-                        int yi = childState.freshVar();
-                        childState.expressions.add(new Expression(yi, Q.get(idx)));
-                        return new VariableTerm(yi);
-                    });
-                    
-                    freshVar = Math.max(freshVar, childState.peekVar());
-                    Term hTerm = problemMap.isMappedVar(h) ? new MappedVariableTerm(h) : new FunctionTerm(h, hArgs);
-                    if (!consistencyCheck) {
-                        childState.s.add(new Substitution(expression.variable, hTerm));
+                ArraySet<String> commonProximates = fuzzySystem.commonProximates(nonAnonTerms);
+                
+                if (commonProximates.size() == 1 && Data.any(nonAnonTerms, term -> term instanceof MappedVariableTerm)) {
+                    // special case: MappedVariableTerm as common proximate
+                    assert nonAnonTerms.size() == 1;
+                    state.s.add(new Substitution(expression.variable, Data.getAny(nonAnonTerms)));
+                    branches.add(state);
+                } else {
+                    for (String h : commonProximates) {
+                        List<ArraySet<GroundTerm>> Q = mapArgs(h, nonAnonTerms, 1.0f).left;
+                        assert Q != null;
+                        State childState = commonProximates.size() == 1 ? state : state.copy();
+                        
+                        List<Term> hArgs = Data.list(fuzzySystem.arity(h), idx -> {
+                            int yi = childState.freshVar();
+                            childState.expressions.add(new Expression(yi, Q.get(idx)));
+                            return new VariableTerm(yi);
+                        });
+                        
+                        freshVar = Math.max(freshVar, childState.peekVar());
+                        Term hTerm = new FunctionTerm(h, hArgs);
+                        if (!consistencyCheck) {
+                            childState.s.add(new Substitution(expression.variable, hTerm));
+                        }
+                        branches.add(childState);
                     }
-                    branches.add(childState);
                 }
+                
                 continue BRANCHING;
             }
             if (consistencyCheck) {
@@ -371,6 +391,6 @@ public class Algorithm {
         if (log.isDebugEnabled()) {
             log.debug("  conjunction: {} => {}", terms, solutions);
         }
-        return new Pair<>(new ArraySet<>(solutions, true), freshVar);
+        return new Pair<>(ArraySet.of(solutions, true), freshVar);
     }
 }

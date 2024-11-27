@@ -16,7 +16,7 @@ public class ArraySet<E> implements Set<E> {
     private Integer hash = null;
     
     @SuppressWarnings("unchecked")
-    public ArraySet(Collection<E> collection, boolean knownAsUnique) {
+    private ArraySet(Collection<E> collection, boolean knownAsUnique) {
         if (collection instanceof ArraySet) {
             ArraySet<E> arraySet = (ArraySet<E>) collection;
             elements = arraySet.elements;
@@ -28,16 +28,24 @@ public class ArraySet<E> implements Set<E> {
         }
     }
     
-    public ArraySet(Collection<E> collection) {
-        this(collection, false);
+    public static <E> ArraySet<E> of(Collection<E> collection, boolean knownAsUnique) {
+        return collection instanceof ArraySet ? ((ArraySet<E>) collection) : new ArraySet<>(collection, knownAsUnique);
     }
     
-    @SuppressWarnings("unchecked")
+    public static <E> ArraySet<E> of(Collection<E> collection) {
+        return of(collection, false);
+    }
+    
+    @SafeVarargs
     public ArraySet(E... elements) {
-        this.elements = elements;
+        this(Arrays.asList(elements), false);
     }
     
     @SuppressWarnings("unchecked")
+    private ArraySet(E element) {
+        this.elements = (E[]) new Object[]{element};
+    }
+    
     public static <E> ArraySet<E> singleton(E element) {
         return new ArraySet<>(element);
     }
@@ -129,7 +137,7 @@ public class ArraySet<E> implements Set<E> {
     
     /**
      * ArraySets don't in principle need to be ordered, and the decision is mostly based on performance in
-     * {@linkplain at.jku.risc.uarau.impl.ProblemMap#commonProximates(ArraySet) ProblemMap.commonProximates(ArraySet)}.
+     * {@linkplain at.jku.risc.uarau.impl.PredefinedFuzzySystem#commonProximates(Set) PredefinedFuzzySystem.commonProximates(ArraySet)}.
      * <br><br>
      * Memory "hits" usually greatly outnumber the "misses" due to permutations of a single set of function symbols.
      * This usually makes it worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).

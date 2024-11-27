@@ -3,7 +3,7 @@ package at.jku.risc.uarau;
 import at.jku.risc.uarau.impl.Parser;
 import org.junit.jupiter.api.Test;
 
-public class ProblemMapTest {
+public class PredefinedFuzzySystemTest {
     @Test
     public void flippedRelationsAreSymmetric() {
         assert symmetric(Parser.parseProximityRelation("f g [0.9] {1 1, 3 2, 1 1}"));

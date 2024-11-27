@@ -1,12 +1,13 @@
 package at.jku.risc.uarau.impl;
 
+import at.jku.risc.uarau.FuzzySystem;
 import at.jku.risc.uarau.ProximityRelation;
 import at.jku.risc.uarau.term.GroundTerm;
 import at.jku.risc.uarau.term.MappedVariableTerm;
 import at.jku.risc.uarau.util.ArraySet;
+import at.jku.risc.uarau.util.Data;
 import at.jku.risc.uarau.util.Pair;
 import at.jku.risc.uarau.util.Panic;
-import at.jku.risc.uarau.util.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,44 +15,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * A precomputed view of a given generalization problem.
- * <br>
- * It is used by the {@linkplain Algorithm Algorithm} to look up information about the problem:
- * <br>
- * <ul>
- *     <li> proximity classes / relations of functions
- *     <li> function arities
- *     <li> status of constants as {@linkplain MappedVariableTerm mapped variables}
- *     <li> the relations' overall restriction type
- * </ul>
- */
-class ProblemMap {
-    public enum RestrictionType {
-        UNRESTRICTED(false, false),
-        CORRESPONDENCE(true, false),
-        MAPPING(false, true),
-        CORRESPONDENCE_MAPPING(true, true);
-        
-        public final boolean correspondence, mapping;
-        
-        RestrictionType(boolean correspondence, boolean mapping) {
-            this.correspondence = correspondence;
-            this.mapping = mapping;
-        }
-    }
+class PredefinedFuzzySystem implements FuzzySystem {
     
-    private static final Logger log = LoggerFactory.getLogger(ProblemMap.class);
+    private static final Logger log = LoggerFactory.getLogger(PredefinedFuzzySystem.class);
     
     private final Map<String, Map<String, ProximityRelation>> proximityMap;
     private final Map<String, Integer> arities;
-    private final Set<String> mappedVariables;
-    public final RestrictionType restrictionType, theoreticalRestrictionType;
+    private final RestrictionType restrictionType, practicalRestrictionType;
     
     /**
      * Constructs a precomputed view of the problem described by the problem terms, relations and λ-cut.
      */
-    public ProblemMap(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> statedRelations, float lambda) {
+    public PredefinedFuzzySystem(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> statedRelations, float lambda) {
         // include flipped relations
         List<ProximityRelation> allProximityRelations = new ArrayList<>(statedRelations.size() * 2);
         for (ProximityRelation relation : statedRelations) {
@@ -60,26 +35,25 @@ class ProblemMap {
         }
         enforceValidRelations(allProximityRelations);
         
-        Pair<Map<String, Integer>, Set<String>> pair = inferArities(lhs, rhs, allProximityRelations);
-        this.arities = Collections.unmodifiableMap(pair.left);
-        this.mappedVariables = Collections.unmodifiableSet(pair.right);
+        this.arities = Collections.unmodifiableMap(inferArities(lhs, rhs, allProximityRelations));
         
-        this.theoreticalRestrictionType = inferRestriction(allProximityRelations);
-        removeProximitesBelowLambda(allProximityRelations, lambda);
         this.restrictionType = inferRestriction(allProximityRelations);
+        removeProximitesBelowLambda(allProximityRelations, lambda);
+        this.practicalRestrictionType = inferRestriction(allProximityRelations);
         
         this.proximityMap = Collections.unmodifiableMap(buildMap(allProximityRelations));
     }
     
     // *** public methods ***
     
-    /**
-     * True iff the function/constant 'f' was mapped from a variable in the original stated problem.
-     * <br>
-     * <b>Undefined</b> for ANON.
-     */
-    public boolean isMappedVar(String f) {
-        return mappedVariables.contains(f);
+    @Override
+    public RestrictionType restrictionType() {
+        return restrictionType;
+    }
+    
+    @Override
+    public RestrictionType practicalRestrictionType() {
+        return practicalRestrictionType;
     }
     
     /**
@@ -97,6 +71,7 @@ class ProblemMap {
      * <br>
      * <b>Undefined</b> if either side is ANON.
      */
+    @Override
     public ProximityRelation proximityRelation(String f, String g) {
         assert proximityMap.containsKey(g);
         return proximityClass(f).get(g);
@@ -107,6 +82,7 @@ class ProblemMap {
      * <br>
      * <b>Undefined</b> for ANON.
      */
+    @Override
     public int arity(String f) {
         assert arities.containsKey(f);
         return arities.get(f);
@@ -122,6 +98,7 @@ class ProblemMap {
      * <br><br>
      * Uses some rudimentary memoization, since we can often expect calls on the same sets of terms.
      */
+    @Override
     public ArraySet<String> commonProximates(ArraySet<GroundTerm> terms) {
         assert !terms.isEmpty();
         
@@ -140,7 +117,7 @@ class ProblemMap {
             }
         }
         
-        ArraySet<String> result = new ArraySet<>(commonProximates, true);
+        ArraySet<String> result = ArraySet.of(commonProximates, true);
         if (heads.size() <= PROXIMATES_MEMORY_MAX_SIZE) {
             proximatesMemory.put(heads, result);
         }
@@ -206,7 +183,7 @@ class ProblemMap {
      * <br>
      * Note: this limits our knowledge of non-relevant positions to those of functions that appear in the problem.
      */
-    private Pair<Map<String, Integer>, Set<String>> inferArities(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> proximityRelations) {
+    private Map<String, Integer> inferArities(GroundTerm lhs, GroundTerm rhs, Collection<ProximityRelation> proximityRelations) {
         Map<String, Integer> termArities = new HashMap<>();
         Set<String> mappedVariables = new HashSet<>();
         
@@ -225,7 +202,7 @@ class ProblemMap {
             }
             arities.put(relation.f, Math.max(relation.argMapping.size(), arities.getOrDefault(relation.f, 0)));
         }
-        return new Pair<>(arities, mappedVariables);
+        return arities;
     }
     
     /**
@@ -283,9 +260,9 @@ class ProblemMap {
     /**
      * Creates map representation of the given proximity relations.
      * <br><br>
-     * From it, we can retrieve the {@linkplain ProblemMap#proximityClass} of 'f' with <b>proximityRelations.get(f)</b>,
+     * From it, we can retrieve the {@linkplain PredefinedFuzzySystem#proximityClass} of 'f' with <b>proximityRelations.get(f)</b>,
      * <br>
-     * and the {@linkplain ProblemMap#proximityRelation(String, String)} of 'f' and 'g' with <b>proximityRelations.get(f).get(g)</b>.
+     * and the {@linkplain PredefinedFuzzySystem#proximityRelation(String, String)} of 'f' and 'g' with <b>proximityRelations.get(f).get(g)</b>.
      */
     private Map<String, Map<String, ProximityRelation>> buildMap(Collection<ProximityRelation> relations) {
         Map<String, Map<String, ProximityRelation>> map = new HashMap<>();

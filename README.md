@@ -133,6 +133,11 @@ Also by definition, a function approximates itself with the identity `f f [1.0] 
 > If nothing is provided, we assume no proximity relations besides the `id` relations.
 
 ---
+### Custom Fuzzy System
+
+> TODO
+
+---
 ### 📐 T-Norm
 When we compute a generalisation, we're doing as many substitutions as we can - and for each substitution,
 we're taking advantage of some proximity relation.
@@ -191,7 +196,7 @@ In case you're interested in how the program works,
 I've tried providing some concise documentation in the key parts of the algorithm:
 
 - `Algorithm` contains the main loop and `conjunction` subroutine
-- `ProblemMap` contains precalculated information on the occurring function symbols and restriction type
+- `PredefinedFuzzySystem` contains precalculated information on the occurring function symbols
 - `Config`, together with `AUT` and `Substitution`, represent branching states in the main loop
 - `State` and `Expresssion` represent branching state during the `conjunction` subroutine
 - `Parser` parses strings to terms / proximity relations

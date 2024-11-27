@@ -166,7 +166,7 @@ public class Parser {
         for (int idx = 0; idx < pairs.size() / 2; idx++) {
             argRelationsIndexed.get(pairs.get(idx * 2) - 1).add(pairs.get(idx * 2 + 1) - 1);
         }
-        return Data.mapList(argRelationsIndexed, ArraySet::new);
+        return Data.mapList(argRelationsIndexed, ArraySet::of);
     }
     
     private static class GroundTermBuilder {

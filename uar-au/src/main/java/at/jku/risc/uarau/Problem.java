@@ -17,6 +17,7 @@ import java.util.Set;
 public class Problem {
     private final Pair<GroundTerm, GroundTerm> equation;
     private Collection<ProximityRelation> proximityRelations = new HashSet<>();
+    private FuzzySystem customFuzzySystem = null;
     private float lambda = 1.0f;
     private TNorm tNorm = Math::min;
     private boolean merge = true, witnesses = true;
@@ -113,7 +114,6 @@ public class Problem {
         return this;
     }
     
-    // TODO put some varargs in this bih?? :^o
     /**
      * Define the set of <b>proximity relations</b> (see {@linkplain Problem#proximityRelations(Collection)}) via String representation:
      * <ul>
@@ -134,11 +134,27 @@ public class Problem {
      * </code>
      */
     public Problem proximityRelations(String relations) {
+        if (customFuzzySystem != null) {
+            throw Panic.arg("Ambiguous problem definition: proximity relations and custom problem space both defined.");
+        }
         return proximityRelations(Parser.parseProximityRelations(relations));
     }
     
+    // TODO document
     public Collection<ProximityRelation> getProximityRelations() {
         return proximityRelations;
+    }
+    
+    public Problem customProblemSpace(FuzzySystem customFuzzySystem) {
+        if (!proximityRelations.isEmpty()) {
+            throw Panic.arg("Ambiguous problem definition: proximity relations and custom problem space both defined.");
+        }
+        this.customFuzzySystem = customFuzzySystem;
+        return this;
+    }
+    
+    public FuzzySystem getCustomProblemSpace() {
+        return customFuzzySystem;
     }
     
     /**

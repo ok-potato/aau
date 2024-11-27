@@ -16,7 +16,7 @@ import java.util.*;
  * <br>
  * The identity relation of every function is also predefined, so should also not be provided.
  * <br><br>
- * The modelling/validation of this occurs in {@linkplain at.jku.risc.uarau.impl.ProblemMap ProblemMap}.
+ * The modelling/validation of this occurs in {@linkplain at.jku.risc.uarau.impl.PredefinedFuzzySystem PredefinedFuzzySystem}.
  */
 public class ProximityRelation {
     public final String f, g;
@@ -42,7 +42,7 @@ public class ProximityRelation {
                 flippedArgs.get(flippedIdx).add(idx);
             }
         }
-        return new ProximityRelation(g, f, proximity, Data.mapList(flippedArgs, relation -> new ArraySet<>(relation, true)));
+        return new ProximityRelation(g, f, proximity, Data.mapList(flippedArgs, relation -> ArraySet.of(relation, true)));
     }
     
     @Override
