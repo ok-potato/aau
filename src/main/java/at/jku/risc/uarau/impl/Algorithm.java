@@ -297,7 +297,7 @@ public class Algorithm {
         }).collect(Collectors.toSet());
         
         log.info(Data.log(ANSI.yellow("SOLUTIONS:"), solutions));
-        log.info("🧇");
+        log.info("██");
         return solutions;
     }
     

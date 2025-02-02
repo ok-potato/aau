@@ -1,7 +1,5 @@
 package at.jku.risc.uarau;
 
-import at.jku.risc.uarau.Problem;
-import at.jku.risc.uarau.Solution;
 import at.jku.risc.uarau.impl.Algorithm;
 import at.jku.risc.uarau.term.GroundTerm;
 import at.jku.risc.uarau.util.ArraySet;
