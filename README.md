@@ -2,7 +2,7 @@
 This project implements the generalization framework described in the paper 
 <br>[A Framework for Approximate Generalization in Quantitative Theories](https://doi.org/10.1007/978-3-031-10769-6_34).
 
-> TODO links, license?
+> TODO links
 
 You can interact with the program [here (TODO)]() or include this library in your project.
 
