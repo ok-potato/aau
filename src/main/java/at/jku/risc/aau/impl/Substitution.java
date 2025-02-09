@@ -1,9 +1,6 @@
 package at.jku.risc.aau.impl;
 
-import at.jku.risc.aau.term.FunctionTerm;
-import at.jku.risc.aau.term.GroundTerm;
-import at.jku.risc.aau.term.Term;
-import at.jku.risc.aau.term.VariableTerm;
+import at.jku.risc.aau.term.*;
 import at.jku.risc.aau.util.Data;
 import at.jku.risc.aau.util.Panic;
 
@@ -35,12 +32,12 @@ public class Substitution {
     }
     
     /**
-     * Asserts at type level that there are no unsubstituted variables (besides ANON) remaining after substitution
+     * Type level assertion that there are no unsubstituted variables (besides ANON) remaining after substitution
      */
-    public static GroundTerm applyAllForceGroundTerm(Queue<Substitution> substitutions, Term baseTerm) {
+    public static GroundishTerm applyAll_forceGroundish(Queue<Substitution> substitutions, Term baseTerm) {
         Term term = applyAll(substitutions, baseTerm);
         try {
-            return GroundTerm.force(term);
+            return GroundishTerm.force(term);
         } catch (UnsupportedOperationException e) {
             throw new IllegalArgumentException("Couldn't force cast: " + term, e);
         }
@@ -50,14 +47,14 @@ public class Substitution {
         if (term instanceof VariableTerm) {
             return ((VariableTerm) term).var == this.var ? this.substitute : term;
         }
-        if (term instanceof GroundTerm) {
+        if (term instanceof GroundishTerm) {
             return term;
         }
         if (!(term instanceof FunctionTerm)) {
             throw Panic.state("Unknown Term type used in substitution: %s", term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        return new FunctionTerm(functionTerm.head, Data.mapToList(functionTerm.arguments, this::apply));
+        return new FunctionTerm(functionTerm.head(), Data.mapToList(functionTerm.arguments(), this::apply));
     }
     
     @Override

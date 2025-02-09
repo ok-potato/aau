@@ -2,7 +2,8 @@ package at.jku.risc.aau;
 
 import at.jku.risc.aau.impl.Algorithm;
 import at.jku.risc.aau.impl.Substitution;
-import at.jku.risc.aau.term.GroundTerm;
+import at.jku.risc.aau.term.GroundTermOrAnon;
+import at.jku.risc.aau.term.GroundishTerm;
 import at.jku.risc.aau.term.Term;
 import at.jku.risc.aau.util.ANSI;
 import at.jku.risc.aau.util.Data;
@@ -45,11 +46,11 @@ public class Solution {
         this.alpha2 = alpha2;
     }
     
-    public Pair<Set<GroundTerm>, Set<GroundTerm>> enumerate() {
+    public Pair<Set<GroundishTerm>, Set<GroundishTerm>> enumerate() {
         return Pair.of(enumerateSide(lhs.substitutions), enumerateSide(rhs.substitutions));
     }
     
-    private Set<GroundTerm> enumerateSide(Map<Integer, Set<Term>> substitutions) {
+    private Set<GroundishTerm> enumerateSide(Map<Integer, Set<GroundishTerm>> substitutions) {
         List<Set<Substitution>> steps = substitutions.entrySet().stream()
                 .map(entry -> entry.getValue().stream()
                         .map(term -> new Substitution(entry.getKey(), term))
@@ -58,7 +59,7 @@ public class Solution {
         
         Set<Term> generalization = Collections.singleton(this.generalization);
         Set<Term> unchaste = Data.permute(generalization, steps, ((term, substitution) -> substitution.apply(term)));
-        return unchaste.stream().map(GroundTerm::force).collect(Collectors.toSet());
+        return unchaste.stream().map(GroundTermOrAnon::force).collect(Collectors.toSet());
     }
     
     @Override

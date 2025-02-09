@@ -1,7 +1,7 @@
 package at.jku.risc.aau;
 
 import at.jku.risc.aau.impl.Algorithm;
-import at.jku.risc.aau.term.GroundTerm;
+import at.jku.risc.aau.term.GroundishTerm;
 import at.jku.risc.aau.util.ArraySet;
 import at.jku.risc.aau.util.Data;
 import at.jku.risc.aau.util.Pair;
@@ -17,11 +17,11 @@ public class TestUtils {
         if (problem.wantsWitnesses()) {
             for (Solution solution : solutions) {
                 // var(Solution) <=> keys(witnesses)
-                Set<Integer> v_named = solution.generalization.v_named();
+                Set<Integer> v_named = solution.generalization.namedVariables();
                 assert v_named.equals(solution.lhs.substitutions.keySet())
                         && v_named.equals(solution.rhs.substitutions.keySet());
                 
-                Pair<Set<GroundTerm>, Set<GroundTerm>> enumerated = solution.enumerate();
+                Pair<Set<GroundishTerm>, Set<GroundishTerm>> enumerated = solution.enumerate();
 
                 // all substitutions should lead to proximates of the problem terms
                 assert Data.all(enumerated.left, groundTerm -> algorithm.consistent(new ArraySet<>(groundTerm, problem.getEquation().left)));
@@ -29,7 +29,7 @@ public class TestUtils {
                 
                 if (!Collections.disjoint(enumerated.left, enumerated.right)) {
                     // there can be no common terms between left and right - unless we found a fully substituted generalization
-                    GroundTerm.force(solution.generalization);
+                    GroundishTerm.force(solution.generalization);
                 } else {
                     // there are some substitutions, so check there wasn't a more specific generalization
                     assert Data.none(enumerated.left, groundTerm -> algorithm.consistent(new ArraySet<>(groundTerm, problem.getEquation().right)));

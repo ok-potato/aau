@@ -1,6 +1,6 @@
 package at.jku.risc.aau.impl;
 
-import at.jku.risc.aau.term.GroundTerm;
+import at.jku.risc.aau.term.GroundishTerm;
 import at.jku.risc.aau.util.ArraySet;
 import at.jku.risc.aau.util.Data;
 
@@ -13,9 +13,9 @@ import at.jku.risc.aau.util.Data;
  */
 class Expression {
     final int variable;
-    final ArraySet<GroundTerm> T;
+    final ArraySet<GroundishTerm> T;
     
-    Expression(int variable, ArraySet<GroundTerm> T) {
+    Expression(int variable, ArraySet<GroundishTerm> T) {
         this.variable = variable;
         this.T = T;
     }

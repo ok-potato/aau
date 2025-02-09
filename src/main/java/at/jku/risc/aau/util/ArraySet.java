@@ -137,7 +137,7 @@ public class ArraySet<E> implements Set<E> {
     
     /**
      * ArraySets don't in principle need to be ordered, and the decision is mostly based on performance in
-     * {@linkplain at.jku.risc.aau.impl.PredefinedFuzzySystem#commonProximates(Set) PredefinedFuzzySystem.commonProximates(ArraySet)}.
+     * {@linkplain at.jku.risc.aau.impl.PredefinedFuzzySystem#commonProximates(ArraySet) PredefinedFuzzySystem.commonProximates(ArraySet)}.
      * <br><br>
      * Memory "hits" usually greatly outnumber the "misses" due to permutations of a single set of function symbols.
      * This usually makes it worth saving the redundant permutations in exchange for an O(n) equality check (versus O(n^2) in the unordered case).

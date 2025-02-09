@@ -9,14 +9,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * {@linkplain FunctionTerm FunctionTerms} are generated during
- * {@linkplain Substitution#apply(Term) substitutions}.
+ * {@linkplain FunctionTerm FunctionTerms} are generated via {@linkplain Substitution#apply(Term) substitutions}.
  * <br><br>
  * See {@linkplain GroundTerm} for representing function terms in the problem statement.
  */
 public class FunctionTerm implements Term {
-    public final String head;
-    public final List<Term> arguments;
+    private final String head;
+    private final List<Term> arguments;
     
     public FunctionTerm(String head, List<Term> arguments) {
         this.head = head.intern();
@@ -24,13 +23,21 @@ public class FunctionTerm implements Term {
     }
     
     private Set<Integer> v_named = null;
-    
+
+    public String head() {
+        return head;
+    }
+
+    public List<Term> arguments() {
+        return arguments;
+    }
+
     @Override
-    public Set<Integer> v_named() {
+    public Set<Integer> namedVariables() {
         if (v_named == null) {
             v_named = new HashSet<>();
             for (Term argument : arguments) {
-                v_named.addAll(argument.v_named());
+                v_named.addAll(argument.namedVariables());
             }
         }
         return v_named;

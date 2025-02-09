@@ -4,6 +4,7 @@ import at.jku.risc.aau.FuzzySystem;
 import at.jku.risc.aau.ProximityRelation;
 import at.jku.risc.aau.term.GroundTerm;
 import at.jku.risc.aau.term.MappedVariableTerm;
+import at.jku.risc.aau.term.GroundishTerm;
 import at.jku.risc.aau.util.ArraySet;
 import at.jku.risc.aau.util.Data;
 import at.jku.risc.aau.util.Pair;
@@ -101,10 +102,10 @@ class PredefinedFuzzySystem implements FuzzySystem {
      * Uses some rudimentary memoization, since we can often expect calls on the same sets of terms.
      */
     @Override
-    public ArraySet<String> commonProximates(ArraySet<GroundTerm> terms) {
+    public ArraySet<String> commonProximates(ArraySet<GroundishTerm> terms) {
         assert !terms.isEmpty();
         
-        ArraySet<String> heads = terms.map(t -> t.head);
+        ArraySet<String> heads = terms.map(GroundishTerm::head);
         if (heads.size() <= PROXIMATES_MEMORY_MAX_SIZE && proximatesMemory.containsKey(heads)) {
             return proximatesMemory.get(heads);
         }
@@ -215,20 +216,20 @@ class PredefinedFuzzySystem implements FuzzySystem {
      * Recursively infers arities from a term and all its sub-terms.
      */
     private void inferAritiesFromTerm(GroundTerm term, Map<String, Integer> arities, Set<String> mappedVariables) {
-        if (arities.containsKey(term.head)) {
-            if (arities.get(term.head) != term.arguments.size()) {
-                throw Panic.arg("'%s' is defined or appears in the posed problem with multiple arities", term.head);
+        if (arities.containsKey(term.head())) {
+            if (arities.get(term.head()) != term.arguments().size()) {
+                throw Panic.arg("'%s' is defined or appears in the posed problem with multiple arities", term.head());
             }
-            if (mappedVariables.contains(term.head) != term instanceof MappedVariableTerm) {
-                throw Panic.arg("%s appears as both a variable and a function/const symbol", term.head);
+            if (mappedVariables.contains(term.head()) != term instanceof MappedVariableTerm) {
+                throw Panic.arg("%s appears as both a variable and a function/const symbol", term.head());
             }
         } else { // first occurrence
-            arities.put(term.head, term.arguments.size());
+            arities.put(term.head(), term.arguments().size());
             if (term instanceof MappedVariableTerm) {
-                mappedVariables.add(term.head);
+                mappedVariables.add(term.head());
             }
         }
-        for (GroundTerm arg : term.arguments) {
+        for (GroundTerm arg : term.arguments()) {
             inferAritiesFromTerm(arg, arities, mappedVariables);
         }
     }

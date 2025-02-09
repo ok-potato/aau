@@ -24,5 +24,5 @@ public interface Term {
     /**
      * The set of variables (excluding ANON) which appear as sub-terms in this term.
      */
-    Set<Integer> v_named();
+    Set<Integer> namedVariables();
 }

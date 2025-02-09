@@ -25,7 +25,7 @@ public class VariableTerm implements Term {
     }
     
     @Override
-    public Set<Integer> v_named() {
+    public Set<Integer> namedVariables() {
         return Collections.singleton(var);
     }
     

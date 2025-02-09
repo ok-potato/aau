@@ -1,6 +1,6 @@
 package at.jku.risc.aau;
 
-import at.jku.risc.aau.term.Term;
+import at.jku.risc.aau.term.GroundishTerm;
 import at.jku.risc.aau.util.ANSI;
 import at.jku.risc.aau.util.Data;
 
@@ -14,9 +14,9 @@ import java.util.stream.Stream;
  * See {@linkplain Solution}
  */
 public class Witness {
-    public final Map<Integer, Set<Term>> substitutions;
+    public final Map<Integer, Set<GroundishTerm>> substitutions;
     
-    public Witness(Map<Integer, Set<Term>> substitutions) {
+    public Witness(Map<Integer, Set<GroundishTerm>> substitutions) {
         this.substitutions = Collections.unmodifiableMap(substitutions);
     }
     

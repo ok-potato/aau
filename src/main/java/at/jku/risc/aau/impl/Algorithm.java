@@ -9,11 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// TODO is it okay to have ANON as a MappedVariableTerm?
-//  - I like being able to encode that AUTs and Expressions only contain GroundTerms + ANON
-//  - depending on what you do with the output, it might be a problem that ANON is not of type Variable?
-//  - could make its own type which extends both Variable and GroundTerm ???
-//  - also, since ANON is a GroundTerm, that means you can include it in the input -> could check for this
+import static at.jku.risc.aau.term.Anon.ANON;
 
 // TODO provide TestUtils.verify() in library?
 
@@ -114,7 +110,7 @@ public class Algorithm {
                 AUT aut = cfg.A.remove();
                 // TRIVIAL
                 if (aut.T1.isEmpty() && aut.T2.isEmpty()) {
-                    cfg.substitutions.add(new Substitution(aut.variable, MappedVariableTerm.ANON));
+                    cfg.substitutions.add(new Substitution(aut.variable, ANON));
                     log.debug("TRI => {}", cfg);
                     continue;
                 }
@@ -159,7 +155,7 @@ public class Algorithm {
     // TODO document
     private Queue<Config> decompose(AUT aut, Config cfg) {
         Queue<Config> children = new ArrayDeque<>();
-        ArraySet<GroundTerm> merged = ArraySet.merged(aut.T1, aut.T2);
+        ArraySet<GroundishTerm> merged = ArraySet.merged(aut.T1, aut.T2);
         ArraySet<String> commonProximates = fuzzySystem.commonProximates(merged);
         
         if (commonProximates.size() == 1 && Data.any(merged, term -> term instanceof MappedVariableTerm)) {
@@ -172,14 +168,14 @@ public class Algorithm {
         
         for (String h : commonProximates) {
             // map arguments
-            Pair<List<ArraySet<GroundTerm>>, Float> T1Mapped = mapArgs(h, aut.T1, cfg.alpha1);
-            List<ArraySet<GroundTerm>> Q1 = T1Mapped.left;
+            Pair<List<ArraySet<GroundishTerm>>, Float> T1Mapped = mapArgs(h, aut.T1, cfg.alpha1);
+            List<ArraySet<GroundishTerm>> Q1 = T1Mapped.left;
             float alpha1 = T1Mapped.right;
             if (alpha1 < lambda) {
                 continue;
             }
-            Pair<List<ArraySet<GroundTerm>>, Float> T2Mapped = mapArgs(h, aut.T2, cfg.alpha2);
-            List<ArraySet<GroundTerm>> Q2 = T2Mapped.left;
+            Pair<List<ArraySet<GroundishTerm>>, Float> T2Mapped = mapArgs(h, aut.T2, cfg.alpha2);
+            List<ArraySet<GroundishTerm>> Q2 = T2Mapped.left;
             float alpha2 = T2Mapped.right;
             if (alpha2 < lambda) {
                 continue;
@@ -210,8 +206,8 @@ public class Algorithm {
         final int freshVar = linearCfg.freshVar();
         
         Queue<AUT> expanded = Data.mapToQueue(linearCfg.S, aut -> {
-            Pair<ArraySet<GroundTerm>, Integer> E1 = conjoin(aut.T1, freshVar);
-            Pair<ArraySet<GroundTerm>, Integer> E2 = conjoin(aut.T2, E1.right);
+            Pair<ArraySet<GroundishTerm>, Integer> E1 = conjoin(aut.T1, freshVar);
+            Pair<ArraySet<GroundishTerm>, Integer> E2 = conjoin(aut.T2, E1.right);
             assert !E1.left.isEmpty() && !E2.left.isEmpty();
             return new AUT(aut.variable, E1.left, E2.left);
         });
@@ -232,9 +228,9 @@ public class Algorithm {
             int freshVar = expandedCfg.peekVar();
             // try merge on each remaining AUT
             for (AUT candidate : remaining) {
-                Pair<ArraySet<GroundTerm>, Integer> mergedLHS =
+                Pair<ArraySet<GroundishTerm>, Integer> mergedLHS =
                         conjoin(ArraySet.merged(collector.T1, candidate.T1), freshVar);
-                Pair<ArraySet<GroundTerm>, Integer> mergedRHS = mergedLHS.left.isEmpty() ? mergedLHS :
+                Pair<ArraySet<GroundishTerm>, Integer> mergedRHS = mergedLHS.left.isEmpty() ? mergedLHS :
                         conjoin(ArraySet.merged(collector.T2, candidate.T2), mergedLHS.right);
                 
                 if (mergedLHS.left.isEmpty() || mergedRHS.left.isEmpty()) {
@@ -271,18 +267,18 @@ public class Algorithm {
      * .... then .... Q = [{a}, {b,c}]
      * </code>
      */
-    private Pair<List<ArraySet<GroundTerm>>, Float> mapArgs(String h, ArraySet<GroundTerm> T, float beta) {
+    private Pair<List<ArraySet<GroundishTerm>>, Float> mapArgs(String h, ArraySet<GroundishTerm> T, float beta) {
         int hArity = fuzzySystem.arity(h);
-        List<Set<GroundTerm>> Q = Data.list(hArity, idx -> new HashSet<>());
-        for (GroundTerm t : T) {
-            ProximityRelation htRelation = fuzzySystem.proximityRelation(h, t.head);
+        List<Set<GroundishTerm>> Q = Data.list(hArity, idx -> new HashSet<>());
+        for (GroundishTerm t : T) {
+            ProximityRelation htRelation = fuzzySystem.proximityRelation(h, t.head());
             beta = tNorm.apply(beta, htRelation.proximity);
             if (beta < lambda) {
                 return Pair.of(null, beta);
             }
             for (int hIdx = 0; hIdx < hArity; hIdx++) {
                 for (int termIdx : htRelation.argMapping.get(hIdx)) {
-                    Q.get(hIdx).add(t.arguments.get(termIdx));
+                    Q.get(hIdx).add(t.arguments().get(termIdx));
                 }
             }
         }
@@ -302,10 +298,10 @@ public class Algorithm {
     }
     
     private Pair<Witness, Witness> generateWitnesses(Config cfg, Term r) {
-        Map<Integer, Set<Term>> W1 = new HashMap<>();
-        Map<Integer, Set<Term>> W2 = new HashMap<>();
-        for (int var : r.v_named()) {
-            Pair<Set<Term>, Set<Term>> applied = AUT.substituteAll(cfg.S, new VariableTerm(var));
+        Map<Integer, Set<GroundishTerm>> W1 = new HashMap<>();
+        Map<Integer, Set<GroundishTerm>> W2 = new HashMap<>();
+        for (int var : r.namedVariables()) {
+            Pair<Set<GroundishTerm>, Set<GroundishTerm>> applied = AUT.substituteAll(cfg.S, new VariableTerm(var));
             W1.put(var, applied.left);
             W2.put(var, applied.right);
         }
@@ -314,25 +310,25 @@ public class Algorithm {
     
     // *** special conjunction ***
     
-    public boolean consistent(ArraySet<GroundTerm> terms) {
+    public boolean consistent(ArraySet<GroundishTerm> terms) {
         return doConjoin(terms, VariableTerm.VAR_0.var, true) == IS_CONSISTENT;
     }
     
-    private Pair<ArraySet<GroundTerm>, Integer> conjoin(ArraySet<GroundTerm> terms, int freshVar) {
-        Pair<ArraySet<GroundTerm>, Integer> result = doConjoin(terms, freshVar, false);
+    private Pair<ArraySet<GroundishTerm>, Integer> conjoin(ArraySet<GroundishTerm> terms, int freshVar) {
+        Pair<ArraySet<GroundishTerm>, Integer> result = doConjoin(terms, freshVar, false);
         assert result != null;
         return result;
     }
     
-    private final Pair<ArraySet<GroundTerm>, Integer> IS_CONSISTENT = Pair.of(null, null);
+    private final Pair<ArraySet<GroundishTerm>, Integer> IS_CONSISTENT = Pair.of(null, null);
     
     // TODO document
-    private Pair<ArraySet<GroundTerm>, Integer> doConjoin(ArraySet<GroundTerm> terms, int baseVar, boolean consistencyCheck) {
+    private Pair<ArraySet<GroundishTerm>, Integer> doConjoin(ArraySet<GroundishTerm> terms, int baseVar, boolean consistencyCheck) {
         int freshVar = baseVar;
         Queue<State> branches = new ArrayDeque<>();
         branches.add(new State(terms, freshVar));
         
-        Queue<GroundTerm> solutions = consistencyCheck ? null : new ArrayDeque<>();
+        Queue<GroundishTerm> solutions = consistencyCheck ? null : new ArrayDeque<>();
         BRANCHING:
         while (!branches.isEmpty()) {
             State state = branches.remove();
@@ -340,12 +336,12 @@ public class Algorithm {
                 Expression expression = state.expressions.remove();
                 // by explicitly ignore ANON, we don't need to worry about defining R.proximityClass(ANON)
                 // we might also get to "cheat" and apply REMOVE where we couldn't otherwise
-                ArraySet<GroundTerm> nonAnonTerms = expression.T.filter(term -> !MappedVariableTerm.ANON.equals(term));
+                ArraySet<GroundishTerm> nonAnonTerms = expression.T.filter(term -> !ANON.equals(term));
                 // REMOVE
                 if (consistencyCheck && nonAnonTerms.size() <= 1) {
                     continue;
                 } else if (nonAnonTerms.isEmpty()) {
-                    state.s.add(new Substitution(expression.variable, MappedVariableTerm.ANON));
+                    state.s.add(new Substitution(expression.variable, ANON));
                     continue;
                 }
                 // REDUCE
@@ -358,7 +354,7 @@ public class Algorithm {
                     branches.add(state);
                 } else {
                     for (String h : commonProximates) {
-                        List<ArraySet<GroundTerm>> Q = mapArgs(h, nonAnonTerms, 1.0f).left;
+                        List<ArraySet<GroundishTerm>> Q = mapArgs(h, nonAnonTerms, 1.0f).left;
                         assert Q != null;
                         State childState = commonProximates.size() == 1 ? state : state.copy();
                         
@@ -382,7 +378,7 @@ public class Algorithm {
             if (consistencyCheck) {
                 return IS_CONSISTENT;
             }
-            solutions.add(Substitution.applyAllForceGroundTerm(state.s, new VariableTerm(baseVar)));
+            solutions.add(Substitution.applyAll_forceGroundish(state.s, new VariableTerm(baseVar)));
         }
         if (consistencyCheck) {
             return null;

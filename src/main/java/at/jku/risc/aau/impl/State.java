@@ -1,6 +1,6 @@
 package at.jku.risc.aau.impl;
 
-import at.jku.risc.aau.term.GroundTerm;
+import at.jku.risc.aau.term.GroundishTerm;
 import at.jku.risc.aau.util.ArraySet;
 
 import java.util.ArrayDeque;
@@ -23,7 +23,7 @@ class State {
     
     private int freshVar;
     
-    public State(ArraySet<GroundTerm> T, int freshVar) {
+    public State(ArraySet<GroundishTerm> T, int freshVar) {
         this.expressions = new ArrayDeque<>();
         this.s = new ArrayDeque<>();
         this.freshVar = freshVar;

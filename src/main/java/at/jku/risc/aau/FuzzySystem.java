@@ -1,6 +1,6 @@
 package at.jku.risc.aau;
 
-import at.jku.risc.aau.term.GroundTerm;
+import at.jku.risc.aau.term.GroundishTerm;
 import at.jku.risc.aau.util.ArraySet;
 
 import java.util.Collections;
@@ -21,7 +21,7 @@ public interface FuzzySystem {
     
     ProximityRelation proximityRelation(String f, String g);
     
-    ArraySet<String> commonProximates(ArraySet<GroundTerm> f);
+    ArraySet<String> commonProximates(ArraySet<GroundishTerm> f);
     
     int arity(String f);
     
