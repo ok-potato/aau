@@ -102,7 +102,7 @@ public class Data {
         return open + joiner + close;
     }
     
-    private static final String LOG_NEWLINE = "\n        ";
+    private static final String LOG_NEWLINE = "\n      ";
     
     public static String log(String title, Collection<?> collection) {
         return title + str(collection, LOG_NEWLINE, "", LOG_NEWLINE, "");

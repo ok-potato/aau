@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 // TODO provide TestUtils.verify() in library?
 
-// TODO is it halal to remove proximities < lambda?
+// TODO is it kosher to remove proximities < lambda?
 
 /**
  * Core implementation of the Algorithm described in the paper:
