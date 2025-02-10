@@ -107,34 +107,37 @@ E.g. `f(a()) ?= f(b())` results in the single solution `f(x1)`, with the possibl
 
 To introduce our fuzzy logic, we need some of the functions to have `proximity relations`, which we can use in our substitutions.
 
-The `proximity` is a value in the range `[0.0, 1.0]`. If not specified, it's assumed to be `0`.
+The `proximity` is a value in the range `[0.0, 1.0]`. If no relation is specified between two functions,
+their proximity is assumed to be `0`.
 <br>
 The `argument relation` defines how the functions' arguments map onto each other.
+
+The relations can be provided as `ProximityRelation` objects, or using string syntax, with the format
+`function1 function2 [proximity] {argument relation}` (see javadoc for more details)
 
 Proximity relations are symmetric, e.g. `f g [0.5] {(1 2) (2 3)}` is equivalent to `g f [0.5] {(2 1) (3 2)}`.
 <br>
 A function approximates itself with the identity `f f [1.0] {(1 1) ... (n n)}`.
 
-You can provide relations as a set of `ProximityRelations`, or represented via string (see javadoc for syntax).
-
 ### 📐 T-Norm
 > Default: Math.min(a, b)
 
-When we compute a generalisation, we're doing as many substitutions as we can - and using some proximity relation for each substitution.
+When the algorithm computes a generalisation, it does as many substitutions as it can -
+and uses some proximity relation for each substitution.
 
 We get the proximity of a generalization to the original terms by applying the `T-Norm` over all proximities we used while substituting.
 
-The `T-Norm` can be any bi-function over the range [0.0, 0.1], which satisfies the mathematical properties `commutativity, monotonicity, associativity and 1-identity`.
+The `T-Norm` is some bi-function over the range [0.0, 0.1], which satisfies the mathematical properties `commutativity, monotonicity, associativity and 1-identity`.
 
 ### 🔪 Lambda-Cut
 > Default: 1.0
 
 You can specify a `lambda-cut` value within the range `[0.0, 1.0]`, which is the minimum proximity for a solution to count as "close".
-<br> The algorithm then creates the least general generalizations above the lambda-cut.
+<br> The algorithm then creates the set of least general generalizations _above the lambda-cut_.
 
-A `1.0` lambda-cut just gives you the non-fuzzy generalizations of terms equal to the problem terms.
+A `1.0` lambda-cut just gives you the _non-fuzzy_ generalizations of terms equal to the problem terms.
 
-A `0.0` lambda-cut is essentially a bogus input, since it results in an infinite set of terms.
+A `0.0` lambda-cut is considered a bogus input, since it would result in an infinite set of terms.
 
 ### 🔧 Setting: Witnesses
 > Default: true
@@ -142,7 +145,11 @@ A `0.0` lambda-cut is essentially a bogus input, since it results in an infinite
 For each solution, you can also generate a set of `witness substitutions` per side of the equation.
 
 For each variable that appears in the solution, they contain a set of possible substitutions.
-Applying one from each set gives you a `ground term` that approximates the problem term.
+Applying one from each set gives you a proximate to the problem term.
+
+These proximate terms can contain the `anonymous variable ('_')`,
+which marks `irrelevant positions`, which can be substituted with anything.
+Aside from the anonymous variable, the proximate terms are `ground`.
 
 ### 🔧 Setting: Merge
 > Default: true
@@ -153,19 +160,19 @@ If `merge` is enabled, the program checks for this, and merges the variables whe
 ### 🦄 Custom Arities
 
 The program does its best to infer function arities,
-but specifying arities is required for one relatively specific scenario.
+but specifying arities is required for one specific scenario.
 
 _That is, When the function doesn't appear in the problem terms, and its last argument position doesn't appear in the proximity relations.
 An example of this occurring is `Example 7` in the paper, where the final positions of `h1` and `h2` are each irrelevant positions._
 
-When using this library in code, it's probably best to always provide the arities, to avoid potential pitfalls.
+When using this library in code, it's probably best to always provide the arities, to avoid this potential pitfall.
 
 ### 🎭 Custom Fuzzy System
 
 The default implementation of the algorithm assumes that you can enumerate all proximity relations that exist in your fuzzy system.
 But this isn't technically required.
 
-If required, you can provide a custom implementation of `FuzzySystem`, which must implement the methods:
+If desired, you can provide a custom implementation of `FuzzySystem`, which must implement the methods:
 - `ProximityRelation proximityRelation(String f, String g)` 
 - `ArraySet<String> commonProximates(ArraySet<GroundTerm> f)`
 - `int arity(String f)`
@@ -183,7 +190,7 @@ you can skip `expand` by disabling both settings.
 
 ## 🤿 Diving deeper
 In case you're interested in how the program works,
-I've tried providing some concise documentation in the key parts of the algorithm:
+I've tried providing some concise documentation for the key parts of the algorithm:
 
 - `Algorithm` contains the main loop and `conjunction` subroutine
 - `PredefinedFuzzySystem` contains precalculated information on the occurring function symbols
