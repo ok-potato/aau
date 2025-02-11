@@ -242,8 +242,13 @@ class PredefinedFuzzySystem implements FuzzySystem {
      * however, we still get information about the kind of the generated generalization set.
      */
     private RestrictionType inferRestriction(Collection<ProximityRelation> relations) {
-        boolean correspondence = Data.all(relations, relation -> Data.none(relation.argMapping, Set::isEmpty));
-        boolean mapping = Data.all(relations, relation -> Data.none(relation.argMapping, argRel -> argRel.size() > 1));
+        boolean correspondence = Data.all(relations, relation ->
+                relation.argMapping.size() == arity(relation.f) && Data.none(relation.argMapping, Set::isEmpty)
+        );
+        boolean mapping = Data.all(relations, relation ->
+                Data.none(relation.argMapping, argRel -> argRel.size() > 1)
+        );
+
         if (correspondence) {
             return mapping ? RestrictionType.CORRESPONDENCE_MAPPING : RestrictionType.CORRESPONDENCE;
         } else {
