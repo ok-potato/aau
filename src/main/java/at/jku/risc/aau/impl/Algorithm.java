@@ -157,7 +157,8 @@ public class Algorithm {
         Queue<Config> children = new ArrayDeque<>();
         ArraySet<GroundishTerm> merged = ArraySet.merged(aut.T1, aut.T2);
         ArraySet<String> commonProximates = fuzzySystem.commonProximates(merged);
-        
+        log.trace("  {} common proximates: {}", merged, commonProximates);
+
         if (commonProximates.size() == 1 && Data.any(merged, term -> term instanceof MappedVariableTerm)) {
             // special case: MappedVariableTerm as common proximate
             assert merged.size() == 1;
@@ -172,17 +173,20 @@ public class Algorithm {
             List<ArraySet<GroundishTerm>> Q1 = T1Mapped.left;
             float alpha1 = T1Mapped.right;
             if (alpha1 < lambda) {
+                log.trace("  {} -> α1 < λ", h);
                 continue;
             }
             Pair<List<ArraySet<GroundishTerm>>, Float> T2Mapped = mapArgs(h, aut.T2, cfg.alpha2);
             List<ArraySet<GroundishTerm>> Q2 = T2Mapped.left;
             float alpha2 = T2Mapped.right;
             if (alpha2 < lambda) {
+                log.trace("  {} -> α2 < λ", h);
                 continue;
             }
             assert Q1 != null && Q2 != null;
             if (!fuzzySystem.practicalRestrictionType().mapping) {
                 if (Data.any(Q1, q -> !consistent(q)) || Data.any(Q2, q -> !consistent(q))) {
+                    log.trace("  {} -> inconsistent: {}  {}", h, Q1, Q2);
                     continue;
                 }
             }
@@ -384,7 +388,7 @@ public class Algorithm {
             return null;
         }
         if (log.isDebugEnabled()) {
-            log.debug("  conjunction: {} => {}", terms, solutions);
+            log.debug("  conj: {} => {}", terms, solutions);
         }
         return Pair.of(ArraySet.of(solutions, true), freshVar);
     }
