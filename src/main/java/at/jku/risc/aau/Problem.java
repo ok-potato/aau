@@ -3,6 +3,8 @@ package at.jku.risc.aau;
 import at.jku.risc.aau.impl.Algorithm;
 import at.jku.risc.aau.impl.Parser;
 import at.jku.risc.aau.term.GroundTerm;
+import at.jku.risc.aau.tnorm.CommonTNorms;
+import at.jku.risc.aau.tnorm.TNorm;
 import at.jku.risc.aau.util.Pair;
 import at.jku.risc.aau.util.Panic;
 
@@ -18,7 +20,7 @@ public class Problem {
     private Map<String, Integer> definedArities = new HashMap<>();
     private FuzzySystem customFuzzySystem = null;
     private float lambda = 1.0f;
-    private TNorm tNorm = Math::min;
+    private TNorm tNorm = CommonTNorms.minimum;
     private boolean merge = true, witnesses = true;
     
     // *** constructors ***

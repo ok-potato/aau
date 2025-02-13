@@ -1,4 +1,4 @@
-package at.jku.risc.aau;
+package at.jku.risc.aau.tnorm;
 
 public interface TNorm {
     /**
@@ -8,7 +8,8 @@ public interface TNorm {
      * <br>
      * <b>commutativity</b>, <b>monotonicity</b> and <b>associativity</b>, with <b>1 as the identity</b>.
      * <br><br>
-     * The default implementation is {@linkplain Math#min(float, float)}
+     * The default implementation is the {@linkplain CommonTNorms#minimum minimum}.
+     * Some more examples can be found in {@linkplain CommonTNorms}.
      */
     float apply(float a, float b);
 }

@@ -125,7 +125,7 @@ A function approximates itself with the identity `f f [1.0] {(1 1) ... (n n)}`.
 When the algorithm computes a generalisation, it does as many substitutions as it can -
 and uses some proximity relation for each substitution.
 
-We get the proximity of a generalization to the original terms by applying the `T-Norm` over all proximities we used while substituting.
+We essentially get the proximity of a generalization to the original terms by applying the `T-Norm` over all proximities we used while substituting.
 
 The `T-Norm` is some bi-function over the range [0.0, 0.1], which satisfies the mathematical properties `commutativity, monotonicity, associativity and 1-identity`.
 

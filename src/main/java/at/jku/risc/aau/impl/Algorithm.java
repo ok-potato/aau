@@ -2,6 +2,7 @@ package at.jku.risc.aau.impl;
 
 import at.jku.risc.aau.*;
 import at.jku.risc.aau.term.*;
+import at.jku.risc.aau.tnorm.TNorm;
 import at.jku.risc.aau.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
