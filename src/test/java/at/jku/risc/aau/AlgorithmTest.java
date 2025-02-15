@@ -89,12 +89,18 @@ public class AlgorithmTest {
         Problem problem1 = new Problem("f(a(), c()) ?= g(a())").proximityRelations(relations).lambda(0.5f);
         Set<Solution> solutions1 = TestUtils.verify(problem1);
         assert solutions1.size() == 1;
-        // TODO TestUtils.check(Data.getAny(solutions1), "..", "..", "h(b())", 0.7f, 0.6f);
-        
+        Solution solution1 = Data.getAny(solutions1);
+        assert solution1.generalization.toString().equals("h(b())");
+        assert TestUtils.close(solution1.alpha1, 0.7f);
+        assert TestUtils.close(solution1.alpha2, 0.6f);
+
         Problem problem2 = new Problem("f(a(), d()) ?= g(a())").proximityRelations(relations).lambda(0.5f);
         Set<Solution> solutions2 = TestUtils.verify(problem2);
         assert solutions2.size() == 1;
-        // TODO TestUtils.check(Data.getAny(solutions2), null, null, "0", 1.0f, 1.0f);
+        Solution solution2 = Data.getAny(solutions2);
+        assert solution2.generalization.head().equals("0");
+        assert TestUtils.close(solution2.alpha1, 1.0f);
+        assert TestUtils.close(solution2.alpha2, 1.0f);
     }
     
     @Test

@@ -21,6 +21,7 @@ public abstract class GroundishTerm implements Term {
         this.head = head.intern();
     }
 
+    @Override
     public String head() {
         return head;
     }
@@ -39,7 +40,7 @@ public abstract class GroundishTerm implements Term {
             throw Panic.state("Couldn't cast sub-term '%s' of type %s", term, term.getClass());
         }
         FunctionTerm functionTerm = (FunctionTerm) term;
-        return new GroundTermOrAnon(functionTerm.head(), Data.mapToList(functionTerm.arguments(), GroundTermOrAnon::force));
+        return new GroundishTermImpl(functionTerm.head(), Data.mapToList(functionTerm.arguments(), GroundishTermImpl::force));
     }
 
     @Override

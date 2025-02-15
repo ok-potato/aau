@@ -24,6 +24,7 @@ public class FunctionTerm implements Term {
     
     private Set<Integer> v_named = null;
 
+    @Override
     public String head() {
         return head;
     }

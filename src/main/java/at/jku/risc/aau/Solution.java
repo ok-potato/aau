@@ -2,8 +2,8 @@ package at.jku.risc.aau;
 
 import at.jku.risc.aau.impl.Algorithm;
 import at.jku.risc.aau.impl.Substitution;
-import at.jku.risc.aau.term.GroundTermOrAnon;
 import at.jku.risc.aau.term.GroundishTerm;
+import at.jku.risc.aau.term.GroundishTermImpl;
 import at.jku.risc.aau.term.Term;
 import at.jku.risc.aau.util.ANSI;
 import at.jku.risc.aau.util.Data;
@@ -59,14 +59,14 @@ public class Solution {
         
         Set<Term> generalization = Collections.singleton(this.generalization);
         Set<Term> unchaste = Data.permute(generalization, steps, ((term, substitution) -> substitution.apply(term)));
-        return unchaste.stream().map(GroundTermOrAnon::force).collect(Collectors.toSet());
+        return unchaste.stream().map(GroundishTermImpl::force).collect(Collectors.toSet());
     }
     
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder().append(generalization);
         if (lhs == null) {
-            sb.append(ANSI.red("  ∅")).append(ANSI.yellow("  α..", alpha1, alpha2));
+            sb.append(ANSI.red("  *")).append(ANSI.yellow("  α..", alpha1, alpha2));
         } else {
             sb.append(ANSI.yellow("  LHS (α=" + alpha1 + ")..  "))
                     .append(lhs)

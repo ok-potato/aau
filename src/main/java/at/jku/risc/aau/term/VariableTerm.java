@@ -23,7 +23,12 @@ public class VariableTerm implements Term {
     public VariableTerm(int var) {
         this.var = var;
     }
-    
+
+    @Override
+    public String head() {
+        return Integer.toString(var);
+    }
+
     @Override
     public Set<Integer> namedVariables() {
         return Collections.singleton(var);

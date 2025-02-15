@@ -1,8 +1,8 @@
 package at.jku.risc.aau.impl;
 
 import at.jku.risc.aau.Witness;
-import at.jku.risc.aau.term.GroundTermOrAnon;
 import at.jku.risc.aau.term.GroundishTerm;
+import at.jku.risc.aau.term.GroundishTermImpl;
 import at.jku.risc.aau.term.Term;
 import at.jku.risc.aau.util.ANSI;
 import at.jku.risc.aau.util.ArraySet;
@@ -44,9 +44,9 @@ class AUT {
 
         return Pair.of(
                 Collections.unmodifiableSet(
-                        applied.left.stream().map(GroundTermOrAnon::force).collect(Collectors.toSet())),
+                        applied.left.stream().map(GroundishTermImpl::force).collect(Collectors.toSet())),
                 Collections.unmodifiableSet(
-                        applied.right.stream().map(GroundTermOrAnon::force).collect(Collectors.toSet()))
+                        applied.right.stream().map(GroundishTermImpl::force).collect(Collectors.toSet()))
         );
     }
     

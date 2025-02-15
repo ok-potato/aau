@@ -14,8 +14,6 @@ import static at.jku.risc.aau.term.Anon.ANON;
 
 // TODO provide TestUtils.verify() in library?
 
-// TODO is it kosher to remove proximities < lambda?
-
 /**
  * Core implementation of the Algorithm described in the paper:
  * <br>
