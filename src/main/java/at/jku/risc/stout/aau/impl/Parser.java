@@ -47,7 +47,9 @@ public class Parser {
         // (?<=\() => if last char was '('
         //       , => if this char is ','
         //  (?=\)) => if next char is ')'
-        String[] tokens = termString.split("(?<=\\()|,|(?=\\))");
+        List<String> tokens = Arrays.stream(termString.split("(?<=\\()|,|(?=\\))"))
+                .filter(it -> !StringUtils.isBlank(it))
+                .collect(Collectors.toList());
         
         Stack<GroundTermBuilder> subTerms = new Stack<>();
         subTerms.push(GroundTermBuilder.dummy());

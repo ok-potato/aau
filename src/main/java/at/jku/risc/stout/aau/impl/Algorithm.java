@@ -82,7 +82,7 @@ public class Algorithm {
         if (log.isDebugEnabled()) {
             log.debug(Data.log(ANSI.yellow("R:"), fuzzySystem.fullView()));
         } else {
-            log.info(ANSI.yellow("R: ") + Data.str(fuzzySystem.compactView()));
+            log.info(ANSI.yellow("R (compact): ") + Data.str(fuzzySystem.compactView()));
         }
         
         if (fuzzySystem.restrictionType() == fuzzySystem.practicalRestrictionType()) {
